@@ -8,3 +8,6 @@ overleaf:
   pull:
     - src/tex/ms.tex
     - src/tex/bib.bib
+    - src/auxiliary_texfiles/preamble.tex
+    - src/auxiliary_texfiles/frontmatter.tex
+    - src/auxiliary_texfiles/datasheet.tex
