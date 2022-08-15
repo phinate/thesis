@@ -156,3 +156,5 @@ src/*/_version.py
 .vscode/
 
 .DS_Store
+
+/.quarto/
