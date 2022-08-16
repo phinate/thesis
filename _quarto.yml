@@ -2,15 +2,24 @@ project:
   type: book
 
 book:
-  title: "thesis"
-  author: "Jane Doe"
+  title: "Analysis in High-Energy Physics as a Differentiable Program"
+  author: "Nathan Simpson"
   date: "15/08/2022"
   chapters:
     - index.qmd
     - intro.qmd
-    - summary.qmd
     - references.qmd
-    - thing.ipynb
+    - part: stat-fundamentals.ipynb
+    - part: stat-practical.ipynb
+    - part: diffprog.ipynb
+    - part: ml.ipynb
+    - part: neos.ipynb
+    - part: flow-interp.ipynb
+    - part: sh.ipynb
+  appendices:
+    - software.ipynb
+    - trt.ipynb
+    - clarinet.ipynb
 
 bibliography: references.bib
 

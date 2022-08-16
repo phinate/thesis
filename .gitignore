@@ -158,3 +158,4 @@ src/*/_version.py
 .DS_Store
 
 /.quarto/
+_book/
