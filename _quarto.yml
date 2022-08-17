@@ -8,18 +8,23 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
+    - part: "Fundamentals"
+      chapters:
+            - stat-fundamentals.ipynb
+            - stat-practical.ipynb
+            - diffprog.ipynb
+            - ml.ipynb
+    - part: "Applications"
+      chapters:
+      - neos.ipynb
+      - flow-interp.ipynb
+      - sh.ipynb
     - references.qmd
-    - part: stat-fundamentals.ipynb
-    - part: stat-practical.ipynb
-    - part: diffprog.ipynb
-    - part: ml.ipynb
-    - part: neos.ipynb
-    - part: flow-interp.ipynb
-    - part: sh.ipynb
   appendices:
     - software.ipynb
     - trt.ipynb
     - clarinet.ipynb
+
 
 bibliography: references.bib
 
