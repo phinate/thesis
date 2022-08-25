@@ -16,7 +16,7 @@ book:
             - ml.ipynb
     - part: "Applications"
       chapters:
-      - neos.ipynb
+      - diffprog-hep.ipynb
       - flow-interp.ipynb
       - sh.ipynb
     - references.qmd
