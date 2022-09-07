@@ -6,11 +6,11 @@ I say this to emphasize that the advancements made in deep learning over the pas
 
 This section will take a tour through the basics of gradient computation, and then we'll compare the different types of automatic differentiation mechanisms (do we build a graph of our program before executing the code, or do we trace it at runtime?), and then show some example code for each.
 
-## Introduction + Notation
+## Getting dressed, but the clothes are gradients
 
 We'll begin by focusing on a function $F: \mathbb{R}^n \rightarrow \mathbb{R}$, which is a scalar valued function that takes in a vector input of dimensionality $n$, and returns a scalar. We deliberately choose this to mimic an objective function as seen in deep learning, which typically maps a high-dimensional vector of weights & biases to a single real number. We can also explicitly denote the application and output of $F$ as $F(\mathbf{x}\in\mathbb{R}^n) \rightarrow y \in \mathbb{R}$.
 
-If we could break down $F$ into a composition of (arbitrarily) four other functions, we would write that as
+If we break down $F$ into a composition of (arbitrarily) four other functions, we would write that as
 $F = D \circ C \circ B \circ A$. Each one of these can be any random operation, like adding 5, taking the logarithm, or hooking into your OS to gain `root` access (equivalent to the identity operation from a numerical perspective). We can write this explicit chain of computations as $y = F(\mathbf{x}) = D(C(B(A(\mathbf{x}))))$, where we can interpret the computation as starting from the inner level, i.e. application of $A$ to $\mathbf{x}$, then $B$ to $\mathbf{a} =$ the output of $A(\mathbf{x})$), and so on. Let's also define $\mathbf{b} = B(\mathbf{a})$, $\mathbf{c} = C(\mathbf{b})$, and $y = D(\mathbf{c})$.
 
 We'll see why function composition is important to cover -- a core idea of automatic differentiation is to break down the gradient of the whole into the composition of the gradient of its parts via the chain rule. But more on that later.
@@ -23,22 +23,24 @@ $$
 
 This matrix is organized into the shape `(input size, output size)`, which is `(n, 1)` (we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$), making this just one row vector.
 
-Given the decomposition of $F$ above, we can break this down into a product of individual Jacobian matricies for each of the intermediate functions:
+Given the decomposition of $F$ above, we can break this down into a product of individual Jacobian matricies for each of the intermediate functions via the chain rule:
 
-
+$$
+F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \frac{\partial \mathbf{a}}{\partial \mathbf{x}},
+$$
 
 One can see the sizes of each of the intermediate matricies:
 
-- size($D'(\mathbf{c})$) = (1,len(c))
-- size($C'(\mathbf{b})$) = (len(c), len(b))
-- size($B'(\mathbf{a})$) = (len(b), len(a))
-- size($A'(\mathbf{x})$) = (len(a), n) (horizontal size on the last image is n)
+- size $\partial y / \partial \mathbf{c} $ = `(1,len(c))`
+- size($\partial \mathbf{c} / \partial \mathbf{b} $) = `(len(c), len(b))`
+- size($\partial \mathbf{b} / \partial \mathbf{a} $) = `(len(b), len(a))`
+- size($\partial \mathbf{a} / \partial \mathbf{x} $) = `(len(a), n)` (horizontal size on the last image is `n`)
 
 The size of the final Jacobian matrix is then  `(1, n)`, as shown earlier.
 
-This kind of sequential matrix multiplication can be called "accumulating" the Jacobian piece-by-piece. The order of the multiplication of these matricies (i.e. where to put the parentheses) can matter to optimise computational load, but two cases are of particular interest:
+This kind of sequential matrix multiplication can be called "accumulating" the Jacobian piece-by-piece. The order of the multiplication of these matricies (i.e. where to put the parentheses) matters to optimize computational load, but we'll look at two particular extreme cases:
 
-- **Forward accumulation**: ****Start from the input and work forwards to the output (right to left)
+- **Forward accumulation**: Start from the input and work forwards to the output (right to left)
 
 $$
 F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\right)\right),
@@ -66,16 +68,47 @@ Note that the size of every intermediate matrix product is always `(1, -)`, mean
 
 Let's touch again on this idea of only storing intermediate vectors: we can see this arose in the case of reverse accumulation from the fact that our first multiplication had a 1 in the external dimensions, i.e. was a *row* vector $\mathbf{v}^T$ multiplying from the left. We can recover this situation for forward mode if we pre-multiply the Jacobian matrix by some *column* vector $\mathbf{v}$ from the right. This leads us to think about the generality offered by considering Jacobian-vector and vector-Jacobian products (JVP/VJPs) as primary functions of forward and reverse mode autodiff respectively.
 
+To illustrate this with equations, we can write a JVP for our function $F$ with the same operation ordering as with the *forward* accumulation of a Jacobian:
+
+$$
+F'(\mathbf{x})\,\mathbf{v} = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \left(\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \mathbf{v} \right) \right)\right)
+$$
+
+Thinking of the rules of matrix multiplication, we note that $\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \mathbf{v}$ is only tractable if $\mathbf{v}$ is of size `(n, 1)`, since $\frac{\partial \mathbf{a}}{\partial \mathbf{x}}$  is of size `(len(a), n)`. Provided this is the case, all following computations will include 1 as one of the outer dimensions, meaning we once again only need to consider intermediary vectors instead of matricies when computing this quantity.
+
 Now, you may be thinking "Nathan, this is all well and good, but what *is* the vector $\mathbf{v}$, and why are you showing it to me? Aren't we interested in the Jacobian itself, and not its product with some arbitrary vector?"
 
-Firstly, I would respond by asking why you're saying this in a thick British accent. After that, I would then go on to say that we can still use this formulation to recover the whole Jacobian -- we can simply let $\mathbf{v}$ be a *one-hot encoding*
+Firstly, I would respond by asking why you're saying this in a thick British accent. After that, I would then go on to say that we can still use this formulation to recover the whole Jacobian -- we can simply let $\mathbf{v}$ be a *one-hot encoding* (or *unit vector* if you're more mathematically inclined) of one of the input dimensions, e.g. $\mathbf{v} = [1, 0, \dots, 0]^T$, and the result of our JVP will then be the first *column* of the Jacobian:
 
-To first see the motivation, we can write this query with the same operation ordering as with the *forward* accumulation of a Jacobian:
 
-$$
-F'(\mathbf{x})\,\mathbf{v} = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \left(\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \cdot \mathbf{v} \right) \right)\right)
-$$
+ $$
+\begin{align}
+    F'(\mathbf{x})\,\mathbf{v} &= \begin{bmatrix}
+           \frac{\partial y_1}{\partial x_1} \\
+           \frac{\partial y_2}{\partial x_1}\\
+           \vdots
+         \end{bmatrix}
+  \end{align}
+ $$
 
-Thinking of the rules of matrix multiplication, we note that $\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \cdot \mathbf{v}$ is only tractable if $\mathbf{v}$ is of size `(n, 1)`, since $\frac{\partial \mathbf{a}}{\partial \mathbf{x}}$  is of size `(len(a), n)`. Provided this is the case, all following computations will include 1 as one of the outer dimensions, meaning we once again only need to consider intermediary vectors instead of matricies when computing a
+ We can repeat this for each dimension by changing the place we put the 1 in $\mathbf{v}$, then concatenate the results to get the whole Jacobian. Ah, but wait a minute, I used $y_1, y_2$ etc. above -- my mistake, we don't actually have a vector for our choice of $F$ from earlier. We only have just one scalar output $y$. That means that the result of our computation above would be the single first element of the Jacobian: $\partial y / \partial x_1$, and we would need one JVP calculation for each element. That seems a bit excessive! Wasn't reverse mode meant to be better? Shouldn't we use that?
 
-What does it mean to "differentiate through" something?
+ Agreed. Let's do the same thing, and produce a *vector-Jacobian product* with a one-hot encoding of the output dimensions.
+
+$$\begin{align}
+\mathbf{v}^T \, F'(\mathbf{x}) &= \left( \left( \left( \mathbf{v}^T \,\frac{\partial y}{\partial \mathbf{c}} \right) \frac{\partial \mathbf{c}}{\partial \mathbf{b}} \right)\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \right)\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \\
+
+& =\left[ \frac{\partial y_1}{\partial x_1} , \frac{\partial y_1}{\partial x_2}, \cdots, \frac{\partial y_1}{\partial x_n}\right].
+\end{align}$$
+
+We've calculated the first *row* of the Jacobian, and can construct the full thing with a VJP for each row, corresponding to each dimension of the output. In the case of this output $y$ being scalar as before, that would make $\mathbf{v}^T = 1$ (only one output dimension), and we recover the full Jacobian in one go, since it was only one row to begin with!
+
+To summarize: we've seen the difference between **forward**- and **reverse**-mode autodiff, and their usefulness in constructing Jacobians via **Jacobian-vector** and **vector-Jacobian products**, which bypass the need to store large intermediate matricies by forming the Jacobian one column or one row at a time respectively. We also note that for the deep learning case of interest, where we have an objective function $F$ that maps $\mathbb{R}^n \rightarrow \mathbb{R}$ with $n$ large, we far prefer *reverse-mode* autodiff to calculate its gradient, which we need to perform optimization.
+
+### From sequences to graphs
+
+One thing that you may have noticed in our previous section is the fact that we focused only on a simple decomposition of $F$ into the sequential application of four functions $A$, $B$, $C$, and $D$ to the input $\mathbf{x}$. In reality, computer programs are going to look a lot more complicated, and will be represented by the more general construct of a directed acyclic graph (DAG). We need to adapt the above framework for JVPs/VJPs in order to generalize to these real-life scenarios.
+
+It turns out this is fairly simple: we only need to consider two additional cases The application of a single operation with a single input and output would be represented as one node in a graph, with an edge going in and coming out. Luckily, the only additional generalization we need to consider is the case of multiple inputs (more edges coming in) and multiple outputs (more edges going out).
+
+<!-- TODO: viz for fanin, fanout -->
