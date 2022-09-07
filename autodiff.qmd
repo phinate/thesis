@@ -1,0 +1,81 @@
+# Automatic differentiation
+
+One may think that the pace of scientific discovery is determined by the speed at which new ideas are formed. That was likely true in the early days; if I posited that a rock, when thrown, will roughly trace a parabolic arc, we likely don't need to take leaps in experimental physics to test this hypothesis to some ballpark degree of accuracy -- maybe we could even get away with just a ruler and the naked eye. In contrast to this, science as done in the present requires a little additional technology in order to probe the questions that we're interested in (unless we get really, really good rulers).
+
+I say this to emphasize that the advancements made in deep learning over the past couple decades can be largely attributed to the ability to run *efficient and exact* learning algorithms at scale. For this, we have **automatic differentiation** to thank (which we playfully term "autodiff"), which allows us to take the gradient of pretty much arbitrary computer code. Which is pretty damn cool.
+
+This section will take a tour through the basics of gradient computation, and then we'll compare the different types of automatic differentiation mechanisms (do we build a graph of our program before executing the code, or do we trace it at runtime?), and then show some example code for each.
+
+## Introduction + Notation
+
+We'll begin by focusing on a function $F: \mathbb{R}^n \rightarrow \mathbb{R}$, which is a scalar valued function that takes in a vector input of dimensionality $n$, and returns a scalar. We deliberately choose this to mimic an objective function as seen in deep learning, which typically maps a high-dimensional vector of weights & biases to a single real number. We can also explicitly denote the application and output of $F$ as $F(\mathbf{x}\in\mathbb{R}^n) \rightarrow y \in \mathbb{R}$.
+
+If we could break down $F$ into a composition of (arbitrarily) four other functions, we would write that as
+$F = D \circ C \circ B \circ A$. Each one of these can be any random operation, like adding 5, taking the logarithm, or hooking into your OS to gain `root` access (equivalent to the identity operation from a numerical perspective). We can write this explicit chain of computations as $y = F(\mathbf{x}) = D(C(B(A(\mathbf{x}))))$, where we can interpret the computation as starting from the inner level, i.e. application of $A$ to $\mathbf{x}$, then $B$ to $\mathbf{a} =$ the output of $A(\mathbf{x})$), and so on. Let's also define $\mathbf{b} = B(\mathbf{a})$, $\mathbf{c} = C(\mathbf{b})$, and $y = D(\mathbf{c})$.
+
+We'll see why function composition is important to cover -- a core idea of automatic differentiation is to break down the gradient of the whole into the composition of the gradient of its parts via the chain rule. But more on that later.
+
+Let's turn to gradients: we define the **Jacobian matrix** of partial derivatives of $F$ as
+
+$$
+\mathbf{J}(F) = F'(\mathbf{x}) =  \left[ \frac{\partial y}{\partial x_1} , \frac{\partial y}{\partial x_2}, \cdots, \frac{\partial y}{\partial x_n}\right].
+$$
+
+This matrix is organized into the shape `(input size, output size)`, which is `(n, 1)` (we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$), making this just one row vector.
+
+Given the decomposition of $F$ above, we can break this down into a product of individual Jacobian matricies for each of the intermediate functions:
+
+
+
+One can see the sizes of each of the intermediate matricies:
+
+- size($D'(\mathbf{c})$) = (1,len(c))
+- size($C'(\mathbf{b})$) = (len(c), len(b))
+- size($B'(\mathbf{a})$) = (len(b), len(a))
+- size($A'(\mathbf{x})$) = (len(a), n) (horizontal size on the last image is n)
+
+The size of the final Jacobian matrix is then  `(1, n)`, as shown earlier.
+
+This kind of sequential matrix multiplication can be called "accumulating" the Jacobian piece-by-piece. The order of the multiplication of these matricies (i.e. where to put the parentheses) can matter to optimise computational load, but two cases are of particular interest:
+
+- **Forward accumulation**: ****Start from the input and work forwards to the output (right to left)
+
+$$
+F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\right)\right),
+$$
+
+$$
+\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\ =\frac{\partial \mathbf{b}}{\partial \mathbf{x}}=\left[\begin{array}{ccc}\frac{\partial b_{1}}{\partial x_{1}} & \cdots & \frac{\partial b_{1}}{\partial x_{n}} \\\vdots & \ddots & \vdots \\\frac{\partial b_{m}}{\partial x_{1}} & \cdots & \frac{\partial b_{m}}{\partial x_{n}}\end{array}\right].
+$$
+
+- **Reverse accumulation**: vice-versa!
+
+$$
+F'(\mathbf{x}) = \left( \left( \frac{\partial y}{\partial \mathbf{c}} \cdot \frac{\partial \mathbf{c}}{\partial \mathbf{b}} \right)\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \right)\frac{\partial \mathbf{a}}{\partial \mathbf{x}},
+$$
+
+
+
+$$
+\frac{\partial y}{\partial \mathbf{c}} \cdot \frac{\partial \mathbf{c}}{\partial \mathbf{b}}\ =\frac{\partial y}{\partial \mathbf{b}}= \left[ \frac{\partial y}{\partial b_1} , \frac{\partial y}{\partial b_2}, \cdots, \frac{\partial y}{\partial b_n}\right]
+$$
+
+Note that the size of every intermediate matrix product is always `(1, -)`, meaning if we have this situation where we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$, reverse accumulation looks much more efficient in terms of memory usage and compute, since we're only ever storing intermediate vectors and not matricies. This is the typical setting with a neural network: we have a very large input space (could even be ~billions of parameters), and we want to evaluate the Jacobian matrix of a scalar (loss function) with respect to those parameters. If we had the complementary setting, i.e. $\mathbb{R} \rightarrow \mathbb{R}^n$, which could maybe be some parametrization of a simulator that produces high-dimensional data, we would probably want to compute the Jacobian with forward accumulation instead.
+
+### Jacobian-vector/vector-Jacobian products
+
+Let's touch again on this idea of only storing intermediate vectors: we can see this arose in the case of reverse accumulation from the fact that our first multiplication had a 1 in the external dimensions, i.e. was a *row* vector $\mathbf{v}^T$ multiplying from the left. We can recover this situation for forward mode if we pre-multiply the Jacobian matrix by some *column* vector $\mathbf{v}$ from the right. This leads us to think about the generality offered by considering Jacobian-vector and vector-Jacobian products (JVP/VJPs) as primary functions of forward and reverse mode autodiff respectively.
+
+Now, you may be thinking "Nathan, this is all well and good, but what *is* the vector $\mathbf{v}$, and why are you showing it to me? Aren't we interested in the Jacobian itself, and not its product with some arbitrary vector?"
+
+Firstly, I would respond by asking why you're saying this in a thick British accent. After that, I would then go on to say that we can still use this formulation to recover the whole Jacobian -- we can simply let $\mathbf{v}$ be a *one-hot encoding*
+
+To first see the motivation, we can write this query with the same operation ordering as with the *forward* accumulation of a Jacobian:
+
+$$
+F'(\mathbf{x})\,\mathbf{v} = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \left(\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \cdot \mathbf{v} \right) \right)\right)
+$$
+
+Thinking of the rules of matrix multiplication, we note that $\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \cdot \mathbf{v}$ is only tractable if $\mathbf{v}$ is of size `(n, 1)`, since $\frac{\partial \mathbf{a}}{\partial \mathbf{x}}$  is of size `(len(a), n)`. Provided this is the case, all following computations will include 1 as one of the outer dimensions, meaning we once again only need to consider intermediary vectors instead of matricies when computing a
+
+What does it mean to "differentiate through" something?

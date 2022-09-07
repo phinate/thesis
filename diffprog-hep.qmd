@@ -1,0 +1,145 @@
+---
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+---
+
+# Physics Analysis as a Differentiable Program
+
+## Motivation
+Given the success of the Standard Model (SM), analysis of data from the LHC usually occurs for two reasons:
+- Precisely measuring SM processes to look for small deviations with SM predictions
+- Searching for new physics signatures as predicted by models beyond the SM
+
+When analysing data in this way, we'll have lots of free parameters to tune. These can be as simple as a threshold value that you limit the p_T to, or as complicated as the weights and biases that determine a neural network for identifying $b$-jets. We can of course choose any values for these quantities to do our analysis, but the resulting physics that follows may suffer as a result. As such, we're likely to try some kind of optimization to improve the answers to our physics questions. How do we do this in practice?
+
+In either case above, there is a notion of <span style="color:#13becf">signal</span> (what you’re looking for) and <span style="color:#ff7f0e">background</span> (everything else).
+Generally, we then try to choose a parameter configuration that can separate (or discriminate) the signal from the background, allowing us to extract just the data we think is relevant to the physics process we're looking at. As an example, machine learning models are often trained using the **binary cross-entropy** loss as an objective, which corresponds to optimizing the ability of the model to identify whether an event originated from signal or background processes. A closely related goal is the **Asimov significance** in the case of signal and background event counts $s$ and $b$ with *no uncertainty* on either quantity. The formula for this stems from assuming a Poisson likelihood function, and is equal to
+
+$$Z_A = \sqrt{2\sum_{i\in bins}((s_i + b_i)(\log{(1 + s_i / b_i)}) - s_i)}.$$
+
+As indicated in the sum, these counts can be spread across different bins in the case where your data is a histogram, but the formula is more commonly reduced to the 1-bin scenario that just deals with the overall numbers of signal and background events. In this case, we can then Taylor expand the logarithm to get
+
+$$Z_A = \sqrt{2((s+b)(s/b + \mathcal{O}(s/b) - s)} \approx s/\sqrt{b}~~~\mathrm{for}~s<<b.$$
+
+This makes it much clearer to see that optimising with respect to $Z_A$ is just a fancier way of trying to increase the amount of signal compared to the amount of background, which is directly analogous to separating signal from background, just as binary cross-entropy would do.
+
+Now, this is all very sensible of course (we want to discover our signal), but this approach has some shortcomings that distance the efficacy of the resulting configuration from our physics goals. A recent review of deep learning in LHC physics [@deeplhc] lets us in on why:
+
+> (...) tools are often optimized for performance on a particular task that is **several steps removed from the ultimate physical goal** of searching for a new particle or testing a new physical theory.
+
+> (...) sensitivity to high-level physics questions **must account for systematic uncertainties**, which involve a nonlinear trade-off between the typical machine learning performance metrics and the systematic uncertainty estimates.
+
+This is the crux of the issue: we're not accounting for uncertainty. Our data analysis process comes with many sources of systematic error, which we endeavour to model in the likelihood function as nuisance parameters.
+- e.g. simulation comes with many physics parameters that we have to choose, e.g. jes
+- systs between simulators
+- quantification of data/MC agreement (closure?)
+...etc
+
+But this is all talk... let's prove it!
+
+
+### A simplified analysis example, both with and without uncertainty
+
+
+
+This motivates a search for an objective function that can capture these sources of uncertainty.
+
+### How do we optimize in an uncertainty-aware way?
+
+Attempts:
+- Asimov sig with assumptions on bkg uncert: [@asimovuncert]
+- Learning to pivot: [@pivot]
+- Directly incorporate NPs: [@uncert]
+
+But, don't we already have the goal we're looking for?
+
+We assess physics results by their **significance**, which is a quantity that's one-to-one with a $p$-value coming from a hypothesis test of just background events v.s. additional events from the existence of the signal process. This implies a likelihood model for both of these cases, typically covered in collider physics by the HistFactory setup for building likelihoods based on event counts. In these likelihoods, we're also careful to include all the details of the systematic uncertainties that we're able to quantify by constructing nuisance parameters that vary the shape and normalization of the model. From here, to calculate the $p$-value, we then construct the **profile likelihood ratio** as a test statistic, which accounts for these systematic uncertainties by fitting the value of the nuisance parameters depending on the hypothesis you test (link detail from section).
+
+This seems like a good candidate for an objective function! So why haven't we done this already?
+
+As made clear in (ref sec), if we want to perform optimization using gradient-based methods (footnote: don't have to use gradient based methods!), then we need the objective that we optimize to be *differentiable*. This is not immediately the case for the significance -- we would have to be able to differentiate through all stages of the full calculation, including model building, profiling, and even histograms, which are not generally known for their smoothness. But say we were able to decompose this complicated pipeline into bite-size chunks, each of which we can find a way to take gradients of. What becomes possible then? This begins our view of **physics analysis as a differentiable program**.
+
+In the following sections, we'll take a collider physics analysis apart step-by-step, then see how we can employ tricks and substitutes to recover gradients for each piece. After that, we'll explore the ways that we can use the result to perform gradient-based optimization of different parts of the analysis with respect to physics goals. We'll then do it all at once by*optimizing a toy physics analysis from end-to-end*, exploring the common example of a summary statistic based on a neural network, accounting for uncertainties all the while.
+
+## Making HEP Analysis Differentiable
+
+The goal of this section is to study components within a HEP analysis chain that are not typically differentiable, and show that when we overcome this, we can employ the use of gradient-based optimization methods. From there, we'll examine the typical steps needed to calculate the sensitivity of a physics analysis, and see how we can make that whole chain differentiable at once, opening up a way to incorporate the full inference procedure when finding the best analysis configuration.
+
+- something about surrogates vs gradient tricks (e.g. approximations or using theoretical results)
+
+- something about the fact that surrogates can be used *just* for optimization if the hard version of the op isn't desirable, e.g. assuming the histogram bins follow a poisson distribution (not true if you're approximating the underlying binning process)
+
+Given a pre-filtered dataset, a commonly used analysis pipeline in HEP involves the
+following stages:
+
+
+1.  Construction of a learnable 1-D summary statistic from data (with
+    parameters $\phi$)
+
+2.  Binning of the summary statistic, e.g. through a histogram
+
+3.  Statistical model building, using the summary statistic as a
+    template
+
+4.  Calculation of a test statistic, used to perform a frequentist
+    hypothesis test of signal versus background
+
+5.  A $p$-value (or $\mathrm{CL_s}$ value) resulting from that
+    hypothesis test, used to characterize the sensitivity of the
+    analysis
+
+We can express this workflow as a direct function of the input dataset
+$\mathcal{D}$ and observable parameters $\phi$:
+
+$$
+    \mathrm{CL_s} = f(\mathcal{D},\phi) = (f_{\mathrm{sensitivity}} \circ f_{\mathrm{test\,stat}} \circ f_{\mathrm{likelihood}}  \circ f_{\mathrm{histogram}}  \circ f_{\mathrm{observable}})(\mathcal{D},\phi).
+    $$
+
+### Thresholding (cuts)
+- Cuts are step functions from logical less than or more than statements
+- Basically applies weights to the data -- 0 on one side of the threshold, and 1 on the other
+
+--plot
+
+- a differentiable version of this admits real numbers in-between these values, smoothing out the step
+- example: sigmoid
+- you can tune the steepness of the slope by adding a number
+--plot
+
+### Binned density estimation (histograms)
+
+Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. To demonstrate this, let's examine what happens to a histogram when we shift the underlying distribution by a constant factor.
+
+
+
+
+
+
+
+We address
+this inherent non-differentiability through implementing a
+differentiable surrogate: a histogram based on a *kernel density
+estimate* (KDE).
+
+A KDE is a "non-parametric\" density estimate based on defining a kernel
+function $K$ centred on each data point. Then, the density at an
+evaluation point $x$ is the average of the contributions of each kernel
+function at that point.
+
+a with the full density given as $p(t) = 1/n\sum_i K(t,t_i)$. Normally,
+a popular kernel function choice is the standard normal distribution,
+which comes with a parameter called the **bandwidth** that affects the
+smoothness of the resulting density estimate.
+
+Coming back to gradients: in our case, the data $t_i$ we construct the
+density estimate over are themselves functions of the summary statistic
+parameters, i.e. $t_i = f(x_i;\phi)$. The resulting density estimate
+$p(t|\phi)$ will then be differentiable as long as the kernel $K$ is
+differentiable with respect to $t_i$, and by extension with respect to
+$\phi$. To extend this differentiability in a binned fashion, we can
+accumulate the probability mass of the KDE within the bin edges of the
+original histogram -- equivalent to evaluations of the Gaussian
+cumulative density function -- to convert $p(t|\phi)$ to a **binned KDE
+(bKDE)**, i.e. a set of discrete per-bin probabilities $p_i(\phi)$.
