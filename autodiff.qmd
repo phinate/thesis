@@ -95,11 +95,12 @@ Firstly, I would respond by asking why you're saying this in a thick British acc
 
  Agreed. Let's do the same thing, and produce a *vector-Jacobian product* with a one-hot encoding of the output dimensions.
 
-$$\begin{align}
+\begin{align}
 \mathbf{v}^T \, F'(\mathbf{x}) &= \left( \left( \left( \mathbf{v}^T \,\frac{\partial y}{\partial \mathbf{c}} \right) \frac{\partial \mathbf{c}}{\partial \mathbf{b}} \right)\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \right)\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \\
 
 & =\left[ \frac{\partial y_1}{\partial x_1} , \frac{\partial y_1}{\partial x_2}, \cdots, \frac{\partial y_1}{\partial x_n}\right].
-\end{align}$$
+\end{align}
+
 
 We've calculated the first *row* of the Jacobian, and can construct the full thing with a VJP for each row, corresponding to each dimension of the output. In the case of this output $y$ being scalar as before, that would make $\mathbf{v}^T = 1$ (only one output dimension), and we recover the full Jacobian in one go, since it was only one row to begin with!
 
@@ -109,6 +110,28 @@ To summarize: we've seen the difference between **forward**- and **reverse**-mod
 
 One thing that you may have noticed in our previous section is the fact that we focused only on a simple decomposition of $F$ into the sequential application of four functions $A$, $B$, $C$, and $D$ to the input $\mathbf{x}$. In reality, computer programs are going to look a lot more complicated, and will be represented by the more general construct of a directed acyclic graph (DAG). We need to adapt the above framework for JVPs/VJPs in order to generalize to these real-life scenarios.
 
-It turns out this is fairly simple: we only need to consider two additional cases The application of a single operation with a single input and output would be represented as one node in a graph, with an edge going in and coming out. Luckily, the only additional generalization we need to consider is the case of multiple inputs (more edges coming in) and multiple outputs (more edges going out).
+It turns out this is fairly simple: we only need to consider two additional cases than what we've considered already. The application of a single operation with a single input and output would be represented as one node in a graph, with an edge going in and coming out. Luckily, the only additional generalization we need to consider is the case of multiple inputs (fan-in) and multiple outputs (fan-out).
 
 <!-- TODO: viz for fanin, fanout -->
+
+For the fan-in case, i.e. multiple input values from different computations: wwe know how to calculate Jacobians for a single input, so we can just do this process for each input separately. More explicitly: for $F(\mathbf{a}, \mathbf{b})$, with $\mathbf{a}$ and $\mathbf{b}$ possibly coming from different parts of the program, we calculate the Jacobian for each input separately as before: $F'_\mathbf{a}(\mathbf{a}, \mathbf{b}) = \partial y / \partial \mathbf{a}$ and $F'_\mathbf{b}(\mathbf{a}, \mathbf{b}) = \partial y /\partial \mathbf{b}$.
+
+Fan-out is slightly more involved, since we now have the case of multiple return values. Let's examine a function with this behaviour: $G(\mathbf{x}) = [3\mathbf{x}, 5\mathbf{x}]^T$. We can see that this input replicates our input $\mathbf{x}$ with different factors applied to each output, which we can represent through the linear function $G(\mathbf{x}) = [3I, 5I]^T\mathbf{x}$, where $I$ is the identity matrix. The Jacobian of $G$ is then just the coefficients multiplying $\mathbf{x}$: $G'(\mathbf{x}) = [3I, 5I]^T$. But in practice, we're probably going to be computing a VJP across this node in the graph during backpropagation. Remembering that this involves multiplying by a vector $\mathbf{v}^T$ with the same dimensionality of the output of $G$, we can then write $\mathbf{v}^T = [\mathbf{v_1}^T, \mathbf{v_2}^T]$, one vector for each vector in $G(\mathbf{x})$. This then leads to
+
+\begin{align}
+\mathbf{v}^TG'(\mathbf{x})  &= [\mathbf{v_1}^T, \mathbf{v_2}^T][3I, 5I]^T \\
+&= 3\mathbf{v_1}^T +  5\mathbf{v_2}^T.
+\end{align}
+
+So if we have a function with multiple outputs, we'll be accumulating the VJP of that function across the outputs through addition. We can see that this results from the shapes of the vectors being multiplied here, which will always result in an outer shape of `(1, 1)`, so we can safely generalize this to any number of outputs.
+
+That's pretty much all the scaffolding we need in terms of a framework to calculate gradients. The only missing pieces are:
+
+- A way to express the program in a graph
+- An implementation of the vector-Jacobian and Jacobian-vector operations
+
+We'll discuss both of these in the following sections.
+
+## Building the computation graph
+
+There are two main existing strategies to represent a series of code computations as a graph. One involves letting the user build up the graph structure manually via library-provided primitives; the resulting construct is known as a **static graph**, and is the approach taken by libraries like [Theano]() and [TensorFlow]() (when run without eager execution). This has the unfortunate side effect of making code much more difficult to read and write, since you have to use proxies for operations like control flow,
