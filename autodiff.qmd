@@ -1,3 +1,13 @@
+---
+title: "Automatic differentiation"
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+
+
 # Automatic differentiation
 
 One may think that the pace of scientific discovery is determined by the speed at which new ideas are formed. That was likely true in the early days; if I posited that a rock, when thrown, will roughly trace a parabolic arc, we likely don't need to take leaps in experimental physics to test this hypothesis to some ballpark degree of accuracy -- maybe we could even get away with just a ruler and the naked eye. In contrast to this, science as done in the present requires a little additional technology in order to probe the questions that we're interested in (unless we get really, really good rulers).
@@ -10,7 +20,7 @@ This section will take a tour through the basics of gradient computation, and th
 
 The core idea of autodiff is the breaking down of a potentially complicated calculation into a set of computational **primitives**: basic operations with known derivatives. Think of things like $+$, $\times$, $-$, $\divsymbol$, $\sin$, $\log$, and so on. We know how to take the derivative across each of these operations analytically, so we can say to a computer "Every time you see a $\sin$, replace it with a $\cos$ in the gradient calculation". Then, thanks to the chain rule, we can build up the gradient of the whole program by multiplying these gradient results together.
 
-We'll begin by focusing on a function $F: \mathbb{R}^n \rightarrow \mathbb{R}$, which is a scalar valued function that takes in a vector input of dimensionality $n$, and returns a scalar. We deliberately choose this to mimic an objective function as seen in deep learning, which typically maps a high-dimensional vector of weights & biases to a single real number. We can also explicitly denote the application and output of $F$ as $F(\mathbf{x}\in\mathbb{R}^n) \rightarrow y \in \mathbb{R}$.
+Getting into the specifics of this, we'll begin by focusing on a function $F: \mathbb{R}^n \rightarrow \mathbb{R}$, which is a scalar valued function that takes in a vector input of dimensionality $n$, and returns a scalar. We deliberately choose this to mimic an objective function as seen in deep learning, which typically maps a high-dimensional vector of weights & biases to a single real number. We can also explicitly denote the application and output of $F$ as $F(\mathbf{x}\in\mathbb{R}^n) \rightarrow y \in \mathbb{R}$.
 
 If we break down $F$ into a composition of (arbitrarily) four other functions, we would write that as
 $F = D \circ C \circ B \circ A$. Each one of these can be any random operation, like adding 5, taking the logarithm, or hooking into your OS to gain `root` access (equivalent to the identity operation from a numerical perspective). We can write this explicit chain of computations as $y = F(\mathbf{x}) = D(C(B(A(\mathbf{x}))))$, where we can interpret the computation as starting from the inner level, i.e. application of $A$ to $\mathbf{x}$, then $B$ to $\mathbf{a} =$ the output of $A(\mathbf{x})$), and so on. Let's also define $\mathbf{b} = B(\mathbf{a})$, $\mathbf{c} = C(\mathbf{b})$, and $y = D(\mathbf{c})$.
@@ -95,7 +105,9 @@ Firstly, I would respond by asking why you're saying this in a thick British acc
   \end{align}
  $$
 
- We can repeat this for each dimension by changing the place we put the 1 in $\mathbf{v}$, then concatenate the results to get the whole Jacobian. Ah, but wait a minute, I used $y_1, y_2$ etc. above -- my mistake, we don't actually have a vector for our choice of $F$ from earlier. We only have just one scalar output $y$. That means that the result of our computation above would be the single first element of the Jacobian: $\partial y / \partial x_1$, and we would need one JVP calculation for each element. That seems a bit excessive! Wasn't reverse mode meant to be better? Shouldn't we use that?
+ We can repeat this for each dimension by changing the place we put the 1 in $\mathbf{v}$, then concatenate the results to get the whole Jacobian. So by building up the Jacobian one column at a time when doing forward accumulation, we gain this advantage we talked about earlier of only storing intermediate vectors, and never having to instantiate any potentially large matricies, regardless of the dimensionality of the input or output.
+
+ Ah, but wait a minute, I used $y_1, y_2$ etc. above -- my mistake, we don't actually have a vector for our choice of $F$ from earlier. We only have just one scalar output $y$. That means that the result of our computation above would be the single first element of the Jacobian: $\partial y / \partial x_1$, and we would need one JVP calculation for each element. That seems a bit excessive! Wasn't reverse mode meant to be better? Shouldn't we use that?
 
  Agreed. Let's do the same thing, and produce a *vector-Jacobian product* with a one-hot encoding of the output dimensions.
 
@@ -106,9 +118,9 @@ Firstly, I would respond by asking why you're saying this in a thick British acc
 \end{align}
 
 
-We've calculated the first *row* of the Jacobian, and can construct the full thing with a VJP for each row, corresponding to each dimension of the output. In the case of this output $y$ being scalar as before, that would make $\mathbf{v}^T = 1$ (only one output dimension), and we recover the full Jacobian in one go, since it was only one row to begin with!
+We've calculated the first *row* of the Jacobian, and can construct the full thing with a VJP for each row, corresponding to each dimension of the output. In the case of this output $y$ being scalar as before, that would make $\mathbf{v}^T = 1$ (only one output dimension), and we recover the full Jacobian in one go, since it was only one row to begin with! But of course, if $y$ had multiple dimensions (say 5), we would only have to compute 5 VJPs to form the whole Jacobian, never having to worry about the size of the intermediate quantities.
 
-Based on these appealing properties, we consider the JVP/VJP as the fundamental operation when calculating gradients of programs in practice. It's a funny way of thinking at first, but the quantity we end up with is just the regular Jacobian (or elements thereof) in the end, so it's only important when considering implementation details of gradient computations.
+Based on these appealing properties, it helps when using autodiff to consider the JVP/VJP as the fundamental operation when calculating gradients of programs in practice. It's a funny way of thinking at first, but the quantity we end up with is just the regular Jacobian (or elements thereof) in the end, so it's only important when considering implementation details of gradient computations.
 
 To summarize: we've seen the difference between **forward**- and **reverse**-mode autodiff, and their usefulness in constructing Jacobians via **Jacobian-vector** and **vector-Jacobian products**, which bypass the need to store large intermediate matricies by forming the Jacobian one column or one row at a time respectively. We also note that for the deep learning case of interest, where we have an objective function $F$ that maps $\mathbb{R}^n \rightarrow \mathbb{R}$ with $n$ large, we far prefer *reverse-mode* autodiff to calculate its gradient, which we need to perform optimization.
 
@@ -144,6 +156,15 @@ There are two main existing strategies to represent a series of code computation
 
 The other approach, known as **define-by-run**, builds up a *dynamic graph* structure during a program's execution. How does this work? The program is *traced* at runtime, meaning that the autodiff framework is watching which operations occur when a function is run in order to build up the computation graph for that function. When done this way, incorporating loops and conditional structure within the graph is no longer needed: at runtime, loops are unrolled into sequences, and the branching induced by conditional logic will collapse to one branch when the program is actually ran. These properties make define-by-run the more popular approach to autodiff, and is the approach taken by libraries such as [JAX](), [PyTorch](), and [Tensorflow (eager execution mode)]().
 
+### What happens at runtime?
+
+- Evaluating the gradients requires tracing the program, i.e. evaluating the function
+- Runtime cost for the gradient calculation is of the order of the program. Why? For each primitive in the program, there's a corresponding step in the gradient computation (e.g. wherever you see a $\log{x}$ in your program, there'll be a $1/x$ somewhere in the JVP/VJP call).
+
+## Checkpointing
+
+## Differentiating fixed points
+
 ## Other approaches to taking gradients of programs
 
 I've given most of the spotlight of this section to automatic differentiation, since it's the best existing way to differentiate programs, and it makes up part of the core of my applications of machine learning to physics in later sections. However, there are a number of alternative ways to calculate gradients that we'll briefly study now in order to give some perspective on the landscape of existing methods.
@@ -153,3 +174,43 @@ I've given most of the spotlight of this section to automatic differentiation, s
 I wouldn't be surprised if one of the first things you thought before reading this section is that we can approximate the gradient of a function at $x$ pretty handily already by just evaluating it at both $x$ and a point close by $x + \Delta x$, then computing
 
 $$ \frac{\partial f}{\partial x} \approx \frac{f(x+\Delta x) - f(x)}{\Delta x}.$$
+
+We can see how well this performs on an example problem in [@fig-finite-1] for different step sizes, and in [@fig-finite-2] for different numbers of evaluations. A smaller $\Delta x$ will result in higher accuracy for that point, but if we're interested in the actual gradient function, this may then incur many evaluations of the function itself (twice for each gradient estimate) as we build up the envelope of the gradient. Even then, we'd have to do some kind of functional fit
+
+```{python}
+#| label: fig-finite-1
+#| fig-cap: "Finite difference gradient calculations for the function `y=sin(x)`, varying the distance between the evaluated points."
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.rc("figure", dpi=200)
+eval_grid = np.linspace(0,10, 30)
+
+def finite_diff(func, x, delta_x = 1e-4):
+    return (func(x+delta_x) - func(x)) /  delta_x
+
+for delta in [1e-2,1e-1,1]:
+    plt.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=delta), '-o', alpha=0.4, label=f"$\Delta x$ = {delta}")
+plt.plot(eval_grid, np.cos(eval_grid), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
+plt.legend();
+```
+
+
+```{python}
+#| label: fig-finite-2
+#| fig-cap: "As in [@fig-finite-1], but varying the number of gradient evaluations with a fixed step size of 1e-4."
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.rc("figure", dpi=200)
+eval_grid_t = np.linspace(0,10, 30)
+
+def finite_diff(func, x, delta_x = 1e-4):
+    return (func(x+delta_x) - func(x)) /  delta_x
+
+for delta in [5,10,15]:
+    eval_grid = np.linspace(0,10, delta)
+    plt.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=1e-3), '-o', alpha=0.4, label=f"{delta} evaluations")
+plt.plot(eval_grid_t, np.cos(eval_grid_t), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
+plt.legend(loc="upper right");
+```
