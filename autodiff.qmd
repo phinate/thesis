@@ -48,6 +48,7 @@ $$
 F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\right)\right),
 $$
 
+Here's an example of what that first matrix product looks like:
 $$
 \frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\ =\frac{\partial \mathbf{b}}{\partial \mathbf{x}}=\left[\begin{array}{ccc}\frac{\partial b_{1}}{\partial x_{1}} & \cdots & \frac{\partial b_{1}}{\partial x_{n}} \\\vdots & \ddots & \vdots \\\frac{\partial b_{m}}{\partial x_{1}} & \cdots & \frac{\partial b_{m}}{\partial x_{n}}\end{array}\right].
 $$
@@ -58,13 +59,14 @@ $$
 F'(\mathbf{x}) = \left( \left( \frac{\partial y}{\partial \mathbf{c}} \cdot \frac{\partial \mathbf{c}}{\partial \mathbf{b}} \right)\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \right)\frac{\partial \mathbf{a}}{\partial \mathbf{x}},
 $$
 
+Again, let's take a look at the result of the first matrix product:
 
 
 $$
 \frac{\partial y}{\partial \mathbf{c}} \cdot \frac{\partial \mathbf{c}}{\partial \mathbf{b}}\ =\frac{\partial y}{\partial \mathbf{b}}= \left[ \frac{\partial y}{\partial b_1} , \frac{\partial y}{\partial b_2}, \cdots, \frac{\partial y}{\partial b_n}\right]
 $$
 
-Note that the size of every intermediate matrix product is always `(1, -)`, meaning if we have this situation where we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$, reverse accumulation looks much more efficient in terms of memory usage and compute, since we're only ever storing intermediate vectors and not matricies. This is the typical setting with a neural network: we have a very large input space (could even be ~billions of parameters), and we want to evaluate the Jacobian matrix of a scalar (loss function) with respect to those parameters. If we had the complementary setting, i.e. $\mathbb{R} \rightarrow \mathbb{R}^n$, which could maybe be some parametrization of a simulator that produces high-dimensional data, we would probably want to compute the Jacobian with forward accumulation instead.
+Why is that so much smaller than forward accumulation? Our initial matrix $\partial y / \partial \mathbf{c}$ has only one row due to $y$ being 1-dimensional. Moreover, we note that this causes the size of every intermediate matrix product to always be $(1, \dots)$, meaning if we have this situation where we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$ like with $F$, reverse accumulation looks much more efficient in terms of memory usage and compute to get the same result, since we're only ever storing intermediate vectors and not high-dimensional matricies. This is the typical setting with a neural network: we have a very large input space (could even be ~billions of parameters), and we want to evaluate the Jacobian matrix of a scalar (loss function) with respect to those parameters. If we had the complementary setting, i.e. $\mathbb{R} \rightarrow \mathbb{R}^n$, which could maybe be some parametrization of a simulator that produces high-dimensional data, we would probably want to compute the Jacobian with forward-mode accumulation instead.
 
 ### Jacobian-vector/vector-Jacobian products
 
@@ -138,6 +140,16 @@ We'll discuss both of these in the following sections.
 
 ## Building the computation graph
 
-There are two main existing strategies to represent a series of code computations as a graph. One involves letting the user build up the graph structure manually via library-provided primitives (called *define-and-run*); the resulting construct is known as a **static graph**, and is the approach taken by libraries like [Theano]() and [TensorFlow]() (when run without eager execution). This has the unfortunate side effect of making code much more difficult to read and write, since you have to use symbolic proxies for operations like control flow and looping (e.g. `tf.while_loop` instead of Python's `while`) in order to instantiate that operation in the graph.
+There are two main existing strategies to represent a series of code computations as a graph. One involves letting the user build up the graph structure manually via library-provided primitives -- called **define-and-run**; the resulting construct is known as a *static graph*, and is the approach taken by libraries like [Theano]() and [TensorFlow]() (when run without eager execution). This has the unfortunate side effect of making code much more difficult to read and write, since you have to use symbolic proxies for operations like control flow and looping (e.g. `tf.while_loop` instead of Python's `while`) in order to instantiate that operation in the graph.
 
-The other approach, known as *define-by-run*, builds up a **dynamic graph** structure during a program's runtime. How does this work? The execution of the program is *traced*
+The other approach, known as **define-by-run**, builds up a *dynamic graph* structure during a program's execution. How does this work? The program is *traced* at runtime, meaning that the autodiff framework is watching which operations occur when a function is run in order to build up the computation graph for that function. When done this way, incorporating loops and conditional structure within the graph is no longer needed: at runtime, loops are unrolled into sequences, and the branching induced by conditional logic will collapse to one branch when the program is actually ran. These properties make define-by-run the more popular approach to autodiff, and is the approach taken by libraries such as [JAX](), [PyTorch](), and [Tensorflow (eager execution mode)]().
+
+## Other approaches to taking gradients of programs
+
+I've given most of the spotlight of this section to automatic differentiation, since it's the best existing way to differentiate programs, and it makes up part of the core of my applications of machine learning to physics in later sections. However, there are a number of alternative ways to calculate gradients that we'll briefly study now in order to give some perspective on the landscape of existing methods.
+
+### Numerical differentiation
+
+I wouldn't be surprised if one of the first things you thought before reading this section is that we can approximate the gradient of a function at $x$ pretty handily already by just evaluating it at both $x$ and a point close by $x + \Delta x$, then computing
+
+$$ \frac{\partial f}{\partial x} \approx \frac{f(x+\Delta x) - f(x)}{\Delta x}.$$
