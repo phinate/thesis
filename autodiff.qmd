@@ -11,7 +11,6 @@ jupyter: python3
 
 
 
-# Automatic differentiation
 
 One may think that the pace of scientific discovery is determined by the speed at which new ideas are formed. That was likely true in the early days; if I posited that a rock, when thrown, will roughly trace a parabolic arc, we likely don't need to take leaps in experimental physics to test this hypothesis to some ballpark degree of accuracy -- maybe we could even get away with just a ruler and the naked eye. In contrast to this, science as done in the present requires a little additional technology in order to probe the questions that we're interested in (unless we get really, really good rulers).
 
@@ -33,10 +32,14 @@ We'll see why function composition is important to cover -- a core idea of autom
 Let's turn to gradients: we define the **Jacobian matrix** of partial derivatives of $F$ as
 
 $$
-\mathbf{J}(F) = F'(\mathbf{x}) =  \left[ \frac{\partial y}{\partial x_1} , \frac{\partial y}{\partial x_2}, \cdots, \frac{\partial y}{\partial x_n}\right].
+\mathbf{J}(F) = F'(\mathbf{x}) = \left[\begin{array}{ccc}\frac{\partial y_{1}}{\partial x_{1}} & \cdots & \frac{\partial y_{1}}{\partial x_{n}} \\\vdots & \ddots & \vdots \\\frac{\partial y_{m}}{\partial x_{1}} & \cdots & \frac{\partial y_{m}}{\partial x_{n}}\end{array}\right],
 $$
 
-This matrix is organized into the shape `(input size, output size)`, which is `(n, 1)` (we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$), making this just one row vector.
+assuming $y$ has multiple components ($y_1$, $y_2$, etc.). However, since we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$, the Jacobian is just one row vector:
+
+$$
+F'(\mathbf{x}) =  \left[ \frac{\partial y}{\partial x_1} , \frac{\partial y}{\partial x_2}, \cdots, \frac{\partial y}{\partial x_n}\right].
+$$
 
 Given the decomposition of $F$ above, we can break this down into a product of individual Jacobian matricies for each of the intermediate functions via the chain rule:
 
@@ -44,18 +47,17 @@ $$
 F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \frac{\partial \mathbf{a}}{\partial \mathbf{x}},
 $$
 
-One can see the sizes of each of the intermediate matricies:
+One can note the sizes of each of the intermediate matricies in the format (# rows, # columns):
 
-<!-- \begin{align}
+\begin{align}
 size(\partial y / \partial \mathbf{c}) &= (1,len(c)) \\
 size(\partial \mathbf{c} / \partial \mathbf{b} ) &= (len(c), len(b)) \\
 size(\partial \mathbf{b} / \partial \mathbf{a} ) &= (len(b), len(a)) \\
 size(\partial \mathbf{a} / \partial \mathbf{x} ) &= (len(a), n) \\
-\end{align} -->
+\end{align}
 
-(horizontal size on the last image is n)
 
-The size of the final Jacobian matrix is then  $(1, n)$, as shown earlier.
+The size of the final Jacobian matrix is then  $(1, n)$, as shown earlier (i.e. one row vector). We'll come back to why these sizes are important -- for instance, these matricies could be very hard to store if $n$ is large.
 
 This kind of sequential matrix multiplication can be called "accumulating" the Jacobian piece-by-piece. The order of the multiplication of these matricies (i.e. where to put the parentheses) matters to optimize computational load, but we'll look at two particular extreme cases:
 
@@ -147,13 +149,13 @@ Fan-out is slightly more involved, since we now have the case of multiple return
 
 So if we have a function with multiple outputs, we'll be accumulating the VJP of that function across the outputs through addition. We can see that this results from the shapes of the vectors being multiplied here, which will always result in an outer shape of `(1, 1)`, so we can safely generalize this to any number of outputs.
 
-::: {#fig-elephants layout-ncol=2}
+::: {#fig-fan layout-ncol=2}
 
-![Surus](fanin.pdf){#fig-surus}
+![Fan-in](fanin.svg){#fig-fanin}
 
-![Hanno](fanin.pdf){#fig-hanno}
+![Fan-out](fanout.svg){#fig-fanout}
 
-Famous Elephants
+Demonstration of how functions that fan-in and fan-out are handled when gradients are computed with respect to their input(s).
 :::
 
 That's pretty much all the scaffolding we need in terms of a framework to calculate gradients. The only missing pieces are:
@@ -191,8 +193,12 @@ The first and easiest thing is of course the straight line $f(x) = x$, which has
 
 \begin{align}
 &f(x, \mathrm{loss}) = x - \frac{\partial\, \mathrm{loss}}{\partial x}\left( \times \, \mathrm{learning~rate~etc.}\right)
-\\ \Rightarrow &f(x^*, \mathrm{loss} ) = x^*;~~~x^* = \underset{x}{\mathrm{argmin}}\, \mathrm{loss}
+\\ \Rightarrow &f(x^*, \mathrm{loss} ) = x^*;~~~x^* = \underset{x}{\mathrm{argmin}}\, \mathrm{loss}.
 \end{align}
+
+As above, if our gradient descent is any good, then we'll hopefully converge to the fixed point $x^*$, which is the value of $x$ that lies in some local minimum of the loss function. Further iterations will then not do anything -- we'll still be sitting at $x^*$. How might we take the gradient of this fixed point?
+
+In practice, we'd take many steps to reach this minimum, which corresponds to many sequential applications of $f$ to some initial value of $x$.
 
 ## Other approaches to taking gradients of programs
 

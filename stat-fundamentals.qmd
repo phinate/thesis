@@ -1,0 +1,62 @@
+---
+title: "Statistics in High-Energy Physics: Fundamentals"
+format:
+  html:
+    code-fold: true
+    default-image-extension: pdf
+  pdf:
+    default-image-extension: tex
+jupyter: python3
+---
+
+## Likelihood
+
+- Model is a data-generating story
+
+## Inference
+
+**Statistical inference** can be viewed as the inverse of the data generating process. Let's look at an example.
+
+Say that the Lorax created the Earth. Moreover, say that he did so by rolling a six-sided die, and putting the result of the die into a World Generating Machine, which merely requires a single number as input. As a neutral party that cannot confirm the Lorax's roll, but can definitely observe the outcome, we may wonder: assuming we have a model of the World Generating Machine, what number did the Lorax roll to produce all that we see around us today? Moreover, can we factor in our prior suspicion that a Lorax rolled a die to select a number at random?
+
+Put in a more general way: given a parametrized model of the world around us, potential suspicions about the parameters themeselves, and some data that could be described by that model, which values of the parameters could have produced the data? Moreover, is the model a good description of the data at all? Could another model have described the data more accurately?
+These type of questions fall within the umbrella of statistical inference.
+
+Let us add a layer of specificity to our questions. The key inquiries that are typically dealt with through inference are:
+
+- **Point estimation**: What value(s) of my model parameters best describe the data?
+- **Interval estimation**: How can I specify a plausible range for my model parameters based on the data they attempt to describe? (One can obtain a symbiotic relation between interval and point estimation by viewing a point estimate as the limit of shrinking intervals)
+- **Hypothesis testing**: Given a model of the data generating process, to what extent does it describe the data when...
+    - ...compared to another model with different form?
+    - ...compared to the same model with different parameters?
+    - ...not being compared to any particular alternative? (this has the particular name of the *goodness-of-fit test*)
+
+
+These questions are where the schools of probability see their strongest divide; whether we can assign probabilities to facts -- e.g. what are the odds that neutrinos have masses -- fundamentally alters the kind of question we can ask of our model/data. For example, instead of a point estimate of the neutrino masses, a Bayesian procedure could infer their *distribution* given the data (and some prior beliefs about their values), also termed the *posterior distribution*. Similarly, Bayesian intervals can say "what are the chances the true parameter value lies in this interval" (which frequentist procedures *can not determine*), and hypothesis testing can evaluate the probability of the hypothesis itself.
+
+However, these Bayesian procedures undertake the weight of the specification of a prior distribution for all of these quantities, which will (in the limited data regime, a.k.a. real life) strongly affect the result. Moreover, the frequentist procedures are indeed still useful for making exact, even if convoluted, statements about the model in the presence of observed data.
+
+You'll notice that the common thread throughout these statements is the *model*. As like many statistics-adjacent HEP researchers before me, I will emphasize that *the likelihood model is the most important ingredient for any inference procedure*. In the limit of a well-designed model and sufficient data, even a room full of the most polarized statisticians, hopelessly resigned to their particular school of thought, will agree on basic statements about the validity of a hypothesis. Even failing this,a Bayesian would not ignore a $p$-value of 0.9, and a frequentist would likewise raise their eyebrows at a flat or sharp posterior with low prior sensitivity. But since they both care about the model, any and all effort that could be spent arguing over philosophy may likely be better placed in talking to a domain expert for the problems you care about.
+
+But enough with ranting, or I'll be subject to the same criticism. Let's review the different methods that implement answers to our questions of inferential interest.
+
+### Frequentist procedures
+
+#### Point estimation
+
+#### Confidence intervals
+
+A significant part of my early PhD days was spent trying to understand the confidence interval. I will do my best to try and make you bang your head against the wall a little less than me (metaphorically, I hope).
+
+A confidence interval
+
+
+#### Hypothesis testing
+
+### Bayesian procedures
+
+#### Posterior estimation
+
+#### Credible intervals
+
+#### Hypothesis testing
