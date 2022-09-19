@@ -9,6 +9,16 @@ format:
 jupyter: python3
 ---
 
+```{python}
+
+x = 2
+```
+
+```{python}
+
+print(x)
+```
+
 ## Likelihood
 
 - Model is a data-generating story
@@ -36,9 +46,9 @@ These questions are where the schools of probability see their strongest divide;
 
 However, these Bayesian procedures undertake the weight of the specification of a prior distribution for all of these quantities, which will (in the limited data regime, a.k.a. real life) strongly affect the result. Moreover, the frequentist procedures are indeed still useful for making exact, even if convoluted, statements about the model in the presence of observed data.
 
-You'll notice that the common thread throughout these statements is the *model*. As like many statistics-adjacent HEP researchers before me, I will emphasize that *the likelihood model is the most important ingredient for any inference procedure*. In the limit of a well-designed model and sufficient data, even a room full of the most polarized statisticians, hopelessly resigned to their particular school of thought, will agree on basic statements about the validity of a hypothesis. Even failing this,a Bayesian would not ignore a $p$-value of 0.9, and a frequentist would likewise raise their eyebrows at a flat or sharp posterior with low prior sensitivity. But since they both care about the model, any and all effort that could be spent arguing over philosophy may likely be better placed in talking to a domain expert for the problems you care about.
+A brief aside: you'll notice that the common thread throughout these statements is the *model*. As like many statistics-adjacent HEP researchers before me, I will emphasize that *the likelihood model is the most important ingredient for any inference procedure*. In the limit of a well-designed model and sufficient data, even a room full of the most polarized statisticians, hopelessly resigned to their particular school of thought, will agree on basic statements about the validity of a hypothesis. Even failing this,a Bayesian would not ignore a $p$-value of 0.9, and a frequentist would likewise raise their eyebrows at a flat or sharp posterior with low prior sensitivity. But since they both care about the model, any and all effort that could be spent arguing over inferencial philosophy may likely be better placed in talking to a domain expert for the problems you care about.
 
-But enough with ranting, or I'll be subject to the same criticism. Let's review the different methods that implement answers to our questions of inferential interest.
+But enough with the aside, or I'll be subject to the same criticism of misplaced effort. Let's review the different methods that implement answers to our questions of inference.
 
 ### Frequentist procedures
 
@@ -48,8 +58,21 @@ But enough with ranting, or I'll be subject to the same criticism. Let's review 
 
 A significant part of my early PhD days was spent trying to understand the confidence interval. I will do my best to try and make you bang your head against the wall a little less than me (metaphorically, I hope).
 
-A confidence interval
+A confidence interval is a statement about values of a model parameter $\mu$ for which the observed data is considered not extreme. Values of $\mu$ outside the interval are then those for which the observed data is extreme. We have a couple of ingredients here:
+- How do we define a notion of "extreme" for the data?
+- How do we construct the interval itself?
 
+For the first point, there's a two-part answer: we need a way to rank the data with a notion of extremity, and then also determine the cutoff for which points are considered extreme or not. This isn't going to be by value, but by *proportion*; we'll place our yardstick such that all values of $x$ considered *not* extreme contain the majority of the probability (area under $p(x|\mu)$), and values considered extreme then have one minus that amount. We then determine those values of $\mu$ which produce distributions that satisfy this requirement *when the yardstick is the observed data $x_0$. This, informally, is the construction of a confidence interval.
+
+##### Constructing confidence intervals
+
+
+
+Despite that a confidence interval is in values of $\mu$, it's an inherently *data-dependent construct* -- you'll get a different confidence interval for different observed data $x_0$. The confidence level, then, is a property of the set of intervals that would be constructed over many experiments: if we sampled $x$ from the true distribution many times with many experiments, and constructed a confidence interval using each sample with confidence level of 95%, then 95% of those intervals would contain (or **cover**) the true value of $\mu$. The collection of these confidence intervals is called a **confidence set**, and we say that it has 95% **coverage**. (It's worth noting that the coverage is something that is totally dependent on the method of interval construction, and it should be checked in practice).
+
+This may ring some alarm bells -- we only have one interval in practice, right? Isn't there a chance that it falls in the 5% that don't cover the true, unknown value of $\mu$, and thereby *contradicting the distribution that produced the data*?
+
+In short, yes. But that doesn't mean confidence intervals are useless -- a single 95% interval is overwhelmingly more likely to contain the true parameter value than not. Remember: we're always going to have inherent uncertainty on the statements we make on unknown parameter values -- this uncertainty is expressed as a distribution for Bayesian methods, and as a statement about sampling properties (results in the limit of many repeated experiments) for frequentist methods.
 
 #### Hypothesis testing
 
