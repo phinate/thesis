@@ -58,14 +58,17 @@ But enough with the aside, or I'll be subject to the same criticism of misplaced
 
 A significant part of my early PhD days was spent trying to understand the confidence interval. I will do my best to try and make you bang your head against the wall a little less than me (metaphorically, I hope).
 
-A confidence interval is a statement about values of a model parameter $\mu$ for which the observed data is considered not extreme. Values of $\mu$ outside the interval are then those for which the observed data is extreme. We have a couple of ingredients here:
+A confidence interval is a statement about values of a model parameter $\mu$ for which the observed data is considered *"not extreme"*. Values of $\mu$ outside the interval are then those for which the observed data is *"extreme"*. We have a couple of ingredients to unpack here:
 - How do we define a notion of "extreme" for the data?
-- How do we construct the interval itself?
+- How do we construct the interval itself to satisfy this property (namely that the values of $\mu$ consistently treat $x$ as extreme or not)?
 
-For the first point, there's a two-part answer: we need a way to rank the data with a notion of extremity, and then also determine the cutoff for which points are considered extreme or not. This isn't going to be by value, but by *proportion*; we'll place our yardstick such that all values of $x$ considered *not* extreme contain the majority of the probability (area under $p(x|\mu)$), and values considered extreme then have one minus that amount. We then determine those values of $\mu$ which produce distributions that satisfy this requirement *when the yardstick is the observed data $x_0$. This, informally, is the construction of a confidence interval.
+For the first point, there's a two-part answer: we need a way to order the data with a notion of extremity (rank it from least to most extreme), and then also determine the cutoff for which points are considered extreme or not. This cutoff isn't going to be by value, but by *proportion*; we'll place our yardstick such that all values of $x$ considered *not* extreme contain the majority of the probability (area under $p(x|\mu)$). How much? That's known as the **confidence level** ($\mathrm{C.L.}$). Values considered *extreme* then occupy the other $1-\mathrm{C.L.}$ of the probability. We then determine those values of $\mu$ which produce distributions that satisfy this requirement *when the yardstick is the observed data $x_0$*. We'll see some examples of this below.
 
-##### Constructing confidence intervals
+For 1-D $x$, we look at some simple orderings:
+- *Descending*: large $x$ is not considered extreme, and small $x$ is. The corresponding confidence interval is $[\mu_{\mathrm{lower}}, +\infty]$, where $\mu_{\mathrm{lower}}$ is known as a **lower limit** on $\mu$.
+- *Ascending*: small $x$ is now not extreme, but large $x$ is. The corresponding confidence interval is $[-\infty, \mu_{\mathrm{upper}}]$, where $\mu_{\mathrm{upper}}$ is known as an **upper limit** on $\mu$.
 
+We can also look at a *central* ordering, which produces an interval that can be constructed at a given confidence level $\mathrm{C.L.}$ through calculating a lower and upper limit $[\mu_{\mathrm{lower}}, \mu_{\mathrm{upper}}]$, each with a confidence level of $1-(1-\mathrm{C.L.})/2$ (which guarantees that the central interval contains $\mathrm{C.L.}$ of the probability).
 
 
 Despite that a confidence interval is in values of $\mu$, it's an inherently *data-dependent construct* -- you'll get a different confidence interval for different observed data $x_0$. The confidence level, then, is a property of the set of intervals that would be constructed over many experiments: if we sampled $x$ from the true distribution many times with many experiments, and constructed a confidence interval using each sample with confidence level of 95%, then 95% of those intervals would contain (or **cover**) the true value of $\mu$. The collection of these confidence intervals is called a **confidence set**, and we say that it has 95% **coverage**. (It's worth noting that the coverage is something that is totally dependent on the method of interval construction, and it should be checked in practice).
