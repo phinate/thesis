@@ -10,7 +10,6 @@ book:
     - intro.qmd
     - part: "Probability and Statistics"
       chapters:
-        - stat-fundamentals.ipynb
         - stat-fundamentals.qmd
         - stat-practical.ipynb
     - part: "Gradients"
