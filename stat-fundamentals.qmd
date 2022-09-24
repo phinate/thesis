@@ -3,9 +3,9 @@ title: "Statistics in High-Energy Physics: Fundamentals"
 format:
   html:
     code-fold: true
-    default-image-extension: pdf
+    default-image-extension: svg
   pdf:
-    default-image-extension: tex
+    default-image-extension: svg
 jupyter: python3
 ---
 
@@ -61,11 +61,12 @@ Let's make this concrete with an example: we'll take the same distribution studi
 
 $$x \sim \mathrm{Normal}(\mu, \frac{\mu}{5}).$$
 
-From here, we can examime the pdf (at $\mu=10$ arbitrarily) and the likelihood (at $x=10$ arbitrarily):
+From here, we can examime the pdf (at $\mu=10$ arbitrarily). We can also view the likelihood if we say we observed data $x_0=10$. Both are shown in [@fig-density].
 
 ```{python}
 #| label: fig-density
-#| fig-cap: "Plots of the probability density function for $\\mu$ = 10"
+#| fig-subcap:
+#|   - "First"
 import jax
 import jax.numpy as jnp
 import jax.scipy as jsc
@@ -73,7 +74,7 @@ from jaxopt import OptaxSolver
 from optax import adam
 import matplotlib.pyplot as plt
 
-subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
 
 def pdf(x, mu):
     return jsc.stats.norm.pdf(x, mu, 0.2 * mu)
@@ -96,10 +97,71 @@ ax = axs[1]
 ax.plot(grid, jax.vmap(pdf, in_axes=(None, 0))(x0, grid), color="C9")
 ax.set_xlabel("$\mu$")
 ax.set_ylabel("$p(x=x_0|\mu)$")
-ax.set_title("Likelihood for $x =x_0 =10$")
+ax.set_title("Likelihood for $x =x_0 =10$");
 ```
 
-We can see in [@fig-density]
+Let's now use the aforementioned method to construct a central confidence interval for $\mu$, at say a confidence level of 68.3%. We then divide up this confidence level into the lower and upper limits -- each will be set with a confidence level of $1-(1-0.683)/2 = 84.15\%$, such that the extreme data occupies one minus that amount (15.95%) of the probability on each side of the central interval, giving us back the desired 68.3% between the upper and lower limits.
+
+Finding these limits can be viewed as an optimization problem: we just need to choose $\mu$ such that the area under $p(x|\mu)$ is equal to 84.15% *below* $x_0$ for lower limits, and *above* $x_0$ for upper limits. We can frame this objective using the cumulative density function -- the cdf evaluated at $x_0$ must be equal to 0.843 for lower limits, and equal to 1-0.843 for upper limits. As this thesis focuses on methods relating to gradient descent, we can use this to find our central interval, by optimizing $\mu$ with respect to a mean-squared error loss between the cdf and the relevant probability share. Doing this for our example gives us the limits [8.332, 12.502] that form a central confidence interval for $\mu$.
+
+```{python}
+def central_interval(data, conf_level, inits):
+    level = 1 - (1 - conf_level) / 2
+
+    def solve(init, level):
+        def loss(mu):
+            return (level - jsc.stats.norm.cdf(data, mu, mu * 0.2)) ** 2
+
+        solver = OptaxSolver(loss, adam(1e-3), tol=1e-8, maxiter=1e5)
+        return solver.run(init).params
+
+    lower = solve(inits[0], level)
+    upper = solve(inits[1], 1 - level)
+
+    return lower, upper
+
+
+mu1, mu2 = central_interval(x0, 0.683, [5.0, 5.0])
+```
+
+We can visualize the probability density for each of $\mu_{\mathrm{lower}}$ and $\mu_{\mathrm{upper}}$, which should help cement the idea of capturing some amount of the probability based on an ordering of $x$:
+
+```{python}
+fig, axs = plt.subplots(1, 2, **subplot_settings)
+
+ax = axs[0]
+ax.plot(grid, pdf(grid, mu1))
+ax.fill_between(
+    grid[grid < x0],
+    0,
+    pdf(grid[grid < x0], mu1),
+    hatch="//",
+    edgecolor="C0",
+    alpha=0.3,
+    label="86% prob. (from below)",
+)
+ax.axvline(x0, label="$x_0$", linestyle="dotted", color="C9")
+ax.set_xlabel("x")
+ax.set_ylabel("$p(x|\mu)$")
+ax.legend(loc="upper right")
+ax.set_title(r"$\mu=\mu_{\mathrm{lower}} = $" + f"{mu1:.3g}")
+ax = axs[1]
+ax.plot(grid, pdf(grid, mu2))
+ax.fill_between(
+    grid[grid > x0],
+    0,
+    pdf(grid[grid > x0], mu2),
+    hatch="//",
+    edgecolor="C0",
+    alpha=0.3,
+    label="86% prob. (from above)",
+)
+ax.axvline(x0, label="$x_0$", linestyle="dotted", color="C9")
+ax.set_xlabel("x")
+ax.set_ylabel("$p(x|\mu)$")
+ax.legend(loc="upper right")
+ax.set_title(r"$\mu=\mu_{\mathrm{upper}} = $" + f"{mu2:.3g}")
+```
 
 #### Neyman construction
 

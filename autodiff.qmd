@@ -1,5 +1,6 @@
 ---
 title: "Automatic differentiation"
+pdf-engine: pdflatex
 format:
   html:
     code-fold: true
@@ -151,9 +152,9 @@ So if we have a function with multiple outputs, we'll be accumulating the VJP of
 
 ::: {#fig-fan layout-ncol=2}
 
-![Fan-in](fanin.svg){#fig-fanin}
+<!-- ![Fan-in](fanin.svg){#fig-fanin}
 
-![Fan-out](fanout.svg){#fig-fanout}
+![Fan-out](fanout.svg){#fig-fanout} -->
 
 Demonstration of how functions that fan-in and fan-out are handled when gradients are computed with respect to their input(s).
 :::
