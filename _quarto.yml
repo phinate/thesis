@@ -8,12 +8,10 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
-    - part: "Probability and Statistics"
+    - part: "Fundamentals"
       chapters:
         - stat-fundamentals.qmd
         - stat-practical.ipynb
-    - part: "Gradients"
-      chapters:
         - autodiff.qmd
         - opt.ipynb
         - diffprog.ipynb
