@@ -5,7 +5,7 @@ format:
     code-fold: true
     default-image-extension: svg
   pdf:
-    default-image-extension: svg
+    default-image-extension: pdf
 jupyter: python3
 ---
 
@@ -258,20 +258,33 @@ Once again, we concern ourselves with a statistic of the data $x$ and model para
 
 A hypothesis at a point (e.g. $p(x | \mu=0)$) is known as a **simple hypothesis**, and a set of hypotheses (e.g. a second, unspecified model $p_2(x | \mu)$, or $p(x | \mu\neq0)$) is known as a **composite hypothesis**. In HEP, we're commonly testing a point null of $H_0$ = Standard Model ($p(x | \mu=0)$) against a composite alternative of $H_1$ = Something Else ($p(x | \mu\neq0)$). This poses a challenge from an optimality perspective that we'll cover shortly.
 
-So, how do we actually do the testing itself? We'll need an ordering principle -- known as a **test statistic** $\lambda$ in the framework of testing -- to rank data from least to most extreme. From there, we come up with a cutoff value $\lambda_c$ such that data with $\lambda > \lambda_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** $\alpha$, and we can make analogy to our treatment of confidence intervals by noticing that $\alpha = 1-\mathrm{C.L.}$.
+So, how do we actually do the testing itself? We'll need an ordering principle, which is expressed as a **test statistic** of the data $t(x)$, to rank data from least to most extreme. From there, we come up with a cutoff value $t_c$ such that data with $t > t_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** $\alpha$, and we can make analogy to our treatment of confidence intervals by noticing that $\alpha = 1-\mathrm{C.L.}$.
 
-Under *which distribution* is this ordering and designation of $\alpha$ performed? We do this with the null hypothesis, $p(x|H_0)$. Our statements, then, on how extreme the observed data appears, are fundamentally rooted in the assumption that $H_0$ is true. Knowing this will help you avoid the dangerous minefield of statements that are made about $p$-values, the result of a hypothesis test, which I'll emphasize again later.
+Under *which distribution* is this ordering and designation of $\alpha$ performed? We do this with the pdf of the test statistic under the null hypothesis, $p(t(x)|H_0)$. Importantly, this distribution may not be known to us, and we may have to estimate it by sampling many values of $x \sim p(x|H_0)$, then calculate $t(x)$ for all of them, and estimate the density of the result. Moreover, without this distribution, we don't know how to place our cutoff $t_c$ so it contains a proportion $\alpha$ of the data considered most extreme!
 
- If the observed data $x_0$ falls in the extreme proportion of possible values, i.e. $\lambda(\x_0) > \lambda_c$, we then say we *reject* $H_0$ compared to $H_1$. Note that this does *not mean we accept $H_1$!* For that, we'd have to look at decision theory, which involves establishing the notion of probabilities for $H_0$ and $H_1$, which is beyond the scope of this frequentist testing framework (a more detailed discussion can be found in e.g. [@bob], Section 3.4).
+One more thing we can deduce from the above: our statements on how extreme the observed data appears are *fundamentally under the assumption that $H_0$ is true.* Keep this in mind!
+
+ If the observed data $x_0$ falls in the extreme proportion of possible values, i.e. $t(x_0) > t_c$, we then say we *reject* $H_0$ compared to $H_1$. Note that this does *not mean we accept $H_1$!* For that, we'd have to look at decision theory, which involves establishing the notion of probabilities for $H_0$ and $H_1$, which is beyond the scope of this frequentist testing framework (a more detailed discussion can be found in e.g. [@bob], Section 3.4).
 
 
-So if our testing revolves around $H_0$, where does the alternative $H_1$ come into play? We can see the presence of $H_1$ in commonly used orderings, such as the *likelihood ratio* of the two hypothesis: $p(x | H_0)/p(x|H_1)$. Furthermore, we can define a measure of *error* in relation to $H_1$: given $H_1$ is true, what's the probability of accepting $H_0$, even when the data come from $H_1$? This quantity is known as $\beta$ -- a *powerful* test would have low $\beta$, i.e. often rejects $H_0$ in favour of $H_1$ when it is true, leading to the quantity $1-\beta$ being known as the **power** of a test.
+So if our testing revolves around $H_0$, where does the alternative $H_1$ come into play? We can see the presence of $H_1$ in commonly used orderings, such as the *likelihood ratio* of the two hypothesis: $t(x, \mu) = p(x | H_0)/p(x|H_1)$. Furthermore, we can define a measure of *error* in relation to $H_1$: given $H_1$ is true, what's the probability of accepting $H_0$, even when the data come from $H_1$? This quantity is known as $\beta$ -- a *powerful* test would have low $\beta$, i.e. often rejects $H_0$ in favour of $H_1$ when it is true, leading to the quantity $1-\beta$ being known as the **power** of a test.
 
-When framing things in terms of error, we can see that the confidence level $\alpha$ also represents an error: the probability of rejecting $H_0$ given that it's true. Why? If the observed data was truly generated from $H_0$, it will fall in the extreme proportion of the data exactly $\alpha$ of the time, since that's the way we designated the probability. This would lead to the erroneous statement of rejecting $H_0$ (though we know this stops short of a *decision* on $H_1$).
+[Visualization of a hypothesis test](visualtest.svg){#fig-visualtest}
 
-$\alpha$ and $\beta$ are often called *type-I* and *type-II* error respectively. I forget this all the time (in particular which type means what) so rarely use it, but include it for completeness.
+When framing things in terms of error, we can see that the confidence level $\alpha$ also represents an error: *the probability of rejecting $H_0$ given that it's true.* Why? If the observed data was truly generated from $H_0$, it will fall in the extreme proportion of the data exactly $\alpha$ of the time, since that's the way we designated the proportions to begin with. This would lead to the erroneous statement of rejecting $H_0$ (though we know this stops short of a *decision* on $H_1$).  We can see a representation of both $\alpha$ and $\beta$ in [@fig-visualtest].
 
-What defines an optimal test? Well, $\alpha$ is specified prior to the test, so we're left with maximizing the *power* $1-\beta$. In the case where $H_0$ and $H_1$ are simple, the likelihood ratio is the optimal test statistic in the sense of power, which can be proved through the Neyman-Pearson Lemma [omitted here for the sake of brevity, though see a visual proof in[@kyleproof])
+The quantities $\alpha$ and $\beta$ are often called *type-I* and *type-II* error respectively. I forget this all the time (in particular which type means what) so rarely use these names, but include them for completeness.
+
+#### Optimality {-}
+
+What defines an optimal test? Well, $\alpha$ is specified prior to the test, so we're left with maximizing the *power* $1-\beta$. The task then becomes: given $\alpha$, choose a test statistic $t(x)$ such that the power $1-\beta$ is maximized.
+
+In the case where $H_0$ and $H_1$ are simple, the likelihood ratio is the optimal test statistic in the sense of power, which can be proved through the Neyman-Pearson Lemma (omitted here for the sake of brevity, though see a visual proof in [@kyleproof]). Just like in the section on confidence intervals, it has
+
+When we have a composite hypothesis
+
+
+
 
 
 ### Bayesian procedures
