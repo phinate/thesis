@@ -45,7 +45,7 @@ But enough with the aside, or I'll be subject to the same criticism of misplaced
 
 A significant part of my early PhD days was spent trying to understand the confidence interval. I will do my best to try and make you bang your head against the wall a little less than me (metaphorically, I hope).
 
-A confidence interval is a statement about values of a model parameter $\mu$ for which the observed data is considered *"not extreme"*. Values of $\mu$ outside the interval are then those for which the observed data is *"extreme"*. We have a couple of ingredients to unpack here:
+We begin with some statistic of the observed data $x$. A confidence interval is then a statement about values of a model parameter $\mu$ for which the observed data is considered *"not extreme"*. Values of $\mu$ outside the interval are then those for which the observed data is *"extreme"*. We have a couple of ingredients to unpack here:
 
 - How do we define a notion of "extreme" for the data?
 - How do we construct the interval itself to satisfy this property (namely that the values of $\mu$ consistently treat $x$ as extreme or not)?
@@ -217,11 +217,11 @@ ax.legend();
 
 Even though the appearance of the plot in [@fig-neyman] makes it look so, it is completely *not required that $\mu$ be 1-D!* For example, $\mu$ could easily have been 2-D here, and then the confidence interval in 2-D could still be constructed by the points at which the observed data (which would be the plane defined by $x_0=10$) meets the acceptance intervals, even if this stretches out over other parameter dimensions. What happens if that multi-dimensional space becomes even larger, even if we don't care about some of the parameters? We'll look at new ordering principle for this.
 
-#### Likelihood ratio ordering
+#### Likelihood ratio ordering {-}
 
 A fourth ordering principle for the data was proposed by Feldman & Cousins in [@FC], and is based on the likelihood ratio
 
-$$ R(x, \mu) = \frac{p(x|\mu}{p(x| \hat{\mu}} ,$$
+$$ R(x, \mu) = \frac{p(x|\mu)}{p(x| \hat{\mu})} ,$$
 
 where $\hat{\mu}$ represents the best-fit value of $\mu$. Commonly used in HEP, it appeals to intuition since there's then a correspondence between the notion of "extreme" and low probability density (relative to the maximum). Moreover, since it's a ratio, a change in variables from $x$ to $f(x)$ would lead to the Jacobians cancelling in $R$, making this ordering invariant to a change of metric. We can construct intervals ordered by $R$ through the Neyman method as above.
 
@@ -241,7 +241,7 @@ How do we know our confidence set has this property? Well, the Neyman confidence
 
 This is all well and good, but may ring some alarm bells -- we only have one interval in practice, right? Isn't there a chance that we draw data such that the confidence interval falls in the 5% that don't cover the true, unknown value of $\mu$, and thereby *contradicting the distribution that produced the data point*?
 
-In short, yes. But that doesn't mean confidence intervals are useless -- a single 95% interval is overwhelmingly more likely to contain the true parameter value than not. Remember: we're always going to have inherent uncertainty on the statements we make on unknown parameter values -- this uncertainty is expressed as a distribution for Bayesian methods, and as a statement about sampling properties (results in the limit of many repeated experiments) for frequentist methods.
+In short, yes. But that doesn't mean confidence intervals are useless -- a single 95% interval is overwhelmingly more likely to contain the true parameter value than not. Remember: we're always going to have inherent uncertainty on the statements we make on unknown true parameter values -- this uncertainty is expressed as a probability distribution for Bayesian methods, and as a statement about sampling properties (results in the limit of many repeated experiments) for frequentist methods.
 
 #### Extras {-}
 
@@ -249,6 +249,29 @@ In short, yes. But that doesn't mean confidence intervals are useless -- a singl
 
 ### Frequentist hypothesis testing
 
+Hypothesis testing gives us a framework to make qualitative statements about how extreme the observed data seems under a proposed theory, often in comparison to various alternatives. Note we use "extreme" in the same way as with confidence intervals, so we're going to need to establish an ordering principle for the data. Let's go into more detail.
+
+Once again, we concern ourselves with a statistic of the data $x$ and model parameters $\mu$. Here we follow the conventions set out by Neyman (again) and Pearson in [@hyptests], and start with the notion of a **null** hypothesis $H_0$, which is the assumed default model for the data. One would often take this to be the Standard Model, for example. We then come up with an alternative hypothesis $H_1$. In what way can $H_0$ and $H_1$ differ? We could have:
+
+- Two totally separate probability models $p_1(x | \mu_1)$ and $p_2(x | \mu_2)$, which can differ in number of parameters and functional form
+- A set of hypotheses within a probability model; $p(x | \mu)$ induces a family of hypotheses parametrized by $\mu$, for instance, with any two values of $\mu$ potentially serving as $H_0$ and $H_1$
+
+A hypothesis at a point (e.g. $p(x | \mu=0)$) is known as a **simple hypothesis**, and a set of hypotheses (e.g. a second, unspecified model $p_2(x | \mu)$, or $p(x | \mu\neq0)$) is known as a **composite hypothesis**. In HEP, we're commonly testing a point null of $H_0$ = Standard Model ($p(x | \mu=0)$) against a composite alternative of $H_1$ = Something Else ($p(x | \mu\neq0)$). This poses a challenge from an optimality perspective that we'll cover shortly.
+
+So, how do we actually do the testing itself? We'll need an ordering principle -- known as a **test statistic** $\lambda$ in the framework of testing -- to rank data from least to most extreme. From there, we come up with a cutoff value $\lambda_c$ such that data with $\lambda > \lambda_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** $\alpha$, and we can make analogy to our treatment of confidence intervals by noticing that $\alpha = 1-\mathrm{C.L.}$.
+
+Under *which distribution* is this ordering and designation of $\alpha$ performed? We do this with the null hypothesis, $p(x|H_0)$. Our statements, then, on how extreme the observed data appears, are fundamentally rooted in the assumption that $H_0$ is true. Knowing this will help you avoid the dangerous minefield of statements that are made about $p$-values, the result of a hypothesis test, which I'll emphasize again later.
+
+ If the observed data $x_0$ falls in the extreme proportion of possible values, i.e. $\lambda(\x_0) > \lambda_c$, we then say we *reject* $H_0$ compared to $H_1$. Note that this does *not mean we accept $H_1$!* For that, we'd have to look at decision theory, which involves establishing the notion of probabilities for $H_0$ and $H_1$, which is beyond the scope of this frequentist testing framework (a more detailed discussion can be found in e.g. [@bob], Section 3.4).
+
+
+So if our testing revolves around $H_0$, where does the alternative $H_1$ come into play? We can see the presence of $H_1$ in commonly used orderings, such as the *likelihood ratio* of the two hypothesis: $p(x | H_0)/p(x|H_1)$. Furthermore, we can define a measure of *error* in relation to $H_1$: given $H_1$ is true, what's the probability of accepting $H_0$, even when the data come from $H_1$? This quantity is known as $\beta$ -- a *powerful* test would have low $\beta$, i.e. often rejects $H_0$ in favour of $H_1$ when it is true, leading to the quantity $1-\beta$ being known as the **power** of a test.
+
+When framing things in terms of error, we can see that the confidence level $\alpha$ also represents an error: the probability of rejecting $H_0$ given that it's true. Why? If the observed data was truly generated from $H_0$, it will fall in the extreme proportion of the data exactly $\alpha$ of the time, since that's the way we designated the probability. This would lead to the erroneous statement of rejecting $H_0$ (though we know this stops short of a *decision* on $H_1$).
+
+$\alpha$ and $\beta$ are often called *type-I* and *type-II* error respectively. I forget this all the time (in particular which type means what) so rarely use it, but include it for completeness.
+
+What defines an optimal test? Well, $\alpha$ is specified prior to the test, so we're left with maximizing the *power* $1-\beta$. In the case where $H_0$ and $H_1$ are simple, the likelihood ratio is the optimal test statistic in the sense of power, which can be proved through the Neyman-Pearson Lemma [omitted here for the sake of brevity, though see a visual proof in[@kyleproof])
 
 
 ### Bayesian procedures
