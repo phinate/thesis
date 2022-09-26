@@ -258,7 +258,7 @@ Once again, we concern ourselves with a statistic of the data $x$ and model para
 
 A hypothesis at a point (e.g. $p(x | \mu=0)$) is known as a **simple hypothesis**, and a set of hypotheses (e.g. a second, unspecified model $p_2(x | \mu)$, or $p(x | \mu\neq0)$) is known as a **composite hypothesis**. In HEP, we're commonly testing a point null of $H_0$ = Standard Model ($p(x | \mu=0)$) against a composite alternative of $H_1$ = Something Else ($p(x | \mu\neq0)$). This poses a challenge from an optimality perspective that we'll cover shortly.
 
-So, how do we actually do the testing itself? We'll need an ordering principle, which is expressed as a **test statistic** of the data $t(x)$, to rank data from least to most extreme. From there, we come up with a cutoff value $t_c$ such that data with $t > t_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** $\alpha$, and we can make analogy to our treatment of confidence intervals by noticing that $\alpha = 1-\mathrm{C.L.}$.
+So, how do we actually do the testing itself? We'll need an ordering principle, which is expressed as a **test statistic** of the data $t(x)$, to rank data from least to most extreme. From there, we come up with a cutoff value $t_c$ such that data with $t > t_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** or **test size** $\alpha$.
 
 Under *which distribution* is this ordering and designation of $\alpha$ performed? We do this with the pdf of the test statistic under the null hypothesis, $p(t(x)|H_0)$. Importantly, this distribution may not be known to us, and we may have to estimate it by sampling many values of $x \sim p(x|H_0)$, then calculate $t(x)$ for all of them, and estimate the density of the result. Moreover, without this distribution, we don't know how to place our cutoff $t_c$ so it contains a proportion $\alpha$ of the data considered most extreme!
 
@@ -275,13 +275,32 @@ When framing things in terms of error, we can see that the confidence level $\al
 
 The quantities $\alpha$ and $\beta$ are often called *type-I* and *type-II* error respectively. I forget this all the time (in particular which type means what) so rarely use these names, but include them for completeness.
 
+
+#### $p$-values {-}
+
+So we set up a test by choosing the size $\alpha$, obtain the distribution for our chosen test statistic $t(x)$, and calculate the cutoff value $t_c$. What next? We'll take our observed data $x_0$, calculate $t(x_0)$, and see if it lies past $t_c$. If so, we'll reject $H_0$. If so, we'd maybe like to know by how much the data was incompatible with $H_0$. This quantity is known as the $p$-value, and is just the area under $p(t(x) | H_0)$, i.e.
+
+$$ p(x_0) = \int_{x_0}^{+\infty}p(t(x) | H_0) dx ~.$$
+
+We can then rephrase a hypothesis test as rejecting $H_0$ when $p(x_0) < \alpha$, and accepting $H_0$ otherwise. A low $p$-value is then a sign of low compatibility between the observed data and $H_0$.
+
 #### Optimality {-}
 
 What defines an optimal test? Well, $\alpha$ is specified prior to the test, so we're left with maximizing the *power* $1-\beta$. The task then becomes: given $\alpha$, choose a test statistic $t(x)$ such that the power $1-\beta$ is maximized.
 
-In the case where $H_0$ and $H_1$ are simple, the likelihood ratio is the optimal test statistic in the sense of power, which can be proved through the Neyman-Pearson Lemma (omitted here for the sake of brevity, though see a visual proof in [@kyleproof]). Just like in the section on confidence intervals, it has
+In the case where $H_0$ and $H_1$ are simple, the likelihood ratio is the optimal test statistic in the sense of power, which can be proved through the Neyman-Pearson Lemma (omitted here for the sake of brevity, though see a visual proof in [@kyleproof]).
 
-When we have a composite hypothesis
+When we have a composite hypothesis, things get trickier, since we've only worked out the best test statistic for two point hypotheses. Instead of most powerful test, we need to change our language: we want the *uniformly most powerful test* across the many point hypotheses contained within the composite hypothesis.
+
+A proxy way to address this is the following: we know that the likelihood ratio is optimal for two point hypothesis. If we're testing a point null ($\mu=\mu_0$) against a composite alternative ($\mu \neq \mu_0$), we can represent the alternative through the *best-fit hypothesis to the observed data*, i.e. estimate $\hat{\mu}$ via maximum likelihood. We can then use the test statistic $p(x | \mu_0) / p(x | \hat{\mu})$. This is exactly analogous to the use of a likelihood ratio ordering in confidence intervals!
+
+### Duality between hypothesis test and intervals
+
+It was probably hard to see the number of times I defined "extreme" in this very specific way that seems to apply to both intervals and tests. That's because they're one-to-one in many ways!
+
+Say we make a $\mathrm{C.L.} = 95%$ confidence interval for $\mu$, given an ordering principle, a pdf $p(x | \mu)$, and some observed sata $x_0$.
+
+
 
 
 
