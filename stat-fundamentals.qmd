@@ -258,7 +258,7 @@ Once again, we concern ourselves with a statistic of the data $x$ and model para
 
 A hypothesis at a point (e.g. $p(x | \mu=0)$) is known as a **simple hypothesis**, and a set of hypotheses (e.g. a second, unspecified model $p_2(x | \mu)$, or $p(x | \mu\neq0)$) is known as a **composite hypothesis**. In HEP, we're commonly testing a point null of $H_0$ = Standard Model ($p(x | \mu=0)$) against a composite alternative of $H_1$ = Something Else ($p(x | \mu\neq0)$). This poses a challenge from an optimality perspective that we'll cover shortly.
 
-So, how do we actually do the testing itself? We'll need an ordering principle, which is expressed as a **test statistic** of the data $t(x)$, to rank data from least to most extreme. From there, we come up with a cutoff value $t_c$ such that data with $t > t_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** or **test size** $\alpha$.
+So, how do we actually do the testing itself? We'll need an ordering principle to rank data from least to most extreme. To do this, we usually concentrate on defining a good **test statistic** of the data $t(x)$, then fix an ordering of $t(x)$ ascending (but other orderings are possible, e.g. two-tailed tests are centrally ordered in $t(x)$). From there, we come up with a cutoff value $t_c$ such that data with $t > t_c$ is seen as extreme. The proportion of the probability held by these extreme values is known as the **confidence level** or **test size** $\alpha$.
 
 Under *which distribution* is this ordering and designation of $\alpha$ performed? We do this with the pdf of the test statistic under the null hypothesis, $p(t(x)|H_0)$. Importantly, this distribution may not be known to us, and we may have to estimate it by sampling many values of $x \sim p(x|H_0)$, then calculate $t(x)$ for all of them, and estimate the density of the result. Moreover, without this distribution, we don't know how to place our cutoff $t_c$ so it contains a proportion $\alpha$ of the data considered most extreme!
 
@@ -282,6 +282,8 @@ So we set up a test by choosing the size $\alpha$, obtain the distribution for o
 
 $$ p_{x_0} = \int_{x_0}^{+\infty}p(t(x) | H_0) dx ~.$$
 
+Note that the quantity $p_{x}$ exists generally for $x$ -- this is just a rephrasing of the data into units that tell us how much of the test statistic distribution we're enclosing to the right under $H_0$. $p_{x_0}$ is then this statement for the observed data.
+
 We can then rephrase a hypothesis test as rejecting $H_0$ when $p_{x_0} < \alpha$, and accepting $H_0$ otherwise. A low $p$-value is then a sign of low compatibility between the observed data and $H_0$. (Here, my notation has come back to bite me... $p_{x_0}$ is absolutely *not* the probability of $x_0$!!!)
 
 #### Optimality {-}
@@ -298,9 +300,11 @@ A proxy way to address this is the following: we know that the likelihood ratio 
 
 It was probably hard to watch the number of times I defined "extreme" in this very specific way that seems to apply to both intervals and tests, without commenting on how they're similar or different. That's because they're one-to-one in many ways!
 
-Say we make a $\mathrm{C.L.} = 95%$ confidence interval of $[\mu_1, \mu_2]$ given an ordering principle (e.g. likelihood ratio), a pdf $p(x | \mu)$, and some observed data $x_0$. This interval contains all values of $\mu$ for which the observed data $x_0$ is deemed *not* extreme. Given the *same ordering principle*, a hypothesis test of some particular $\mu_0$ asks: does $x_0$ lie in the extreme fraction of data $\alpha = 1-\mathrm{C.L.}$ when $\mu=\mu_0$? This is the *same thing* as asking: does $\mu_0$ lie in the confidence interval $[\mu_1, \mu_2]$? If so, then the acceptance interval for $p(x | \mu_0)$ will be intercepted by $x_0$ -- this would *accept* $H_0$ in the testing framework, since $x_0$ under assumption of $\mu_0$ is not considered extreme.
+Say we make a $\mathrm{C.L.}$ = 95% confidence interval of $[\mu_1, \mu_2]$ given an ordering principle/test statistic (e.g. likelihood ratio), a pdf $p(x | \mu)$, and some observed data $x_0$. This interval contains all values of $\mu$ for which the observed data $x_0$ is deemed *not* extreme. Given the *same ordering principle*, a hypothesis test of some particular $\mu_0$ asks: does $x_0$ lie in the extreme fraction of data $\alpha = 1-\mathrm{C.L.}$ when $\mu=\mu_0$? This is the *same thing* as asking: does $\mu_0$ lie in the confidence interval $[\mu_1, \mu_2]$? If so, then the acceptance interval for $p(x | \mu_0)$ will be intercepted by $x_0$ -- this would *accept* $H_0$ in the testing framework, since $x_0$ under assumption of $\mu_0$ is not considered extreme.
 
-I hope this is clear enough, it took me a little while to see initially. Also, I've been bit clumsy with my language when talking about orderings and test statistics -- they are equivalent here, but it
+I hope this is clear enough, it took me a little while to see initially! One can then *invert a test* to produce a related confidence interval, which just means taking the set of $\mu$ that aren't rejected in a test using the observed data:
+
+$$ \{\mu: t(x_0, \mu) < \alpha \} = \mathrm{confidence~interval~at~C.L.}=1-\alpha $$
 
 
 
