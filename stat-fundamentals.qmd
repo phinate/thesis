@@ -10,9 +10,65 @@ jupyter: python3
 ---
 
 
-## Likelihood
+## Probability, distributions, and likelihood
 
-- Model is a data-generating story
+It must be said that I have no desire to subject you, the reader, to the same philosophical torment that I have undergone in my pursuit of clarity of this topic, which I could not even claim to have reached. Moreover, given that this is an *experimental* physics thesis, it is exceedingly likely that you are a pragmatist, and wish to move swiftly on to the sections that may be useful to your life. Nonetheless, I’d like you to allow me the courtesy of proposing that there may in fact be something truly useful in revisiting these foundations, if only to reaffirm their non-utility.
+
+Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of Nested Sampling to inferring the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof. This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just
+
+$$
+P(A) = \frac{\mathrm{number~of~occurences~of~}A}{\mathrm{total~number~of~occurences}}~,
+$${#eq-probdef}
+
+right?”
+
+Alas, the contentious nature of humanity would not allow me such a privilege. However, it is from this place of existential angst that we shall proceed, and uncover where this definition of probability encounters its limits (but also where it is useful).
+
+### Axioms of probability theory
+
+For probability $P$ and possible states of an event $\Omega$, we can say for $A \in \Omega$:
+
+- $P(A) \geqslant 0$ always
+- $P(\Omega) = 1$ (at least *one* event will occur)
+-
+
+
+### Nuisance parameters
+
+When our probability model $p(x|\mu)$ fails to describe the data generating process well, we may add more parameters to our model in order to make it more flexible, and thereby hopefully increase the accuracy of the model. As an example, this could be a parameter that controls the shape of the overall distribution in a way that models a physical effect. Such parameters are called **nuisance parameters**, as they exist only to add model flexibility (we're not interested in inferring their true values), and are then a nuisance to deal (increased dimensionality of any downstream calculations). If we denote the set of nuisance parameters of a model as $\theta$, our likelihood then reads $p(x|\mu,\theta)$.
+
+If we have some prior knowledge about $\theta$, e.g. from a previous experiment that measured the physical event on data $y$ (termed "auxillary data" since it isn't directly to do with our main experiment), it would be useful to use that to constrain possible values $\theta$ could take. In a Bayesian setting, this prior knowledge can be added when defining the prior distribution for that parameter at inference time. It's also possible to bake this information into the probability model itself through constructing the joint likelihood of both experiments:
+
+
+$$p(x, y|\mu,\theta) = p(x|\mu,\theta)p(y|\theta) ~.$$
+
+In the case where the distribution $p(y|\theta)$ isn't readily available, it's common practice in HEP to approximate it using a distribution that models the shape of the data $y$ to some reasonable degree of accuracy, e.g. with a normal distribution of mean $\theta$ (this will be discussed more later).
+
+To extract information about parameters of interest $\mu$ from a likelihood that involves $\theta$, we need to somehow lose our dependence on $\theta$ to recover a distribution that just depends on $\mu$. The ways of doing this are as follows:
+
+**Profiling**: for each value of $\mu$, find the best fit value of $\theta$, leading to
+
+$$ p_{\mathrm{profile}}(x|\mu) = p(x | \mu, \hat{\hat{\theta}});\quad\hat{\hat{\theta}}=\underset{\theta}{\mathrm{argmax}}(p(x|\mu,\theta))~.$$
+
+Here, we're essentially picking our best guess of the value of the nuisance parameters given a specified $\mu$. The profile likelihood will obviously be useful in the limit of $\hat{\hat{\theta}}$ being close to the true values of the nuisance parameters, but this isn't guaranteed.
+
+**Marginalization**: we simply integrate away the dependence on the nuisance parameters entirely:
+
+$$p_{\mathrm{marginal}}(x|\mu) = \int_{-\infty}^{+\infty} p(x| \mu, \theta) p(\theta) d\theta ~.$$
+
+Note that this requires a specification of a prior pdf $p(\theta)$. Marginalizing is then a form of averaging of the likelihood and prior across the domain of $\theta$. Despite this technically being a Bayesian procedure due to the specification of the prior, we're free to use the resulting model in a frequentist way -- this is just a model specification step.
+
+
+
+## Estimating distributions from data
+
+### Histograms
+
+### Kernel density estimation
+
+### Fitting an existing distribution
+
+### Other methods
 
 ## Inference
 
@@ -40,6 +96,24 @@ However, these Bayesian procedures undertake the weight of the specification of 
 A brief aside: you'll notice that the common thread throughout these statements is the *model*. As like many statistics-adjacent HEP researchers before me, I will emphasize that *the likelihood model is the most important ingredient for any inference procedure*. In the limit of a well-designed model and sufficient data, even a room full of the most polarized statisticians, hopelessly resigned to their particular school of thought, will agree on basic statements about the validity of a hypothesis. Even failing this,a Bayesian would not ignore a $p$-value of 0.9, and a frequentist would likewise raise their eyebrows at a flat or sharp posterior with low prior sensitivity. But since they both care about the model, any and all effort that could be spent arguing over inferencial philosophy may likely be better placed in talking to a domain expert for the problems you care about.
 
 But enough with the aside, or I'll be subject to the same criticism of misplaced effort. Let's review the different methods that implement answers to our questions of inference.
+
+### Point estimation
+
+Given a probability model $p(x|\mu)$ for data $x$ and model parameters $\mu$, the most common method of estimating parameter values compatible with observed data $x_0$ in the frequentist paradigm is the **maximum likelihood estimate** (MLE), defined as
+
+$$ \hat{\mu} = \underset{\mu}{\mathrm{argmax}}(p(x_0|\mu))~.$$
+
+In practice, we calculate $\hat{\mu}$ with an optimization procedure, e.g. through the (L)BGFS algorithm for unconstrained optimization [@lbgfs]. Since most optimization algorithms target minimization (purely conventional), we often frame this equivalently as
+
+$$ \hat{\mu} = \underset{\mu}{\mathrm{argmin}} (-2\ln p(x_0|\mu))~.$$
+
+The prefactor of 2 leads to some nice theoretical properties via Wilk's theorem, but that's a later discussion (the 2 doesn't matter for optimization purposes). We use calculate the MLE lot in HEP for a few reasons:
+
+- It has a *Normal sampling distribution* in the asymptotic limit (so we can easily quote errors as a sample standard deviation)
+- In the finite data regime, the MLE is effective for many distributions we care about (e.g. Normal, Poisson)
+- Simple to understand and debug!
+
+For more on maximum likelihood methods, see
 
 ### Confidence intervals
 
@@ -227,7 +301,7 @@ where $\hat{\mu}$ represents the best-fit value of $\mu$. Commonly used in HEP, 
 
 ##### Profiling {-}
 
-In the case where the likelihood parameters can be split into $\mu, \theta$, with $\theta$ representing nuisance parameters, we can make this interval construction more feasable by using the **profile likelihood ratio**:
+In the case where the likelihood parameters can be split into $[\mu, \theta]$, with $\theta$ representing nuisance parameters, we can make this interval construction more feasable by using the **profile likelihood ratio**:
 
 $$ \lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)},$$
 
@@ -304,16 +378,34 @@ Say we make a $\mathrm{C.L.}$ = 95% confidence interval of $[\mu_1, \mu_2]$ give
 
 I hope this is clear enough, it took me a little while to see initially! One can then *invert a test* to produce a related confidence interval, which just means taking the set of $\mu$ that aren't rejected in a test using the observed data:
 
-$$ \{\mu: t(x_0, \mu) < \alpha \} = \mathrm{confidence~interval~at~C.L.}=1-\alpha $$
-
-
-
-
-
-
+$$ \{\mu: t(x_0, \mu) < t_c \} = \mathrm{confidence~interval~at~C.L.}=1-\alpha ~.$$
 
 ### Bayesian procedures
 
-#### Posterior estimation
+I won't talk much about the Bayesian methodology here since I didn't explicitly use it in my PhD, but it's worth mentioning for contrast. Moreover, if you're a student within HEP reading this, I don't want to make it seem like there's only one way of doing things -- there are analyses that use these methods, and I think they should be explored more!
 
-#### Credible intervals
+As I've mentioned a few times, the Bayesian interpretation of probability admits distributions for facts; one can ask "how likely is supersymmetry?" or "what's the distribution for my signal strength?" These questions are often answered via use of Bayes theorem, which states that for probability distribution $p(\cdot)$, data ${x}$, and model parameters ${\mu} = \{ \mu_1, \mu_2, \dots, \mu_n\}$,
+$$
+p({\mu}|{x}) = \frac{p({x}|{\mu})p({\mu})}{p({x})}~.
+$$
+
+We call $p({\mu}|{x})$ the joint **posterior** distribution of the parameters ${\mu}$, since it reflects our updated beliefs post-data. We know about the likelihood $p(x|\mu)$, but $p({\mu})$ (the product of the individual distributions $p(\mu_i)$) is a new player in the game: these are the **prior** distributions for each parameter, called as such to reflect our prior belief in their distributions. We need to incorporate this information to perform inference using this paradigm, which is often a difficult task to do faithfully (even when we want to claim ignorance). Finally, the normalizing factor $p({x})$ is termed the **model evidence**, and is obtained by marginalizing out the model parameters:
+
+$$
+\mathrm{Evidence} = \int_\Omega p({x}|\mu)\times p(\mu)\,\mathrm{d}\mu
+$$
+over parameter domain $\Omega$. Often, Bayesian computation only requires proportionality with respect to the parameters, so it's common to just think of the equation
+
+$$
+\mathrm{Posterior} \propto \mathrm{Likelihood} \times \mathrm{Priors}
+$$
+as the defining equation of Bayesian inference, though the model evidence remains useful as a compatibility measure between data and likelihood.
+
+One thing to note: Bayes theorem does not use the Bayesian definition of probability unless we decide to -- it's derived from the axioms of probability, and is thus invariant of interpretation. Using this theorem in a Bayesian way only holds when we have a true but unknown quantity (e.g. $\mu$) as the subject of our distribution, as is done here.
+
+Armed with this equation, Bayesian procedures include:
+
+- **Posterior estimation** (e.g. through Markov chain monte carlo and it's variants [@MCMC])
+    - Can then perform point estimation via *maximum a posteriori* (the mode of the posterior)
+- **Credible intervals**: in contrast to confidence intervals where the endpoints are random variables, $\mu$ itself is now the random variable, and the interval is constructed such that it contains the true value $\mu_T$ with some allocated probability.
+- **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here. See e.g. [@bayestest] for more information.
