@@ -30,8 +30,49 @@ For probability $P$ and possible states of an event $\Omega$, we can say for $A 
 
 - $P(A) \geqslant 0$ always
 - $P(\Omega) = 1$ (at least *one* event will occur)
--
+- $P(A \cup B \cup C) = P(A) + P(B) + P(C)$ for *mutually exclusive* events $A,B,C \in \Omega$ (i.e. only if they cannot occur at the same time)
 
+The next notion to cover is that of **conditional probability**:
+
+$$P(A \cap B) = P(A | B)P(B)~.$$ {#eq-conditionalprob}
+
+Depending on whose axioms you follow, this quantity may be either derived (as in [@kolmogorov]) or axiomatically stated (as in [@definetti]). A pictorial demonstration of this and other probability quantities can be found in @fig-probs.
+
+
+
+
+![Diagram of various probabilities](probs.svg){#fig-probs}
+
+
+
+The axioms above lead to several other properties. For instance, the notion of conditional probability leads to the equation known as Bayes' Theorem:
+
+\begin{align}
+P(A\cap B) = \frac{P(A|B)}{P(B)};&\qquad P(B\cap A) = \frac{P(B|A)}{P(A)} \\
+&\Rightarrow \frac{P(A|B)}{P(B)} = \frac{P(B|A)}{P(A)}~,
+\end{align}{#eq-bayes}
+
+since the notion of "and" ($\cap$) is not position-dependent, i.e. $P(A\cap B) = P(B\cap A)$. This equation allows for the inversion of conditional probability, as long as we can provide the individual probabilities for $A$ and $B$. For example, the age-old situation of $P(\mathrm{positive~test} | \mathrm{have~disease})$ versus $P(\mathrm{have~disease} | \mathrm{positive~test})$. See [@bob] (and countless other introductions to probability) for a worked example along these lines.
+
+Another important notion is that of **independence**:
+
+- For *independent* events $A,B$, $P(A | B) = P(A)$ (i.e. their venn diagrams don't overlap, so the occurrence of $B$ cannot influence $A$)
+    - This also implies $P(A\cap B) = P(A)P(B)$
+
+Independence is an important assumption for HEP -- we assume that events in our particle colliders occur without influencing each other. This assumption fundamentally changes any modelling we do of a collider physics process in a probabilistic sense, as it reduces the modelling to event-level probabilities (and the joint distribution over all events is recovered through multiplication as above).
+
+
+### Interpretations of $P$
+
+The previous section discussed axioms and properties for probability $P$ that hold regardless of interpretation. However, when we start to give meaning to $A$, $B$, $\Omega$ etc, this can pose issues. For something like a coin flip, this isn't too much of an issue -- we can ask what the chances of observing $A$ = heads or $B$ = tails in some number of experiments $N$. But what if, for example, I let $A$ = "The sky is blue right now"? Clearly it will be blue or it won't be blue, so you'd imagine that perhaps the probability is 1/2 if we use the definition of $P$ in @eq-probdef. This isn't particularly useful though -- since I said *now*, there's only one data point we could ever take, and that would be to look at the sky. There's no way to take into account the fact that we may live in a very rainy city during winter, or if the sun exploded (I hope it didn't do that yet).
+
+The reason we faced issues there is because we tried to *assign a probability to a fact*. Similar questions could look like "what is the probability that the Higgs Boson exists?", or "what are the odds of the next prime minister of the U.K. being a walrus?" -- they're all things that will either be true or untrue. We may like to make some probabilistic statements about these facts though (I'm particularly interested in the chances of the latter question): to do this, we need to shift our interpretation of $P$ to a *personalistic degree of belief*. This is known as the **Bayesian** interpretation of probability.
+
+Now, doing things the Bayesian way doesn't mean we assign probabilites to facts with no reason (though we are free to do so). We end up incorporating **prior information** on these facts, e.g. the probability of it raining generally in your area, through Bayes' theorem in @eq-bayes ($P(A)$ and $P(B)$ could play that role). Note, however, that Bayes' theorem stems from the axioms of probability, and *does not require Bayesian $P$*. It's unfortunate that Bayesian and Bayes' theorem are named as such, otherwise this would be clearer. Bayesian inference does, however, tend to use Bayes' theorem for conditional inversion. See @sec-bayes for more.
+
+### Probability density
+
+We now shift our discussion from the big $P$ to the small $p$, which is used to indicate the **probability density function** (pdf).
 
 ### Nuisance parameters
 
@@ -380,7 +421,7 @@ I hope this is clear enough, it took me a little while to see initially! One can
 
 $$ \{\mu: t(x_0, \mu) < t_c \} = \mathrm{confidence~interval~at~C.L.}=1-\alpha ~.$$
 
-### Bayesian procedures
+### Bayesian procedures {#sec-bayes}
 
 I won't talk much about the Bayesian methodology here since I didn't explicitly use it in my PhD, but it's worth mentioning for contrast. Moreover, if you're a student within HEP reading this, I don't want to make it seem like there's only one way of doing things -- there are analyses that use these methods, and I think they should be explored more!
 
