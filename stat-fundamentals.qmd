@@ -34,23 +34,27 @@ For probability $P$ and possible states of an event $\Omega$, we can say for $A 
 
 The next notion to cover is that of **conditional probability**:
 
-$$P(A \cap B) = P(A | B)P(B)~.$$ {#eq-conditionalprob}
+$$
+P(A \cap B) = P(A | B)P(B)~.
+$$ {#eq-conditionalprob}
 
 Depending on whose axioms you follow, this quantity may be either derived (as in [@kolmogorov]) or axiomatically stated (as in [@definetti]). A pictorial demonstration of this and other probability quantities can be found in @fig-probs.
 
 
 
 
-![Diagram of various probabilities](probs.svg){#fig-probs}
+<!-- ![Diagram of various probabilities](probs){#fig-probs} -->
 
 
 
 The axioms above lead to several other properties. For instance, the notion of conditional probability leads to the equation known as Bayes' Theorem:
 
-\begin{align}
-P(A\cap B) = \frac{P(A|B)}{P(B)};&\qquad P(B\cap A) = \frac{P(B|A)}{P(A)} \\
-&\Rightarrow \frac{P(A|B)}{P(B)} = \frac{P(B|A)}{P(A)}~,
-\end{align}{#eq-bayes}
+$$
+P(A\cap B) = \frac{P(A|B)}{P(B)};\qquad P(B\cap A) = \frac{P(B|A)}{P(A)}
+$$
+$$
+\Rightarrow P(A|B)P(A) = P(B|A)P(B)~,
+$${#eq-bayes}
 
 since the notion of "and" ($\cap$) is not position-dependent, i.e. $P(A\cap B) = P(B\cap A)$. This equation allows for the inversion of conditional probability, as long as we can provide the individual probabilities for $A$ and $B$. For example, the age-old situation of $P(\mathrm{positive~test} | \mathrm{have~disease})$ versus $P(\mathrm{have~disease} | \mathrm{positive~test})$. See [@bob] (and countless other introductions to probability) for a worked example along these lines.
 
@@ -64,11 +68,11 @@ Independence is an important assumption for HEP -- we assume that events in our 
 
 ### Interpretations of $P$
 
-The previous section discussed axioms and properties for probability $P$ that hold regardless of interpretation. However, when we start to give meaning to $A$, $B$, $\Omega$ etc, this can pose issues. For something like a coin flip, this isn't too much of an issue -- we can ask what the chances of observing $A$ = heads or $B$ = tails in some number of experiments $N$. But what if, for example, I let $A$ = "The sky is blue right now"? Clearly it will be blue or it won't be blue, so you'd imagine that perhaps the probability is 1/2 if we use the definition of $P$ in @eq-probdef. This isn't particularly useful though -- since I said *now*, there's only one data point we could ever take, and that would be to look at the sky. There's no way to take into account the fact that we may live in a very rainy city during winter, or if the sun exploded (I hope it didn't do that yet).
+The previous section discussed axioms and properties for probability $P$ that hold regardless of interpretation. However, when we start to give meaning to $A$, $B$, $\Omega$ etc, this can pose issues. For something like a coin flip, this isn't too much of an issue -- we can ask what the chances of observing the number of occurrences of $A$ = heads or $B$ = tails in some number of experiments $N$. This is known as the **frequentist** interpretation of $P$ -- literally the *frequency* of that possible outcome. But what if, for example, I let $A$ = "The sky is blue right now"? Clearly it will be blue or it won't be blue, so you'd imagine that perhaps the probability is 1/2 if we use the definition of $P$ in @eq-probdef. This isn't particularly useful though -- since I said *now*, there's only one data point we could ever take, and that would be to look at the sky. There's no way to take into account the fact that we may live in a very rainy city during winter, or if the sun exploded (I hope it didn't do that yet).
 
 The reason we faced issues there is because we tried to *assign a probability to a fact*. Similar questions could look like "what is the probability that the Higgs Boson exists?", or "what are the odds of the next prime minister of the U.K. being a walrus?" -- they're all things that will either be true or untrue. We may like to make some probabilistic statements about these facts though (I'm particularly interested in the chances of the latter question): to do this, we need to shift our interpretation of $P$ to a *personalistic degree of belief*. This is known as the **Bayesian** interpretation of probability.
 
-Now, doing things the Bayesian way doesn't mean we assign probabilites to facts with no reason (though we are free to do so). We end up incorporating **prior information** on these facts, e.g. the probability of it raining generally in your area, through Bayes' theorem in @eq-bayes ($P(A)$ and $P(B)$ could play that role). Note, however, that Bayes' theorem stems from the axioms of probability, and *does not require Bayesian $P$*. It's unfortunate that Bayesian and Bayes' theorem are named as such, otherwise this would be clearer. Bayesian inference does, however, tend to use Bayes' theorem for conditional inversion. See @sec-bayes for more.
+Now, doing things the Bayesian way doesn't mean we assign probabilites to facts with no reason (though we are free to do so). We end up incorporating **prior information** on these facts, e.g. the probability of it raining generally in your area, through Bayes' theorem in @eq-bayes ($P(A)$ and $P(B)$ could play that role). Note, however, that Bayes' theorem stems from the axioms of probability, and *does not require Bayesian $P$*. It's unfortunate that Bayesian and Bayes' theorem are named as such, otherwise this would be clearer. Bayesian inference does, however, tend to use Bayes' theorem for conditional inversion. See @sec-bayes for more on this.
 
 ### Probability density
 
@@ -103,7 +107,35 @@ Note that this requires a specification of a prior pdf $p(\theta)$. Marginalizin
 
 ## Estimating distributions from data
 
+Often we're not equipped with a way to describe some data we're interested in using a probability distribution. In that situation, it's useful to have a set of **density estimation** techniques within your toolkit. Here we go over a couple.
+
 ### Histograms
+
+Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a data distribution through counting the number of data points that lie in a set of adjacent disjoint intervals, or **bins**. A histogram, then, is expressable as a set of counts and a set of bin edges. See some example histograms in
+
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
+num_points = 1000
+data = np.concatenate((np.random.normal(size=num_points), np.random.normal(size=num_points//2)+3))
+fig, axs = plt.subplots(1,3, **subplot_settings, sharex=True, sharey=True)
+ax=axs[0]
+ax.hist(data, bins=10)
+ax.set_ylabel("frequency")
+ax.set_xlabel("x")
+ax.set_title("10 uniform bins")
+ax=axs[1]
+ax.hist(data, bins=100)
+ax.set_xlabel("x")
+ax.set_title("100 uniform bins")
+ax=axs[2]
+ax.hist(data, bins=[-2,-1,-.5,0,1,4,6])
+ax.set_xlabel("x")
+ax.set_title("bins = [-2,-1,-0.5,0,1,4,6]");
+```
 
 ### Kernel density estimation
 
@@ -187,9 +219,6 @@ import jax.numpy as jnp
 import jax.scipy as jsc
 from jaxopt import OptaxSolver
 from optax import adam
-import matplotlib.pyplot as plt
-
-subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
 
 def pdf(x, mu):
     return jsc.stats.norm.pdf(x, mu, 0.2 * mu)
@@ -384,7 +413,7 @@ One more thing we can deduce from the above: our statements on how extreme the o
 
 So if our testing revolves around $H_0$, where does the alternative $H_1$ come into play? We can see the presence of $H_1$ in commonly used orderings, such as the *likelihood ratio* of the two hypothesis: $t(x, \mu) = p(x | H_0)/p(x|H_1)$. Furthermore, we can define a measure of *error* in relation to $H_1$: given $H_1$ is true, what's the probability of accepting $H_0$, even when the data come from $H_1$? This quantity is known as $\beta$ -- a *powerful* test would have low $\beta$, i.e. often rejects $H_0$ in favour of $H_1$ when it is true, leading to the quantity $1-\beta$ being known as the **power** of a test.
 
-[Visualization of a hypothesis test](visualtest.svg){#fig-visualtest}
+<!-- ![Visualization of a hypothesis test](visualtest){#fig-visualtest} -->
 
 When framing things in terms of error, we can see that the confidence level $\alpha$ also represents an error: *the probability of rejecting $H_0$ given that it's true.* Why? If the observed data was truly generated from $H_0$, it will fall in the extreme proportion of the data exactly $\alpha$ of the time, since that's the way we designated the proportions to begin with. This would lead to the erroneous statement of rejecting $H_0$ (though we know this stops short of a *decision* on $H_1$).  We can see a representation of both $\alpha$ and $\beta$ in [@fig-visualtest].
 
