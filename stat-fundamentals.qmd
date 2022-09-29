@@ -111,10 +111,11 @@ Often we're not equipped with a way to describe some data we're interested in us
 
 ### Histograms
 
-Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a data distribution through counting the number of data points that lie in a set of adjacent disjoint intervals, or **bins**. A histogram, then, is expressable as a set of counts and a set of bin edges. See some example histograms in
-
+Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a data distribution through counting the number of data points that lie in a set of adjacent disjoint intervals, or **bins**. A histogram, then, is expressible as a set of counts and a set of bin edges. See some example histograms in @fig-hist to see how the binning can affect the overall envelope of the distribution.
 
 ```{python}
+#| label: fig-hist
+#| fig-cap: "Histogram of some bi-modal data $x$, shown with different binnings."
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -134,8 +135,19 @@ ax.set_title("100 uniform bins")
 ax=axs[2]
 ax.hist(data, bins=[-2,-1,-.5,0,1,4,6])
 ax.set_xlabel("x")
-ax.set_title("bins = [-2,-1,-0.5,0,1,4,6]");
+ax.set_title("edges = [-2,-1,-0.5,0,1,4,6]");
 ```
+
+The area under the histogram is equal to $\sum_{\mathrm{bins~i}} \mathrm{count}_i \times \mathrm{bin~width}_i$; we can force this to unit area by dividing each term in the sum by the bin width and the total number of counts. This produces something that can be interpreted as a (discrete) probability density, which can be useful when looking at just the shape of the distribution, for instance.
+
+#### Why histograms in HEP? {-}
+
+I [asked this question on Twitter](https://twitter.com/phi_nate/status/1251124042012274693?s=20&t=_miEUw-BGQwuWl1rsgyHuQ) because I was confused: the HEP analysis paradigm has the histogram as a central object, but why? The reasons I discovered are as follows:
+
+- **Data structures**: the histogram has many benefits as a vessel to store data, e.g. their memory footprint is *independent of the size of the input data* -- large numbers for the counts are still just single numbers! They also have effectively no cost to evaluate (you just look up the count number based on the bin)
+- **Poisson modelling**: a simple and tractable way to model the likelihood of a collider physics process is with a Poisson-based likelihood function, which has an expected number of counts that is parametrized using templates from signal and background processes. When you make a histogram of your physics quantities, you can model it in this way through having one Poisson distribution per bin!
+
+There was also more in that thread on ease parallel computation, the fact that histograms are good at respecting physical boundaries, and some birds-eye view perspectives on how things are (and could be) done in the field. Many thanks to Kyle Cranmer, Jim Pivarski, Stan Seibert, Nick Smith, and Pablo De Castro for contributing to that discussion!
 
 ### Kernel density estimation
 
