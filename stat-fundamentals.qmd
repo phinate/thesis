@@ -1,5 +1,5 @@
 ---
-title: "Statistics in High-Energy Physics: Fundamentals"
+title: "Probability and Statistics, in theory"
 format:
   html:
     code-fold: true
@@ -151,6 +151,46 @@ There was also more in that thread on ease parallel computation, the fact that h
 
 ### Kernel density estimation
 
+If you wanted a smooth distribution instead of a discrete one, the *kernel density estimate* (KDE) has you covered.
+
+It's a pretty simple but powerful idea: for each data point, define some *kernel function* that uses the point as a centre (e.g. normal distribution). Then, the distribution of the data at a point $x$ is equal to the *average of the kernel functions evaluated at $x$.
+
+There are many different choices of kernel function, each with their own tradeoffs, but the most common one in practice is indeed the standard normal distribution $\mathrm{Normal}(0, 1)$. If we specify the mean as the data, then there's one missing ingredient -- the *width* of these distributions. That number is called the **bandwidth**, and controls the width of every kernel at once. Interestingly, the choice of bandwidth affects the resulting shape in general much more than the choice of kernel -- see @fig-kde for some examples of the bandwidth's influence on the distribution.
+
+```{python}
+from scipy.stats import gaussian_kde
+
+grid = np.linspace(-3,6, 500)
+
+fig, axs = plt.subplots(1, 5, **subplot_settings, sharex=True, sharey=True)
+ax = axs[0]
+kde = gaussian_kde(data, bw_method=0.01)
+ax.plot(grid, kde.pdf(grid))
+ax.set_ylabel("density")
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.01", fontsize="small")
+ax = axs[1]
+kde = gaussian_kde(data, bw_method=0.05)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.05", fontsize="small")
+ax = axs[2]
+kde = gaussian_kde(data, bw_method=0.1)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.1", fontsize="small")
+ax = axs[3]
+kde = gaussian_kde(data, bw_method=0.5)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.5", fontsize="small")
+ax = axs[4]
+kde = gaussian_kde(data, bw_method=1)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 1", fontsize="small");
+```
+
 ### Fitting an existing distribution
 
 ### Other methods
@@ -161,7 +201,7 @@ There was also more in that thread on ease parallel computation, the fact that h
 
 Say that the Lorax created the Earth. Moreover, say that he did so by rolling a six-sided die, and putting the result of the die into a World Generating Machine, which merely requires a single number as input. As a neutral party that cannot confirm the Lorax's roll, but can definitely observe the outcome, we may wonder: assuming we have a model of the World Generating Machine, what number did the Lorax roll to produce all that we see around us today? Moreover, can we factor in our prior suspicion that a Lorax rolled a die to select a number at random?
 
-Put in a more general way: given a parametrized model of the world around us, potential suspicions about the parameters themeselves, and some data that could be described by that model, which values of the parameters could have produced the data? Moreover, is the model a good description of the data at all? Could another model have described the data more accurately?
+Put in a more general way: given a parametrized model of the world around us, potential suspicions about the parameters themselves, and some data that could be described by that model, which values of the parameters could have produced the data? Moreover, is the model a good description of the data at all? Could another model have described the data more accurately?
 These type of questions fall within the umbrella of statistical inference.
 
 Let us add a layer of specificity to our questions. The key inquiries that are typically dealt with through inference are:
