@@ -1,0 +1,118 @@
+---
+title: "Probability and Statistics, in practice"
+format:
+  html:
+    code-fold: true
+    default-image-extension: svg
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
+---
+
+
+This section focuses on how fundamental statistical ideas are translated into meaningful physics insights. We'll look at common practice, and summarize the main components needed to set the scene for applications that involve building new ideas with these techniques.
+
+## Estimating distributions from data
+
+Often we're not equipped with a way to describe some data we're interested in using a probability distribution. In that situation, it's useful to have a set of **density estimation** techniques within your toolkit. Here we go over a couple.
+
+### Histograms
+
+Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a data distribution through counting the number of data points that lie in a set of adjacent disjoint intervals, or **bins**. A histogram, then, is expressible as a set of counts and a set of bin edges. See some example histograms in @fig-hist to see how the binning can affect the overall envelope of the distribution.
+
+```{python}
+#| label: fig-hist
+#| fig-cap: "Histogram of some bi-modal data $x$, shown with different binnings."
+import numpy as np
+import matplotlib.pyplot as plt
+
+subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
+num_points = 1000
+data = np.concatenate((np.random.normal(size=num_points), np.random.normal(size=num_points//2)+3))
+fig, axs = plt.subplots(1,3, **subplot_settings, sharex=True, sharey=True)
+ax=axs[0]
+ax.hist(data, bins=10)
+ax.set_ylabel("frequency")
+ax.set_xlabel("x")
+ax.set_title("10 uniform bins")
+ax=axs[1]
+ax.hist(data, bins=100)
+ax.set_xlabel("x")
+ax.set_title("100 uniform bins")
+ax=axs[2]
+ax.hist(data, bins=[-2,-1,-.5,0,1,4,6])
+ax.set_xlabel("x")
+ax.set_title("edges = [-2,-1,-0.5,0,1,4,6]");
+```
+
+The area under the histogram is equal to $\sum_{\mathrm{bins~i}} \mathrm{count}_i \times \mathrm{bin~width}_i$; we can force this to unit area by dividing each term in the sum by the bin width and the total number of counts. This produces something that can be interpreted as a (discrete) probability density, which can be useful when looking at just the shape of the distribution, for instance.
+
+#### Why histograms in HEP? {-}
+
+I [asked this question on Twitter](https://twitter.com/phi_nate/status/1251124042012274693?s=20&t=_miEUw-BGQwuWl1rsgyHuQ) because I was confused: the HEP analysis paradigm has the histogram as a central object, but why? The reasons I discovered are as follows:
+
+- **Data structures**: the histogram has many benefits as a vessel to store data, e.g. their memory footprint is *independent of the size of the input data* -- large numbers for the counts are still just single numbers! They also have effectively no cost to evaluate (you just look up the count number based on the bin)
+- **Poisson modelling**: a simple and tractable way to model the likelihood of a collider physics process is with a Poisson-based likelihood function, which has an expected number of counts that is parametrized using templates from signal and background processes. When you make a histogram of your physics quantities, you can model it in this way through having one Poisson distribution per bin!
+
+There was also more in that thread on ease parallel computation, the fact that histograms are good at respecting physical boundaries, and some birds-eye view perspectives on how things are (and could be) done in the field. Many thanks to Kyle Cranmer, Jim Pivarski, Stan Seibert, Nick Smith, and Pablo De Castro for contributing to that discussion -- I encourage you to check out the thread!
+
+### Kernel density estimation
+
+If you wanted a smooth distribution instead of a discrete one, the *kernel density estimate* (KDE) has you covered.
+
+It's a pretty simple but powerful idea: for each data point, define some *kernel function* that uses the point as a centre (e.g. normal distribution). Then, the distribution of the data at a point $x$ is equal to the *average of the kernel functions evaluated at $x$.
+
+There are many different choices of kernel function, each with their own tradeoffs, but the most common one in practice is indeed the standard normal distribution $\mathrm{Normal}(0, 1)$. If we specify the mean as the data, then there's one missing ingredient -- the *width* of these distributions. That number is called the **bandwidth**, and controls the width of every kernel at once. Interestingly, the choice of bandwidth affects the resulting shape in general much more than the choice of kernel -- see @fig-kde for some examples of the bandwidth's influence on the distribution.
+
+```{python}
+from scipy.stats import gaussian_kde
+
+grid = np.linspace(-3,6, 500)
+
+fig, axs = plt.subplots(1, 5, **subplot_settings, sharex=True, sharey=True)
+ax = axs[0]
+kde = gaussian_kde(data, bw_method=0.01)
+ax.plot(grid, kde.pdf(grid))
+ax.set_ylabel("density")
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.01", fontsize="medium")
+ax = axs[1]
+kde = gaussian_kde(data, bw_method=0.05)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.05", fontsize="medium")
+ax = axs[2]
+kde = gaussian_kde(data, bw_method=0.1)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.1", fontsize="medium")
+ax = axs[3]
+kde = gaussian_kde(data, bw_method=0.5)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 0.5", fontsize="medium")
+ax = axs[4]
+kde = gaussian_kde(data, bw_method=1)
+ax.plot(grid, kde.pdf(grid))
+ax.set_xlabel("x")
+ax.set_title("bandwidth = 1", fontsize="medium");
+```
+
+Some talk on a midpoint between KDEs and histograms will appear in the applications part of the thesis!
+
+### Fitting an existing distribution
+
+If you have a decent idea on a distribution that may reasonably describe your data, you can simply perform a maximum-likelihood optimization to fit the parameters of the model to the data. One can even compose multiple distributions into a more complex likelihood. Not too much more to say about this, as it essentially comes under point estimation of a model parameter, which we talked about in the previous chapter!
+
+### Other data-driven methods
+
+We'll talk more about these in the machine learning section, e.g. Gaussian processes and normalizing flows. These are generally reserved for when you need a little bit of extra work in order to get a robust result, or to go beyond 1-D and 2-D variables in a scalable way.
+
+## HistFactory: modelling nature as a set of counts
+
+Given some (new) physics process exists, we may expect $\lambda$ events to appear in our detector from that process. This number could come from e.g. simulating the physics process. Say we run our detector, and we record $n$ events. What's the likelihood of observing $n$ events with $\lambda$ expected?
+
+Thanks to our groundwork in
+
+
+## Hypothesis testing and asymptotic formulae in HEP
