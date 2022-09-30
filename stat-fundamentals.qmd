@@ -233,7 +233,9 @@ import jax.numpy as jnp
 import jax.scipy as jsc
 from jaxopt import OptaxSolver
 from optax import adam
+import matplotlib.pyplot as plt
 
+subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
 def pdf(x, mu):
     return jsc.stats.norm.pdf(x, mu, 0.2 * mu)
 

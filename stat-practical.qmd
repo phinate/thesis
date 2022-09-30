@@ -110,9 +110,36 @@ We'll talk more about these in the machine learning section, e.g. Gaussian proce
 
 ## HistFactory: modelling nature as a set of counts
 
-Given some (new) physics process exists, we may expect $\lambda$ events to appear in our detector from that process. This number could come from e.g. simulating the physics process. Say we run our detector, and we record $n$ events. What's the likelihood of observing $n$ events with $\lambda$ expected?
+HistFactory [@hifa] is by far the most common statistical modelling tool used for collider physics data analysis. It's known for being difficult to understand at first -- if you've ever seen the full expression for the general likelihood, you'll have wondered if there was a need to extend the Greek alphabet to write down all the symbols that are used. Here, we'll take a slower and more gentle approach, building up the HistFactory likelihood piece-by-piece, until hopefully it's clear enough what's going on.
 
-Thanks to our groundwork in
+Given some (new) physics process exists, we may expect $\lambda$ events to appear in our detector from that process. This number could come from e.g. simulating the physics process. It could also come from e.g. some data driven extrapolation method, but I'm going to call all of this simulation for the sake of the arguments below. The point is that we estimate it before looking at the important data in the region that would contain new physics.
 
+So: say we run our detector, and we record $n$ *independent* events. What's the likelihood of observing these $n$ events with $\lambda$ expected from simulation?
+
+We know from the previous chapter that this is modelled well with a Poisson distribution:
+
+$$
+p(n|\lambda) = Poisson(\lambda)~.
+$$ {#eq-poisson}
+
+Along with the overall number of events we recorded, we may pick some variable of interest $x$ that we choose to measure. That variable will have a distribution we can predict from simulation. How do we describe it?
+
+We know that our data is divided into two categories: stuff that came from physics we're interested in (**signal**), and stuff that came from everything else (**background**). We can then say we have $s$ signal events in our sample and $b$ background events, with $s+b=\lambda$, our overall number of expected counts from simulation.
+
+Each value of $x$ that comes from a signal event can be viewed as a sample from the unknown signal distribution $f_s(x)$, and likewise for background $f_b(x)$. We can even think of any particular value we measured (e.g. $x_0$) as being "marked" with an extra number -- either $f_s(x_0)$ if it came from signal, or $f_b(x_0)$ if it belongs to the background. This means that our overall distribution for the variable $x$ is described by "$s$" much of $f_s(x)$, and "$b$"-much of $f_b(x)$, i.e. for any value of $x$, it's density is then
+
+$$
+p(x) = \frac{sf_s(x) + bf_b(x)}{s+b}~,
+$$ {#eq-balance}
+
+where we choose to normalize by the total number of events $s+b$ to treat $p(x)$ as a proper density.
+
+We can then model the whole dataset $\{x_i\}_{i=1}^n$ by multiplying the densities of all the individual events, since we assumed they were independent (otherwise we couldn't use the Poisson distribution!). We can then incorporate @eq-poisson with @eq-balance through multiplication of the densities:
+
+$$
+p(\{x_i\}_{i=1}^n) = Poisson(s+b)\prod_{i=1}^n\frac{sf_s(x_i) + bf_b(x_i)}{s+b}~.
+$$
+
+Notice that we don't have any free parameters right now -- the counts $s$ and $b$ will be fixed from our physics simulation. Now, here comes a little trick: if we wanted to infer the amount of signal present in our data, how would we do that? We can accomplish this by adding a pre-mu
 
 ## Hypothesis testing and asymptotic formulae in HEP

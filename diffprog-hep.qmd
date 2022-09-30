@@ -2,7 +2,6 @@
 format:
   html:
     code-fold: true
-    code-summary: "Show the code"
 ---
 
 # Physics Analysis as a Differentiable Program
