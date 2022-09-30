@@ -11,20 +11,20 @@ book:
     - part: "Fundamentals"
       chapters:
         - stat-fundamentals.qmd
-        - stat-practical.ipynb
+        - stat-practical.qmd
         - autodiff.qmd
-        - opt.ipynb
-        - diffprog.ipynb
+        - opt.qmd
+        - diffprog.qmd
     - part: "Applications"
       chapters:
       - diffprog-hep.qmd
-      - flow-interp.ipynb
-      - sh.ipynb
+      - flow-interp.qmd
+      - sh.qmd
     - references.qmd
   appendices:
-    - software.ipynb
-    - trt.ipynb
-    - clarinet.ipynb
+    - software.qmd
+    - trt.qmd
+    - clarinet.qmd
 
 
 bibliography: references.bib
