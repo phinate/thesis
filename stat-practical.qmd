@@ -179,12 +179,18 @@ These gymnastics have left us with the following likelihood:
 
 $$
 p(\{n_j\}_{j=1}^k | \mu) = \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~,
-$$
+$$ {#eq-hifabase}
 
-which is simply a product over Poisson distribution for each bin within a histogram, where we expect a contribution of $\mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j$ from each of signal and background respectively per bin $j$. This expression forms the core of the HistFactory approach. Now, we'll extend this expression in a similar way to when we addded $\mu$ to manipulate the signal scale, but this time, it's in order to be able to model uncertainties.
+which is simply a product over Poisson distribution for each bin within a histogram, where we expect a contribution of $\mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j$ from each of signal and background respectively per bin $j$. This expression forms the core of the HistFactory approach.
 
 ### Uncertainty modelling through nuisance parameters
 
+
+ Now, we'll extend the model from @eq-hifabase in a similar way to when we added $\mu$ to manipulate the signal scale, but this time, it's in order to be able to model uncertainties.
+
+ The general idea is this: we're uncertain as to the true values of the physics parameters that we put into the simulator. Let's denote an example parameter with $\alpha$. We may perhaps have a best prediction for $\alpha$ from studies carried out by e.g. a performance group in your collaboration, but we'll also have some notion of uncertainty on that value, perhaps in the form of a distribution on $\alpha$. To quantify that in the ideal world, we would just include those parameters of the simulator within our likelihood model. However, this would require the ability to simulate data on-the-fly at any given value of the physics parameter, and then propagate that change all the way through our analysis selection requirements. This is difficult from both a practical and a computational perspective (the simulators we use are expensive to evaluate), plus it would have to be done for all the parameters we may want to model in this way.
+
+What we decide to do instead is to just simulate our physics data at the best guess for that parameter $\alpha$ -- we'll refer to this as the **nominal** value $\alpha_{\mathrm{nom}}$ -- and then also simulate data for values at $\alpha_{\mathrm{nom}}+1\sigma_{\alpha} = \alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{nom}}-1\sigma_{\alpha} = \alpha_{\mathrm{down}}$. We can then see what variation this
 
 
 ## Hypothesis testing and asymptotic formulae in HEP
