@@ -16,7 +16,7 @@ This section focuses on how fundamental statistical ideas are translated into me
 
 Often we're not equipped with a way to describe some data we're interested in using a probability distribution. In that situation, it's useful to have a set of **density estimation** techniques within your toolkit. Here we go over a couple.
 
-### Histograms
+### Histograms {#sec-hists}
 
 Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a data distribution through counting the number of data points that lie in a set of adjacent disjoint intervals, or **bins**. A histogram, then, is expressible as a set of counts and a set of bin edges. See some example histograms in @fig-hist to see how the binning can affect the overall envelope of the distribution.
 
@@ -47,7 +47,7 @@ ax.set_title("edges = [-2,-1,-0.5,0,1,4,6]");
 
 The area under the histogram is equal to $\sum_{\mathrm{bins~i}} \mathrm{count}_i \times \mathrm{bin~width}_i$; we can force this to unit area by dividing each term in the sum by the bin width and the total number of counts. This produces something that can be interpreted as a (discrete) probability density, which can be useful when looking at just the shape of the distribution, for instance.
 
-#### Why histograms in HEP? {-}
+#### Why histograms in HEP? {-} {#sec-whyhist}
 
 I [asked this question on Twitter](https://twitter.com/phi_nate/status/1251124042012274693?s=20&t=_miEUw-BGQwuWl1rsgyHuQ) because I was confused: the HEP analysis paradigm has the histogram as a central object, but why? The reasons I discovered are as follows:
 
@@ -137,9 +137,23 @@ where we choose to normalize by the total number of events $s+b$ to treat $p(x)$
 We can then model the whole dataset $\{x_i\}_{i=1}^n$ by multiplying the densities of all the individual events, since we assumed they were independent (otherwise we couldn't use the Poisson distribution!). We can then incorporate @eq-poisson with @eq-balance through multiplication of the densities:
 
 $$
-p(\{x_i\}_{i=1}^n) = Poisson(s+b)\prod_{i=1}^n\frac{sf_s(x_i) + bf_b(x_i)}{s+b}~.
+p(\{x_i\}_{i=1}^n) = \mathrm{Poisson}(s+b)\prod_{i=1}^n\frac{sf_s(x_i) + bf_b(x_i)}{s+b}~.
+$$ {#eq-histcomb}
+
+Notice that we don't have any free parameters right now -- the counts $s$ and $b$ will be fixed from our physics simulation once we get around to it. But what if wanted to infer the amount of signal present in our data? How would we do that? We can accomplish this through a little trick: we can multiply the number of signal events $s$ with an additional number $\mu$ that controls the overall **signal strength**. Estimating the value of $\mu$ would then tell us information about the amount of signal present in the data (assuming our model is accurate enough)!
+
+We can now replace $s$ with $\mu s$ in @eq-histcomb to get
+
+$$
+p(\{x_i\}_{i=1}^n | \mu) = \mathrm{Poisson}(\mu s+b)\prod_{i=1}^n\frac{\mu sf_s(x_i) + bf_b(x_i)}{\mu s+b}~.
 $$
 
-Notice that we don't have any free parameters right now -- the counts $s$ and $b$ will be fixed from our physics simulation. Now, here comes a little trick: if we wanted to infer the amount of signal present in our data, how would we do that? We can accomplish this by adding a pre-mu
+In this formalism so far, we've kept things generalized to the "unknown" pdfs $f_s(x)$ and $f_b(x)$, but we don't actually have access to them. We can approximate them using a KDE or some other method, but it's more common to find us with a *histogram* for this representation (reasons for why are outlined in @sec-whyhist).
+
+Say we histogram our simulated signal and background data with the same binning, giving us sets of counts $\mathbf{h}^{\mathrm{sig}} = \{h_1^{\mathrm{sig}}, h_2^{\mathrm{sig}}, \dots, h_s^{\mathrm{sig}}\}$ and $\mathbf{h}^{\mathrm{bkg}} = \{h_1^{\mathrm{bkg}}, h_2^{\mathrm{bkg}}, \dots, h_s^{\mathrm{bkg}}\}$. Recall from @sec-hists that we can use these to approximate a density by normalizing with respect to bin width and number of events, which we can write here as
+
+$$
+
+$$
 
 ## Hypothesis testing and asymptotic formulae in HEP
