@@ -112,6 +112,8 @@ We'll talk more about these in the machine learning section, e.g. Gaussian proce
 
 HistFactory [@hifa] is by far the most common statistical modelling tool used for collider physics data analysis. It's known for being difficult to understand at first -- if you've ever seen the full expression for the general likelihood, you'll have wondered if there was a need to extend the Greek alphabet to write down all the symbols that are used. Here, we'll take a slower and more gentle approach, building up the HistFactory likelihood piece-by-piece, until hopefully it's clear enough what's going on.
 
+### Baseline model for a chosen statistic
+
 Given some (new) physics process exists, we may expect $\lambda$ events to appear in our detector from that process. This number could come from e.g. simulating the physics process. It could also come from e.g. some data driven extrapolation method, but I'm going to call all of this simulation for the sake of the arguments below. The point is that we estimate it before looking at the important data in the region that would contain new physics.
 
 So: say we run our detector, and we record $n$ *independent* events. What's the likelihood of observing these $n$ events with $\lambda$ expected from simulation?
@@ -122,7 +124,7 @@ $$
 p(n|\lambda) = Poisson(n|\lambda)~.
 $$ {#eq-poisson}
 
-Along with the overall number of events we recorded, we may pick some variable of interest $x$ that we choose to measure. That variable will have a distribution we can predict from simulation. How do we describe it?
+Along with the overall number of events we recorded, we may pick some statistic of the data $x$ that we choose to measure. That variable will have a distribution we can predict from simulation. How do we describe it?
 
 We know that our data is divided into two categories: stuff that came from physics we're interested in (**signal**), and stuff that came from everything else (**background**). We can then say we have $s$ signal events in our sample and $b$ background events, with $s+b=\lambda$, our overall number of expected counts from simulation.
 
@@ -176,10 +178,12 @@ where the constant of proportionality is a factor involving factorials of the in
 These gymnastics have left us with the following likelihood:
 
 $$
-p(p(\{n_j\}_{j=1}^k | \mu) = \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~.
+p(\{n_j\}_{j=1}^k | \mu) = \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~,
 $$
 
-This expression forms the core of the HistFactory approach. Now, we'll extend this expression in a similar way to when we addded $\mu$ in order to be able to model uncertainties.
+which is simply a product over Poisson distribution for each bin within a histogram, where we expect a contribution of $\mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j$ from each of signal and background respectively per bin $j$. This expression forms the core of the HistFactory approach. Now, we'll extend this expression in a similar way to when we addded $\mu$ to manipulate the signal scale, but this time, it's in order to be able to model uncertainties.
+
+### Uncertainty modelling through nuisance parameters
 
 
 
