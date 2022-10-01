@@ -119,7 +119,7 @@ So: say we run our detector, and we record $n$ *independent* events. What's the 
 We know from the previous chapter that this is modelled well with a Poisson distribution:
 
 $$
-p(n|\lambda) = Poisson(\lambda)~.
+p(n|\lambda) = Poisson(n|\lambda)~.
 $$ {#eq-poisson}
 
 Along with the overall number of events we recorded, we may pick some variable of interest $x$ that we choose to measure. That variable will have a distribution we can predict from simulation. How do we describe it?
@@ -137,7 +137,7 @@ where we choose to normalize by the total number of events $s+b$ to treat $p(x)$
 We can then model the whole dataset $\{x_i\}_{i=1}^n$ by multiplying the densities of all the individual events, since we assumed they were independent (otherwise we couldn't use the Poisson distribution!). We can then incorporate @eq-poisson with @eq-balance through multiplication of the densities:
 
 $$
-p(\{x_i\}_{i=1}^n) = \mathrm{Poisson}(s+b)\prod_{i=1}^n\frac{sf_s(x_i) + bf_b(x_i)}{s+b}~.
+p(\{x_i\}_{i=1}^n) = \mathrm{Poisson}(n|s+b)\prod_{i=1}^n\frac{sf_s(x_i) + bf_b(x_i)}{s+b}~.
 $$ {#eq-histcomb}
 
 Notice that we don't have any free parameters right now -- the counts $s$ and $b$ will be fixed from our physics simulation once we get around to it. But what if wanted to infer the amount of signal present in our data? How would we do that? We can accomplish this through a little trick: we can multiply the number of signal events $s$ with an additional number $\mu$ that controls the overall **signal strength**. Estimating the value of $\mu$ would then tell us information about the amount of signal present in the data (assuming our model is accurate enough)!
@@ -145,15 +145,42 @@ Notice that we don't have any free parameters right now -- the counts $s$ and $b
 We can now replace $s$ with $\mu s$ in @eq-histcomb to get
 
 $$
-p(\{x_i\}_{i=1}^n | \mu) = \mathrm{Poisson}(\mu s+b)\prod_{i=1}^n\frac{\mu sf_s(x_i) + bf_b(x_i)}{\mu s+b}~.
-$$
+p(\{x_i\}_{i=1}^n | \mu) = \mathrm{Poisson}(n|\mu s+b)\prod_{i=1}^n\frac{\mu sf_s(x_i) + bf_b(x_i)}{\mu s+b}~.
+$$ {#eq-bothparts}
 
 In this formalism so far, we've kept things generalized to the "unknown" pdfs $f_s(x)$ and $f_b(x)$, but we don't actually have access to them. We can approximate them using a KDE or some other method, but it's more common to find us with a *histogram* for this representation (reasons for why are outlined in @sec-whyhist).
 
-Say we histogram our simulated signal and background data with the same binning, giving us sets of counts $\mathbf{h}^{\mathrm{sig}} = \{h_1^{\mathrm{sig}}, h_2^{\mathrm{sig}}, \dots, h_s^{\mathrm{sig}}\}$ and $\mathbf{h}^{\mathrm{bkg}} = \{h_1^{\mathrm{bkg}}, h_2^{\mathrm{bkg}}, \dots, h_s^{\mathrm{bkg}}\}$. Recall from @sec-hists that we can use these to approximate a density by normalizing with respect to bin width and number of events, which we can write here as
+Say we histogram our simulated signal and background data with the same binning (not required to be uniform) that uses a number of bins $k$, giving us sets of counts $\mathbf{h}^{\mathrm{sig}} = \{h_1^{\mathrm{sig}}, h_2^{\mathrm{sig}}, \dots, h_k^{\mathrm{sig}}\}$ and $\mathbf{h}^{\mathrm{bkg}} = \{h_1^{\mathrm{bkg}}, h_2^{\mathrm{bkg}}, \dots, h_k^{\mathrm{bkg}}\}$. Recall from @sec-hists that we can use these to approximate a density by normalizing with respect to bin width and number of events. Then, if we say a given value of $x$ falls into some bin with index $j$, we can write that the density at $x$ is approximated by the (normalized) count in that bin, for both signal and background separately:
 
 $$
+f_s(x \in \mathrm{bin~}j) \approx \frac{h^{\mathrm{sig}}_j}{s\times\mathrm{width~of~bin}~j};~~~f_b(x \in \mathrm{bin~}j ) \approx \frac{h^{\mathrm{bkg}}_j}{b\times\mathrm{width~of~bin}~j}
+$$
+
+
+<!-- Fill me in with possible details on going to a binned model -->
+
+From here, we can express @eq-bothparts as a product over bins $j$ instead of events $i$:
 
 $$
+p(\{n_j\}_{j=1}^k | \mu) = \mathrm{Poisson}(n|\mu s+b)\prod_{j=1}^k\frac{\mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j}{\mu s+b}~.
+$$
+
+Note that we've shifted from talking about values of $x_i$ to bin counts $n_j$, where $\sum_{j=1}^k n_i = n$. These counts don't seem to appear in the likelihood yet, but we can make this explicit through the following relation^[This relation arises from noticing that $\lambda^n = \lambda^{\sum n_j} = \prod_j \lambda^{n_j}$, and using it to manipulate the Poisson on the left-hand side, amongst other things. We gloss over the full working, but I would like to include it if I have time (reading this means I probably didn't, but I do plan to release a blog post in future).]:
+
+$$
+\mathrm{Poisson}(n|\mu s+b)\prod_{j=1}^k\frac{\mu h^{\mathrm{sig}}_i  + h^{\mathrm{bkg}}_i}{\mu s+b} \propto \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~,
+$$
+
+where the constant of proportionality is a factor involving factorials of the individual counts (also referred to as combinatorics). Since we don't care about the overall normalization when we do inference (e.g. the maximum likelihood value is independent of the scale, and the normalization cancels in a likelihood ratio), we will consider this proportionality as an equivalence.
+
+These gymnastics have left us with the following likelihood:
+
+$$
+p(p(\{n_j\}_{j=1}^k | \mu) = \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~.
+$$
+
+This expression forms the core of the HistFactory approach. Now, we'll extend this expression in a similar way to when we addded $\mu$ in order to be able to model uncertainties.
+
+
 
 ## Hypothesis testing and asymptotic formulae in HEP
