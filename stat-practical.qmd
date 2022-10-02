@@ -232,13 +232,17 @@ This quantity (or $-2\ln$ of it at least) forms the basis of all test statistics
 
 ### Sampling distributions for -2 \ln \lambda
 
-The first result we'll exploit to our advantage is that of Wilks @wilks, who showed that under the assumption of the null hypothesis $\mu=\mu_0$, we can relate $\lambda(x,\mu_0)$ with the maximum likelihood estimate $\hat{\mu}$ in the following way:
+The first result we'll exploit to our advantage is that of Wald @wald, who showed that we can relate $\lambda(x,\mu)$ with the maximum likelihood estimate $\hat{\mu}$ in the following way:
 
 $$
--2\ln \lambda(x,\mu) = \left(\frac{\mu_0 - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2~,
-$$
+-2\ln \lambda(x,\mu) = \left(\frac{\mu - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 + \mathcal{O}(\frac{1}{\sqrt{N}})~,
+$$ {#eq-wald}
 
-where $\sigma_{\hat{\mu}}$ is the sample standard deviation of $\hat{\mu}(x)$.
+where $\sigma_{\hat{\mu}}$ is the standard deviation $\hat{\mu}(x)$, which will tend to a normal distribution with sufficient data, and $N$ is our data size. This equation is known as **Wald's relation**. Note that this is just a quadratic in $\hat{\mu}(x)$  -- the plot of $-2\ln \lambda(x,\mu)$ vs $\hat{\mu}(x)$ will be a parabola (to the extent that we can neglect the $\mathcal{O}(1/ \sqrt{N}$ term).
+
+Another interesting result is that since we're already incorporating nuisance parameters within $\lambda$, the shape of the test statistic against $\hat{\mu}(x)$ will follow this relation independent of the value of the nuisance parameters.
+
+How do we go from here to $p(-2\ln \lambda(x,\mu) | H)$? Well, $H$ can be represented as a value of $\mu$ which we'll call $\mu'$ -- it either
 
 
 
