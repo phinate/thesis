@@ -121,7 +121,7 @@ So: say we run our detector, and we record $n$ *independent* events. What's the 
 We know from the previous chapter that this is modelled well with a Poisson distribution:
 
 $$
-p(n|\lambda) = Poisson(n|\lambda)~.
+p(n|\lambda) = \mathrm{Poisson}(n|\lambda)~.
 $$ {#eq-poisson}
 
 Along with the overall number of events we recorded, we may pick some statistic of the data $x$ that we choose to measure. That variable will have a distribution we can predict from simulation. How do we describe it?
@@ -192,15 +192,55 @@ which is simply a product over Poisson distribution for each bin within a histog
 
  The origin of systematic uncertainties in simulation is this: we're uncertain as to the true values of the physics parameters that we should put into the simulator. Let's denote an example parameter with $\alpha$. To quantify how varying $\alpha$ changes the likelihood in the ideal world, we would just include those parameters of the simulator within our likelihood model. However, this would require the ability to simulate data on-the-fly at any given value of the physics parameter, and then propagate that change all the way through our analysis selection requirements. This is difficult from both a practical and a computational perspective (the simulators we use are expensive to evaluate), plus it would have to be done for all the parameters we may want to model in this way. So what do we do instead?
 
-We may have a best prediction for $\alpha$ from studies carried out by e.g. a performance group in your collaboration that focuses on measuring $\alpha$, but we'll also have some notion of uncertainty on that value, perhaps in the form of a distribution on $\alpha$. What we decide to do then is to just simulate our physics data at the best guess for that parameter $\alpha$ -- we'll refer to this as the **nominal** value $\alpha_{\mathrm{nom}}$ -- and then also simulate data for values at $\alpha_{\mathrm{nom}}+\sigma_{\alpha} = \alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{nom}}-\sigma_{\alpha} = \alpha_{\mathrm{down}}$, where $\sigma_{\alpha}$ is some notion of a standard deviation on $\alpha$ (e.g. calculated arithmetically on a  sample or fitted as part of a normal distribution).
+We may have a best prediction for $\alpha$ from studies carried out by e.g. a performance group in your collaboration that focuses on measuring $\alpha$, but we'll also have some notion of uncertainty on that value, perhaps in the form of a distribution on $\alpha$. An example procedure that we often do in this case is to just simulate our physics data at the best guess for that parameter $\alpha$ -- we'll refer to this as the **nominal** value $\alpha_{\mathrm{nom}}$ -- and then also simulate data for values at $\alpha_{\mathrm{nom}}+\sigma_{\alpha} = \alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{nom}}-\sigma_{\alpha} = \alpha_{\mathrm{down}}$, where $\sigma_{\alpha}$ is some notion of a standard deviation on $\alpha$ (e.g. calculated arithmetically on a  sample or fitted as part of a normal distribution).
 
-We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{down}}$, but it's pretty commonplace as a quick way to get a rough idea of the influence of $\alpha$ on the histograms. And that's the point -- we really only care about how varying $\alpha$ changes the resulting histogram for that process -- either $\mathbf{h}^{\mathrm{sig}}$ or $\mathbf{h}^{\mathrm{bkg}}$. We can then estimate the effect of $\alpha$ as a continuous change by some kind of *interpolation between the resulting histograms*.
+We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{down}}$, but it's pretty commonplace as a quick way to get a rough idea of the influence of $\alpha$ on the histograms. And that's the point -- we really only care about how varying $\alpha$ changes the resulting histogram for that process -- either $\mathbf{h}^{\mathrm{sig}}$ or $\mathbf{h}^{\mathrm{bkg}}$. We can then estimate the effect of $\alpha$ as a continuous change by some kind of *interpolation between the resulting histogram yields*. More on the methods of interpolation later.
 
 
 
-#### Interpolation {-}
+
+
+
+
+
+
+
+#### Interpolation {-} {#sec-interp}
 
 
 
 
 ## Hypothesis testing and asymptotic formulae in HEP
+
+In @sec-hyptests, which covered frequentist hypothesis tests, we noted that we don't necessarily have access to the *sampling distribution* of the test statistic $p(t(x)|H)$ given a particular hypothesis $H$. One way to estimate $p(t(x)|H)$ is to simply calculate $t(x)$ for many samples $x \sim p(x|H)$, and build up the distribution empirically. However, there exist some choices of $t(x)$ that give us *asymptotic guarantees* as to the form of $p(t(x)|H)$, i.e. we can fairly reliably know its shape as long as we have a decent enough sample size of $x$.
+
+One of these choices that we've seen a couple times already is the likelihood ratio between a point null at $\mu$ and a composite alternative represented by the maximum likelihood point $\hat{\mu}$:
+
+$$
+R(x, \mu) = \frac{p(x|\mu)}{p(x|\hat{\mu})}~.
+$$
+
+We'll likely have to deal with nuisance parameters in the likelihood, for which we extend this as shown in @eq-profile-lhood-ratio to:
+
+$$
+\lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)},
+$$
+
+where we recall that $\hat{\hat{\theta}}(\mu)$ represents fitting the value of $\theta$ while holding $\mu$ fixed at it's value from the input to $\lambda$.
+
+This quantity (or $-2\ln$ of it at least) forms the basis of all test statistics that we use in tests for the discovery of a new particle, or for setting a limit on a physical quantity (e.g. a particle mass or process cross-section).
+
+### Sampling distributions for -2 \ln \lambda
+
+The first result we'll exploit to our advantage is that of Wilks @wilks, who showed that under the assumption of the null hypothesis $\mu=\mu_0$, we can relate $\lambda(x,\mu_0)$ with the maximum likelihood estimate $\hat{\mu}$ in the following way:
+
+$$
+-2\ln \lambda(x,\mu) = \left(\frac{\mu_0 - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2~,
+$$
+
+where $\sigma_{\hat{\mu}}$ is the sample standard deviation of $\hat{\mu}(x)$.
+
+
+
+
+Given that we're interested in probability models of the form in @eq-hifabase, we can derive some

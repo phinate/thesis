@@ -194,7 +194,7 @@ $$ \hat{\mu} = \underset{\mu}{\mathrm{argmin}} (-2\ln p(x_0|\mu))~.$$
 
 The prefactor of 2 leads to some nice theoretical properties via Wilk's theorem, but that's a later discussion (the 2 doesn't matter for optimization purposes). We use calculate the MLE lot in HEP for a few reasons:
 
-- It has a *Normal sampling distribution* in the asymptotic limit (so we can easily quote errors as a sample standard deviation)
+- It has a *Normal sampling distribution* in the asymptotic limit (so we can easily quote errors using a sample standard deviation)
 - In the finite data regime, the MLE is effective for many distributions we care about (e.g. Normal, Poisson)
 - Simple to understand and debug!
 
@@ -389,7 +389,9 @@ where $\hat{\mu}$ represents the best-fit value of $\mu$. Commonly used in HEP, 
 
 In the case where the likelihood parameters can be split into $[\mu, \theta]$, with $\theta$ representing nuisance parameters, we can make this interval construction more feasable by using the **profile likelihood ratio**:
 
-$$ \lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)},$$
+$$
+\lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)},
+$$ {#eq-profile-lhood-ratio}
 
 where $\hat{\hat{\theta}}(\mu)$ represents the fitted value of $\theta$ when holding $\mu$ fixed. Doing this reduces the dimensionality of the parameter space to just those of which we're interested in (e.g. signal strength). However, coverage properties for intervals constructed in this way may vary, so need to have their sampling properties studied (see section 13 in [@bob]).
 
@@ -403,11 +405,9 @@ This is all well and good, but may ring some alarm bells -- we only have one int
 
 In short, yes. But that doesn't mean confidence intervals are useless -- a single 95% interval is overwhelmingly more likely to contain the true parameter value than not. Remember: we're always going to have inherent uncertainty on the statements we make on unknown true parameter values -- this uncertainty is expressed as a probability distribution for Bayesian methods, and as a statement about sampling properties (results in the limit of many repeated experiments) for frequentist methods.
 
-#### Extras {-}
 
 
-
-### Frequentist hypothesis testing
+### Frequentist hypothesis testing {#sec-hyptests}
 
 Hypothesis testing gives us a framework to make qualitative statements about how extreme the observed data seems under a proposed theory, often in comparison to various alternatives. Note we use "extreme" in the same way as with confidence intervals, so we're going to need to establish an ordering principle for the data. Let's go into more detail.
 
