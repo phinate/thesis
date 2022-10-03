@@ -230,7 +230,7 @@ where we recall that $\hat{\hat{\theta}}(\mu)$ represents fitting the value of $
 
 This quantity (or $-2\ln$ of it at least) forms the basis of all test statistics that we use in tests for the discovery of a new particle, or for setting a limit on a physical quantity (e.g. a particle mass or process cross-section).
 
-### Sampling distributions for -2 \ln \lambda
+### Sampling distributions for $-2 \ln \lambda$
 
 The first result we'll exploit to our advantage is that of Wald @wald, who showed that we can relate $\lambda(x,\mu)$ with the maximum likelihood estimate $\hat{\mu}$ in the following way:
 
@@ -238,16 +238,47 @@ $$
 -2\ln \lambda(x,\mu) = \left(\frac{\mu - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 + \mathcal{O}(\frac{1}{\sqrt{N}})~,
 $$ {#eq-wald}
 
-where $\sigma_{\hat{\mu}}$ is the standard deviation $\hat{\mu}(x)$, which will tend to a normal distribution with sufficient data, and $N$ is our data size. This equation is known as **Wald's relation**. Note that this is just a quadratic in $\hat{\mu}(x)$  -- the plot of $-2\ln \lambda(x,\mu)$ vs $\hat{\mu}(x)$ will be a parabola (to the extent that we can neglect the $\mathcal{O}(1/ \sqrt{N}$ term).
+where $\sigma_{\hat{\mu}}$ is the standard deviation $\hat{\mu}(x)$, which will tend to a normal distribution with sufficient data, and $N$ is our data size. This equation is known as **Wald's relation**. Note that this is just a quadratic in $\hat{\mu}(x)$  -- the plot of $-2\ln \lambda(x,\mu)$ vs $\hat{\mu}(x)$ will be a parabola (to the extent that we can neglect the $\mathcal{O}(1/ \sqrt{N})$ term).
 
 Another interesting result is that since we're already incorporating nuisance parameters within $\lambda$, the shape of the test statistic against $\hat{\mu}(x)$ will follow this relation independent of the value of the nuisance parameters.
 
 How do we go from here to $p(-2\ln \lambda(x,\mu) | H_0)$? We can take another look at @eq-wald and notice that the RHS has the quantity $(\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}$ all squared. In the large sample size limit (asymptotically), $\hat{\mu}(x) $ is normally distributed around $\mu$ with width $\sigma_{\hat{\mu}}$, meaning that $(\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}$ follows a standard normal distribution! So if we have a standard normally distributed variable squared, i.e. $\lambda(x,\mu)$, we have a $\chi^2$ distribution with one degree of freedom!
 
-This is a powerful result. Let's apply it for our case of interest, which is the test statistic distribution evaluated at the null, $-2\ln \lambda(x,\mu_0)$. Neglecting the $\mathcal{O}(1/ \sqrt{N}$ term for now, we write
+This is a powerful result. Let's apply it for our case of interest, which is the test statistic distribution evaluated at the null, $-2\ln \lambda(x,\mu_0)$. Neglecting the $\mathcal{O}(1/ \sqrt{N})$ term for now, we write
 
 $$
 -2\ln \lambda(x,\mu_0) = \left(\frac{\mu_0 - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 ~.
 $$ {#eq-wilks}
 
-We can then say that, under the assumption of $H_0$ (i.e. $x\sim p(x|\mu_0)$), $-2\ln \lambda(x,\mu_0)$ follows a $\chi^2$ distribution with one degree of freedom. This is known as **Wilks' theorem** @wilks.
+We can then say that, under the assumption of $H_0$ (i.e. assuming $x\sim p(x|\mu_0)$), the MLE $\hat{\mu}$ will be normally distributed around $\mu_0$, and $-2\ln \lambda(x,\mu_0)$ then follows a $\chi^2$ distribution with one degree of freedom. This is known as **Wilks' theorem** @wilks, and gives us access to the sampling distribution we need for hypothesis testing.
+
+<!-- What happens when we break our assumption of $H_0$ being true, and want access to the  -->
+
+
+### The catalog of test statistics
+
+The results we showed in the previous section hold for a test statistic of $-2\ln \lambda(x,\mu)$. In practice, we tend to use some slight variations on this, depending on the physics task we want to undertake. Here are some examples.
+
+
+#### Discovery {-}
+
+When we are searching to **discover** a new physics process, we will test using
+
+$$
+q_0(x) = \begin{cases}
+    -2\ln \lambda(x,0),& \text{if } \hat{\mu} \geqslant 0\\
+    0,              & \text{if } \hat{\mu} < 0
+\end{cases}
+~,
+$$
+
+where we have a null hypothesis of $\mu_0 = 0$, i.e. we test the background-only model. The reason we set $q_0=0$ when $\hat{\mu} < 0$ is that this would imply that the MLE for the expected number of events is even smaller than the nominal background, so we assume no signal is present. That means rejection of $\mu=0$ would then only indicate a positive signal strength $\mu>0$, indicating the potential presence of some amount of signal.
+
+
+#### Upper limit setting {-}
+
+We can also use our hypothesis test as a mechanism to set an **exclusion limit** on the signal strength $\mu$, which is conventionally done through an upper limit, as defined in @sec-conf-intervals. We could equally well look at other ordering choices, e.g. a central interval for $\mu$, though the upper limit may have more implications from a physics perspective as a yardstick for the maximum plausible amount of the signal that could exist in nature.
+
+<!-- In the case of an upper limit, values of $\mu$ that are greater than $\mu_{\mathrm{upper}}$ consider our observed data as extreme, so we term these values as *excluded* at our chosen confidence level.  -->
+
+If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_0$, then $\lambda(x,\mu_0)$ will be different than 1, indicating less compatibility between $H_0$ and $H_1$ since their likelihoods differ.

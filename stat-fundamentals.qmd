@@ -202,7 +202,7 @@ For more on maximum likelihood methods, see [@mle].
 
 Other methods of point estimation could be as simple as quoting the *mode* (value with highest density), *median* (value that partitions the distribution into equal segments of probability), or *arithmetic mean* (sum of the data divided by the size of the data). These are more useful in the absence of a good probability model.
 
-### Confidence intervals
+### Confidence intervals {#sec-conf-intervals}
 
 A significant part of my early PhD days was spent trying to understand the confidence interval. I will do my best to try and make you bang your head against the wall a little less than me (metaphorically, I hope).
 
