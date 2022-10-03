@@ -1,0 +1,34 @@
+---
+title: "Differentiable programming"
+format:
+  html:
+    code-fold: true
+    default-image-extension: svg
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
+---
+
+Moving forward with the groundwork from the previous section on automatic differentiation, we'll dive into how this enables a particular learning procedure called *gradient descent*. We'll explore what that means, then apply this to a few different scenarios to demonstrate its utility, along with highlighting some more intelligent versions that have arisen as a by-product of the recent deep learning revolution. Importantly, this will also set the stage to show the main mechanism for how neural networks are able to train.
+
+## Gradient descent
+
+Say we have a ball on a hill, and we wanted to roll it down. How would you go about this task? Well, I imagine you'd probably just give it some initial kick, and then let gravity do the rest. Alright then -- let's take away gravity. What then? Look for the bottom of the hill and try to push it there? But what if you can't see the hill itself? This is the situation we find ourself in when trying to optimize a workflow. We're able to see what point we're at during optimization, but we don't know where the bottom of the hill is (minimum of our objective), or what the surrounding landscape looks like (could be very expensive to scan over the space).
+
+Ah, but here's a trick: if we can see where we are at one point on the hill, we can determine the way the slope goes that we're standing on. If the slope points up, we'll want to push the ball in the opposite direction to go down. Then, we're guaranteed to at least get *nearer* the bottom of the hill. But by how much do we push the ball?
+
+If the ball is close to the bottom of the hill, you could imagine that the ground starts getting flatter, which would make the magnitude of the slope less. Likewise, if the slope is steep, we know we're probably not at the bottom yet, so we should move a reasonable amount. We can then just move *proportionally to the magnitude of the slope.*
+
+To write this out in equation form: given the horizontal position on the hill $x_i$, and the vertical position $y_i$, we propose to move to a new point $x_{i+1}$ in proportion to the slope at the point that we're on, i.e.
+
+$$
+x_{i+1} = x_i - \alpha \frac{\Delta y_i}{\Delta x_i}~,
+$$
+
+where $\alpha$ is the constant of proportionality that we're free to choose (also called the **learning rate**, since it modifies the step size we take), and $\Delta$ is a small change that we assume we can calculate. However, instead of assuming we can numerically calculate this small change, we already have a way to calculate a small change at a point from calculus: the derivative! So if we take $y$ as a function of $x$, then we can replace the deltas with the gradient of $y(x)$ evaluated at our current point $x_i$, leaving us with
+
+$$
+x_{i+1} = x_i - \alpha \frac{\partial y(x_i)}{\partial x_i}~.
+$$ {#eq-grad-descent}
+
+@eq-grad-descent is the equation for gradient descent, and is probably the most important equation in the whole thesis, since it enables all of the downstream applications I'll talk about later. It's also the mechanism that enables most artificial intelligence systems to have any degree of "intelligence" at all.
