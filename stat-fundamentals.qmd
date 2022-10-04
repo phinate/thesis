@@ -77,9 +77,7 @@ Now, doing things the Bayesian way doesn't mean we assign probabilites to facts 
 ### Probability density
 
 We now shift our discussion from the big $P$ to the small $p$, which is used to indicate the **probability density function** (pdf).
-
-
-
+ß
 
 #### i.i.d.
 A common expression you'll see about a set of random variables is that they're **i.i.d.**, which stands for *independently and identically distributed*. This refers to the situation when
@@ -88,6 +86,8 @@ A common expression you'll see about a set of random variables is that they're *
 - Each sample drawn (random variable) is independent from any other sample
 
 An example is just drawing some random sample, e.g. `np.random.uniform(size=10)`. That would be 10 i.i.d. samples from a uniform distribution.
+
+### Change of variables formula
 
 ### Commonly used distributions {#sec-dists}
 
@@ -182,7 +182,7 @@ A brief aside: you'll notice that the common thread throughout these statements 
 
 But enough with the aside, or I'll be subject to the same criticism of misplaced effort. Let's review the different methods that implement answers to our questions of inference.
 
-### Point estimation
+### Point estimation {#sec-mle}
 
 Given a probability model $p(x|\mu)$ for data $x$ and model parameters $\mu$, the most common method of estimating parameter values compatible with observed data $x_0$ in the frequentist paradigm is the **maximum likelihood estimate** (MLE), defined as
 
@@ -495,3 +495,6 @@ Armed with this equation, Bayesian procedures include:
     - Can then perform point estimation via *maximum a posteriori* (the mode of the posterior)
 - **Credible intervals**: in contrast to confidence intervals where the endpoints are random variables, $\mu$ itself is now the random variable, and the interval is constructed such that it contains the true value $\mu_T$ with some allocated probability.
 - **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here. See e.g. [@bayestest] for more information.
+
+
+## Fisher information and the Cramér–Rao bound {#sec-fisher}

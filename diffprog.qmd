@@ -25,10 +25,152 @@ $$
 x_{i+1} = x_i - \alpha \frac{\Delta y_i}{\Delta x_i}~,
 $$
 
-where $\alpha$ is the constant of proportionality that we're free to choose (also called the **learning rate**, since it modifies the step size we take), and $\Delta$ is a small change that we assume we can calculate. However, instead of assuming we can numerically calculate this small change, we already have a way to calculate a small change at a point from calculus: the derivative! So if we take $y$ as a function of $x$, then we can replace the deltas with the gradient of $y(x)$ evaluated at our current point $x_i$, leaving us with
+where $\alpha$ is the constant of proportionality that we're free to choose (also called the **learning rate**, since it modifies the step size we take), and $\Delta$ is a small change that we assume we can calculate. Take note of the minus sign -- this is us trying to move in the *opposite direction to the slope* at $x_i$.
+
+Instead of assuming we can numerically calculate the small change $\Delta$, we actually already have a way to calculate a small change at a point from calculus: the derivative! So if we take $y$ as a function of $x$, then we can replace the deltas with the gradient of $y(x)$ evaluated at our current point $x_i$, leaving us with
 
 $$
 x_{i+1} = x_i - \alpha \frac{\partial y(x_i)}{\partial x_i}~.
 $$ {#eq-grad-descent}
 
-@eq-grad-descent is the equation for gradient descent, and is probably the most important equation in the whole thesis, since it enables all of the downstream applications I'll talk about later. It's also the mechanism that enables most artificial intelligence systems to have any degree of "intelligence" at all.
+@eq-grad-descent is the equation for gradient descent, and is probably the most important equation in the whole thesis, since it enables all of the downstream applications I'll talk about later. It's also the mechanism that enables most artificial intelligence systems to learn.
+
+To reframe this equation one more time through the lens of optimization: given an **objective function** $L$ with parameters $\varphi$ that defines a goal relative to data $d$ (so $L=L(\varphi, x)$), we can use *gradient descent* to update the parameters $\varphi$ such that we minimize the objective evaluated at $d$:
+
+$$
+\varphi_{i+1} = \varphi_i - \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i}~.
+$$ {#eq-grad-descent}
+
+We're now specifying the data $d$ because we want to give meaning to the vertical position in the hill: it's some quantity that's assessing the quality of our workflow with respect to some data from the real world $d$, given that we're using parameters $\varphi_i$. In practice this may be a small subset of the dataset that we draw at random, since we can't computationally do this update on the whole data set due to memory restrictions on the device we run this on.
+
+A key point to highlight: this mechanism only works if $L$ is differentiable with respect to $\varphi$, otherwise we won't be able to calculate its gradient. This restriction may look tame for common objectives, which tend to involve simple algebraic expressions involving the output of a neural network, which is already a differentiable function. However, if we want to add domain knowledge to our loss function, we may end up discovering that not everything we want to calculate has a well-defined gradient. There are various ways to get around this, including the use of surrogate operations that are **relaxed** (jargon for differentiable) versions of their non-differentiable counterparts. We'll look at this in more detail when we study applications of this nature.
+
+Let's look at an example of gradient descent in action.
+
+### Example: maximum likelihood estimation
+
+Say we have some example data drawn from a bi-modal probability distribution that's somewhat normal-looking, like in @fig-bidata. We may want to try and model this with a normal distribution, but how do we choose the parameters? We can fit them to the data using maximum likelihood estimation, discussed further in @sec-mle. The basic idea is that, given a probability distribution $p$ with parameters $\mu$, we want to calculate
+$$ \hat{\mu} = \underset{\mu}{\mathrm{argmin}} (-2\ln p(x|\mu))~,$$
+
+given some observed data $x$. In other words, we want to find the value of $\mu$ such that we minimize the negative log-likelihood. We can do this via gradient descent!
+
+Using the update rule in @eq-grad-descent with $L$ as the negative log-likelihood and $(\mu, \sigma)$ playing the role of $\varphi$, we can run gradient descent for some number of steps until we reach a result that converges within some tolerance. We'll have to pick some initial value to start for each parameter -- here we use 1 for each. In the implementation, we're using the automatic differentiation framework JAX (@jax) to calculate the gradient of the objective (online viewers can expand the code block above the figure to see the details). This gives us a result in @fig-onenorm, which isn't particularly great in my opinion.
+
+
+```{python}
+#| label: fig-bidata
+#| fig-cap: "Example data produced using two normal distributions in unequal amounts. One is centered on 3, and the other on 0, both with unit standard deviation."
+import numpy as np
+import jax
+import jax.scipy as jsc
+import jax.numpy as jnp
+import copy
+
+num_points = 10000
+
+data = np.concatenate(
+    (np.random.normal(size=num_points), np.random.normal(size=num_points // 2) + 3)
+)
+
+# want to minimize negative log likelihood
+def loss(pars, data):
+    mu, sigma = pars
+    return jnp.mean(-jsc.stats.norm.logpdf(data, mu, sigma))
+
+
+# gradient descent
+def update_rule(pars, data, lr, loss):
+    return pars - lr * jax.grad(loss)(pars, data)
+
+
+def learning(loss, init_pars, num_steps=1000, tol=1e-6, lr=5e-2):
+    pars = copy.deepcopy(init_pars)
+    for i in range(num_steps):
+        new_pars = update_rule(pars, data, lr, loss)
+        if not np.allclose(new_pars, pars, atol=tol):
+            pars = new_pars
+        else:
+            return new_pars
+    print("max steps reached")
+    return pars
+
+
+pars = learning(loss, init_pars=jnp.array([1.0, 1.0]))
+
+import matplotlib.pyplot as plt
+
+subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
+fig, ax = plt.subplots(**subplot_settings)
+
+ax.hist(data, density=True)
+ax.set_xlabel("x")
+ax.set_ylabel("density");
+```
+
+
+```{python}
+#| label: fig-onenorm
+#| fig-cap: "A single normal distribution fitted to the data in @fig-bidata using gradient descent."
+
+fig, ax = plt.subplots(**subplot_settings)
+
+ax.hist(data, density=True)
+x = np.linspace(jsc.stats.norm.ppf(0.01, *pars), jsc.stats.norm.ppf(0.99, *pars), 100)
+ax.plot(
+    x,
+    jsc.stats.norm.pdf(x, *pars),
+    label=f"Normal($\mu$={pars[0]:.3g}, $\sigma$={pars[1]:.3g})",
+)
+ax.set_xlabel("x")
+ax.set_ylabel("density")
+ax.set_title(f"negative log-likelihood = {loss(pars, data):.3g}")
+ax.legend();
+```
+
+Pretending we didn't know that the data came from a mixture of normal distributions, we can make a more sophisticated model, e.g.
+
+$$
+p(x |\mu_1, \sigma_1, \mu_2, \sigma_2) = \frac{1}{2}\mathrm{Normal}(\mu_1, \sigma_1) + \frac{1}{2}\mathrm{Normal}(\mu_2, \sigma_2)~.
+$$
+
+We can then simultaneously optimize $\mu_1, \sigma_1, \mu_2, \sigma_2$ in exactly the same way, with no modification to the procedure other than using the new likelihood as the loss function. Doing this yields the distribution in @fig-twonorm. We can tell that the shape of the distribution is represented better here, which is also indicated by the lower negative log-likelihood than in the case of the single normal distribution. Since we forced the proportions of the mixture to be half and half, the lower second peak is modelled through a wider normal distribution to match the height of the second, smaller mode.
+
+Interestingly, if we use 1 as the init for every parameter, we recover the solution from @fig-onenorm, so we have to make sure there's a little mutual variation in the starting values so that the gradients push the different $\mu$ and $\sigma$ values from different positions, allowing the second mode to be discovered. This demonstrates the behavior of gradient descent to move to some *local* minimum of the objective, and won't always converge to something optimal or intuitive.
+
+```{python}
+#| label: fig-twonorm
+#| fig-cap: "A mixture of two normal distributions fitted to the data in @fig-bidata using gradient descent."
+
+def mixture_pdf(data, pars):
+    mu1, sigma1, mu2, sigma2 = pars
+    return 0.5 * jsc.stats.norm.pdf(data, mu1, sigma1) + 0.5 * jsc.stats.norm.pdf(
+        data, mu2, sigma2
+    )
+
+
+def new_loss(pars, data):
+    return jnp.mean(-jnp.log(mixture_pdf(data, pars)))
+
+
+new_pars = learning(
+    new_loss, init_pars=jnp.array([1.0, 1.0, 2.0, 2.0]), lr=1e-1, tol=1e-4
+)
+
+fig, ax = plt.subplots(**subplot_settings)
+
+ax.hist(data, density=True)
+x = np.linspace(-3, 6, 100)
+mu1, sigma1, mu2, sigma2 = new_pars
+ax.plot(
+    x,
+    mixture_pdf(x, new_pars),
+    label=f"0.5*Normal($\mu$={mu1:.2g}, $\sigma$={sigma1:.2g})"
+    + f" + 0.5*Normal($\mu$={mu2:.2g}, $\sigma$={sigma2:.2g})",
+)
+ax.set_xlabel("x")
+ax.set_ylabel("density")
+ax.set_title(f"negative log-likelihood = {new_loss(new_pars, data):.3g}")
+ax.legend(fontsize="small");
+```
+
+### Beyond standard gradient descent

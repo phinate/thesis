@@ -13,8 +13,8 @@ book:
         - stat-fundamentals.qmd
         - stat-practical.qmd
         - autodiff.qmd
-        - opt.qmd
         - diffprog.qmd
+        - ml.qmd
     - part: "Applications"
       chapters:
       - diffprog-hep.qmd

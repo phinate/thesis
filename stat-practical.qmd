@@ -242,7 +242,7 @@ where $\sigma_{\hat{\mu}}$ is the standard deviation $\hat{\mu}(x)$, which will 
 
 Another interesting result is that since we're already incorporating nuisance parameters within $\lambda$, the shape of the test statistic against $\hat{\mu}(x)$ will follow this relation independent of the value of the nuisance parameters.
 
-How do we go from here to $p(-2\ln \lambda(x,\mu) | H_0)$? We can take another look at @eq-wald and notice that the RHS has the quantity $(\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}$ all squared. In the large sample size limit (asymptotically), $\hat{\mu}(x) $ is normally distributed around $\mu$ with width $\sigma_{\hat{\mu}}$, meaning that $(\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}$ follows a standard normal distribution! So if we have a standard normally distributed variable squared, i.e. $\lambda(x,\mu)$, we have a $\chi^2$ distribution with one degree of freedom!
+How do we go from here to $p(-2\ln \lambda(x,\mu) | H_0)$? We can take another look at @eq-wald and notice that the RHS has the quantity $(\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}$ all squared. In the large sample size limit (asymptotically), $\hat{\mu}(x)$ is normally distributed around $\mu$ with width $\sigma_{\hat{\mu}}$, meaning that $(\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}$ follows a standard normal distribution! So if we have a standard normally distributed variable squared, i.e. $\lambda(x,\mu)$, we have a $\chi^2$ distribution with one degree of freedom!
 
 This is a powerful result. Let's apply it for our case of interest, which is the test statistic distribution evaluated at the null, $-2\ln \lambda(x,\mu_0)$. Neglecting the $\mathcal{O}(1/ \sqrt{N})$ term for now, we write
 
