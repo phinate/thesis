@@ -26,7 +26,7 @@ Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a 
 import numpy as np
 import matplotlib.pyplot as plt
 
-subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
 num_points = 1000
 data = np.concatenate((np.random.normal(size=num_points), np.random.normal(size=num_points//2)+3))
 fig, axs = plt.subplots(1,3, **subplot_settings, sharex=True, sharey=True)

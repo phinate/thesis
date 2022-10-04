@@ -9,15 +9,31 @@ format:
 jupyter: python3
 ---
 
+## Neural networks and deep learning
+
+### Mainstay architectures in the modern era
+
+Transformers
+- appear to generalize cross-domain
+
+Convolutional neural networks
+
+Deep sets
+
+Graph neural networks
+
+... and many more!
+
+
 ## Normalizing flows
 
-Flows are a class of model that make up one of my applications, so we'll spend a bit of extra time here to sufficiently ground that work.
+Flows are a class of neural network model that make up one of my applications, so we'll spend a bit of extra time here to sufficiently ground that work.
 
 A **normalizing flow** is a trainable density estimate that admits both sampling and a tractable likelihood. Flows model a vector $\mathbf{x} \in \mathbb{R}^D$ from an underlying distribution $p_X(\mathbf{x})$ as a transformation $\mathbf{x} = T(\mathbf{u})$, where $\mathbf{u} \in \mathbb{R}^D$ is a vector of samples drawn from a chosen distribution $p_U(\mathbf{u})$. We refer to the data distribution $p_X(\mathbf{x})$ as the **target distribution** that we’re trying to model, and to  $p_U(\mathbf{u})$ as the **base distribution** that we transform to do this.
 
 How does this work? The transform $T$ is the key, and is the thing we’ll be training in practice. We start by pointing out the defining property of flows, which is the requirement that $T$ is both
 
-- *differentiable* (the Jacobian of the transformation $J_T(\mathbf{u}) \in \mathbb{R}^{D\times D}$ exists)
+- *differentiable* (the Jacobian of the transformation $J_T(\mathbf{u}) \in \mathbb{R}^{D\times D}$ exists, where $J_T(\mathbf{u})$ is defined as in @eq-jacobian)
 - *invertible* (the inverse transformation $T^{-1}(\mathbf{x})$ exists).
     - $T^{-1}(\mathbf{x})$ is also required to be differentiable for flows!
 
@@ -33,17 +49,59 @@ You may have noted our extra requirement that the inverse transform is also diff
 
 $$
 p_X(\mathbf{x}) = p_U(T^{-1}(\mathbf{x})) \left|\det{J_{T{-1}}(\mathbf{x})} \right|.
+$$ {#eq-flowlhood}
+
+These equations form the basis for constructing a flow, where we implement the transform $T$ by using a neural network to control its parameters (e.g. a location-scale transform, where the location and scale are provided by a network).
+
+One advantage of having a differentiable and invertible $T$ is that we can compose multiple transforms in a row, with the result itself being both differentiable and invertible. Specifically, we can write, for $T=T_1 \circ T_2$:
+
+$$
+T^{-1} = (T_1 \circ T_2)^{-1} = T_2^{-1} \circ T_1^{-1}~,
+$$
+$$
+\det{J_T(\mathbf{u})} = \det{J_{T_1 \circ T_2}(\mathbf{u})} = \det{J_{T_2}(T_1(\mathbf{u}))}\det{J_{T_1}(\mathbf{u})}~.
 $$
 
-### Masked Autoregressive Flows
+Knowing that we can stack transformations freely, we have a similar paradigm to neural networks, where stacking more "layers" (here, transforms) could bring about a more expressive model. This is the "flow" part of a normalizing flow: a series of samples from $p_U$ are flowing through a series of transforms $T$ to arrive at something like the target density $p_X$. The "normalizing" part comes from going the other direction via $T^{-1}$, where data samples are "normalized" back to the base distribution^[The naming is a bit extra, I know. But at least it's not another play on "attention is all you need".].
 
-A specific type of flow that I used in practice was the **masked autoregressive flow** @maf. The approach that this flow takes to density modelling is as follows:
+There are many types of transforms one can choose to satisfy these requirements (which can be partitioned into a bijective "transformer" and a non-bijective "conditioner"), but I'll omit everything but the one I used in @sec-maf, and direct you to @flows for a much more comprehensive review.
+
+### Training a flow {#sec-trainflow}
+
+The goal is clear: we want to make our base distribution look like the target distribution. How do we quantify this?
+
+Recall from @sec-KL that we have a way to measure the divergence between two probability distributions through the expected difference in log-likelihood under the true distribution (or approximate distribution, noting the asymmetric result depending on our choice). Denoting the predicted distribution from the flow as $q_X(\mathbf{x}; \theta)$ (where $\theta$ comprises both the parameters of the base density $\gamma$ and the parameters of the transform $\phi$), and the target density as $p_X(\mathbf{x})$, we can write this explicitly as
+
+$$
+D_{\mathrm{KL}}[p_X(\mathbf{x}) || q_X(\mathbf{x}; \theta) = -\mathbb{E}_{p_X(\mathbf{x})}\left[\log q_X(\mathbf{x}; \theta)\right] + \mathrm{constant}
+$$
+$$
+\Rightarrow = -\mathbb{E}_{p_X}\left[\log p_U(T^{-1}(\mathbf{x} ;\phi); \gamma) + \log |\det J_{T^{-1}}(\mathbf{x}; \phi)|\right] + \mathrm{constant}~,
+$$
+
+where we've substituted our expression for the flow likelihood in @eq-flowlhood.
+
+This is a quantity we'd like to minimize, as to make $p_X$ and $q_X$ as "close" as possible. In practice, we're likely going to have to substitute the expectation over the true (unknown) distribution with a Monte Carlo estimate using our data samples ${x_i}_{i=1}^{n}$, which turns this equation into
+
+
+KL forward if you have samples (MLE equiv)
+
+KL reverse if you can eval density
+
+
+### Masked Autoregressive Flows {#sec-maf}
+
+A specific type of flow that we'll encounter in the wild later is the **masked autoregressive flow** @maf. The approach that this flow takes to density modelling is as follows:
 
 When modelling a distribution across multiple random variables, one can break down their joint density into a product of conditional distributions through the probability chain rule, and models these conditional distributions explicitly:
 
 $$
-p(x_1, \dots, x_N) = p(x_1)p(x_2 | x_1)p(x_3|x_2, x_1)\dots p(x_N | x_{N-1}, \dots, x_1)\\ =\prod_{i=1}^Np(x_i|\mathbf{x}_{j<i})
+p(x_1, \dots, x_N) = p(x_1)p(x_2 | x_1)p(x_3|x_2, x_1)\dots p(x_N | x_{N-1}, \dots, x_1)
 $$
+$$
+=\prod_{i=1}^Np(x_i|\mathbf{x}_{j<i})
+$$
+
 
 Here, we’ve arbitrarily labelled our random variables $x_i$ with indicies $i$ from $1$ to $N$, and use these to construct our conditional distributions. Note, however, that we could shuffle the order of our random variables, then reassign them the index of their place in the array, and the relation would still hold. Despite this, the only important thing is that each conditional distribution assigned to $x_i$ depends *only* on those $x_j$ for which $j<i$, *regardless of the initial variable ordering*. This is known as the **autoregressive property**.
 
@@ -51,7 +109,18 @@ One can model this relationship using a neural network in a *single forward pass
 
 This idea was first used in @made, which used it to output the density directly in one forward pass by having the outputs correspond to the individual conditional distributions. However, to use this network in a flow, which transforms one distribution to another, we can instead use the outputs of the neural network to parametrize the transform $T$. The result is known as a **masked autoregressive flow** (MAF).
 
-...
+The MAF as I used it involved a fairly simple implementation of $T$ -- a location scale transform:
 
+$$
+T(\mathbf{u}; \alpha, \beta) = \mathbf{\alpha} \cdot \mathbf{u} + \mathbf{\beta}~,
+$$
+
+where $\mathbf{\alpha}, \mathbf{\beta}$ are the scale and location parameter vectors respectively. These are *vectors* because there's one entry corresponding to each entry in $\mathbf{u}$, where the individual parameters $\alpha_i, \beta_i$ are coming from the $i$th output of a neural network (or more precisely, the $i$th pair of outputs, since we have two values $\alpha_i, \beta_i$ for every one input $u_i$), which has parameters itself $\phi$. Training the flow is then done as in @sec-trainflow, with the masking mechanism from earlier in this section being put in place.
 
 As a bonus, there's a simple way to condition this transform on side information $\mathbf{y}$ that provides context: we can just add $\mathbf{y}$ as an extra input to the network (or multiple inputs if there's more than one variable), and have it mix with every input, since each conditional distribution would also include $\mathbf{y}$. We then have a MAF that can perform **conditional density estimation**, i.e. estimate $p(x_1, \dots, x_N| \mathbf{y})$.
+
+
+## Neural networks parametrized by physics quantities
+
+- PNN (POIs)
+- Uncert-aware

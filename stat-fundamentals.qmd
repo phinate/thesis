@@ -89,6 +89,8 @@ An example is just drawing some random sample, e.g. `np.random.uniform(size=10)`
 
 ### Change of variables formula
 
+### Expectation values
+
 ### Commonly used distributions {#sec-dists}
 
 #### Normal
@@ -497,4 +499,8 @@ Armed with this equation, Bayesian procedures include:
 - **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here. See e.g. [@bayestest] for more information.
 
 
-## Fisher information and the Cramér–Rao bound {#sec-fisher}
+## Metrics of probability
+
+### Fisher information and the Cramér–Rao bound {#sec-fisher}
+
+### Kullback-Leibler divergence (KL divergence) {#sec-KL}

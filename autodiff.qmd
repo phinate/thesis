@@ -33,8 +33,8 @@ We'll see why function composition is important to cover -- a core idea of autom
 Let's turn to gradients: we define the **Jacobian matrix** of partial derivatives of $F$ as
 
 $$
-\mathbf{J}(F) = F'(\mathbf{x}) = \left[\begin{array}{ccc}\frac{\partial y_{1}}{\partial x_{1}} & \cdots & \frac{\partial y_{1}}{\partial x_{n}} \\\vdots & \ddots & \vdots \\\frac{\partial y_{m}}{\partial x_{1}} & \cdots & \frac{\partial y_{m}}{\partial x_{n}}\end{array}\right],
-$$
+J_F(\mathbf{x}) = F'(\mathbf{x}) = \left[\begin{array}{ccc}\frac{\partial y_{1}}{\partial x_{1}} & \cdots & \frac{\partial y_{1}}{\partial x_{n}} \\\vdots & \ddots & \vdots \\\frac{\partial y_{m}}{\partial x_{1}} & \cdots & \frac{\partial y_{m}}{\partial x_{n}}\end{array}\right],
+$$ {#eq-jacobian}
 
 assuming $y$ has multiple components ($y_1$, $y_2$, etc.). However, since we're going from $\mathbb{R}^n \rightarrow \mathbb{R}$, the Jacobian is just one row vector:
 
