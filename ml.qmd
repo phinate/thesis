@@ -81,12 +81,11 @@ $$
 
 where we've substituted our expression for the flow likelihood in @eq-flowlhood.
 
-This is a quantity we'd like to minimize, as to make $p_X$ and $q_X$ as "close" as possible. In practice, we're likely going to have to substitute the expectation over the true (unknown) distribution with a Monte Carlo estimate using our data samples ${x_i}_{i=1}^{n}$, which turns this equation into
+This is a quantity we'd like to minimize, as to make $p_X$ and $q_X$ as "close" as possible. In practice, we're likely going to have to substitute the expectation over the true (unknown) distribution with a Monte Carlo estimate using our data samples ${x_i}_{i=1}^{N}$, which turns this equation into
 
+$$D_{\mathrm{KL}}[p_X(\mathbf{x}) || q_X(\mathbf{x}; \theta) \approx-\frac{1}{N} \sum_{i=1}^N \log p_{\mathrm{u}}\left(T^{-1}\left(\mathbf{x}_i ; {\phi}\right) ; \gamma\right)+\log \left|\operatorname{det} J_{T^{-1}}\left(\mathbf{x}_i ; {\phi}\right)\right|+ \mathrm{constant}~.$$
 
-KL forward if you have samples (MLE equiv)
-
-KL reverse if you can eval density
+This comes out to effectively minimizing the negative log-likelihood of the flow model on the data samples -- we're just fitting the model with maximum likelihood, as defined in @sec-mle! This is one example of how we can train a flow -- we minimize this objective with respect to parameters $\theta$, by e.g. gradient descent, since this is a differentiable expression in $\theta$.
 
 
 ### Masked Autoregressive Flows {#sec-maf}
