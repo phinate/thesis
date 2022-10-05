@@ -29,7 +29,7 @@ Graph neural networks
 
 Flows are a class of neural network model that make up one of my applications, so we'll spend a bit of extra time here to sufficiently ground that work.
 
-A **normalizing flow** is a trainable density estimate that admits both sampling and a tractable likelihood. Flows model a vector $\mathbf{x} \in \mathbb{R}^D$ from an underlying distribution $p_X(\mathbf{x})$ as a transformation $\mathbf{x} = T(\mathbf{u})$, where $\mathbf{u} \in \mathbb{R}^D$ is a vector of samples drawn from a chosen distribution $p_U(\mathbf{u})$. We refer to the data distribution $p_X(\mathbf{x})$ as the **target distribution** that we’re trying to model, and to  $p_U(\mathbf{u})$ as the **base distribution** that we transform to do this.
+A **normalizing flow** is a trainable density estimate that admits both sampling and a tractable likelihood. Flows model a vector $\mathbf{x} \in \mathbb{R}^D$ from an underlying distribution $p_X(\mathbf{x})$ as a transformation $\mathbf{x} = T(\mathbf{u})$, where $\mathbf{u} \in \mathbb{R}^D$ is a vector of samples drawn from a chosen distribution $p_U(\mathbf{u})$. We refer to the data distribution $p_X(\mathbf{x})$ as the **target distribution** that we’re trying to model, and to  $p_U(\mathbf{u})$ as the **base distribution** that we transform to do this. This base distribution is normally something simple like a normal distribution, which offers some guarantees as to making the flow a universal density approximator (details in @flows).
 
 How does this work? The transform $T$ is the key, and is the thing we’ll be training in practice. We start by pointing out the defining property of flows, which is the requirement that $T$ is both
 
@@ -92,7 +92,7 @@ This comes out to effectively minimizing the negative log-likelihood of the flow
 
 A specific type of flow that we'll encounter in the wild later is the **masked autoregressive flow** @maf. The approach that this flow takes to density modelling is as follows:
 
-When modelling a distribution across multiple random variables, one can break down their joint density into a product of conditional distributions through the probability chain rule, and models these conditional distributions explicitly:
+When modelling a distribution across multiple random variables, one can break down their joint density into a product of conditional distributions through the probability chain rule as in @eq-chainruledensity, and models these conditional distributions explicitly:
 
 $$
 p(x_1, \dots, x_N) = p(x_1)p(x_2 | x_1)p(x_3|x_2, x_1)\dots p(x_N | x_{N-1}, \dots, x_1)

@@ -1,0 +1,20 @@
+---
+title: "Signal Model Interpolation using Normalizing Flows"
+format:
+  html:
+    code-fold: true
+    default-image-extension: svg
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
+---
+
+One of the primary goals of data analysis in collider physics is to test the viability of proposed models for new physics, which attempt to address the shortcomings of the well-tested Standard Model. We'll call these models the **signal**. Since we don't have access to real data from these hypothesized phenomena, we use high-quality simulations of the underlying physics to generate samples that mimic data collected from major experiments, e.g. the Large Hadron Collider. This then lets us identify the most prominent signature that physics process leaves in the data, such as the shape of the invariant mass of some particular final state. We can compare that signature with data generated to mimic the same final state, but with only standard model processes (which we term **background**), and use this comparison as a mechanism to produce an analysis that *could* discover the signal if it were present. This can then be applied to real data.
+
+How many models are there to test? In general, there's no upper limit -- arXiv grows thicker every day with more theory model submissions. But what about within a certain class of model with *similar free parameters*? This scope-narrowing makes our lives much easier, as we're only now limited by the parameters of the model, e.g. the mass of a new particle. One could then imagine testing each possible value for this new mass... until we realize that there's only so many times we can do this. Recall that simulating data is in general expensive, and we'd rather avoid it where we can. Moreover, if we have a multi-dimensional parameter space to explore, covering that in an efficient way will be prohibitively expensive to simulate. How do we get around this?
+
+Well, if we're interested in some signature from the model in a particular set of variables, we could generate that data for a set of parameters, then find some way to interpolate between them. Specifically, this can be viewed as trying to estimate the probability density (or *shape*) of a variable of interest, where we want to *condition* on the physics parameters involved in the generation of that shape. This is the approach taken here.
+
+## Problem statement
+
+Given a set of physics quantities of interest produced from a signal model ${x_i}_{i=1}^n$, where generally $x_i \in \mathbb{R}$, we take interest in the density $p({x_i}_{i=1}^n | \theta)$, where $\theta$ represents the free parameters of that physics process. We can partition $\theta$ as $\theta = [\phi, \nu]$, where $\phi$ parametrizes the hypothesis of the new physics model (e.g. through the mass of a new particle), and $\nu$ represents parameters that are needed to specify the physics conditions, but are not of interest (e.g. a jet energy scale). We focus on conditioning with respect to $\phi$ here, and leave treatment of $\nu$ as part of the statistical modelling process (see @sec-hifa-nps for more on this).

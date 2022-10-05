@@ -183,7 +183,7 @@ $$ {#eq-hifabase}
 
 which is simply a product over Poisson distribution for each bin within a histogram, where we expect a contribution of $\mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j$ from each of signal and background respectively per bin $j$. This expression forms the core of the HistFactory approach.
 
-### Uncertainty modelling through nuisance parameters
+### Uncertainty modelling through nuisance parameters {#sec-hifa-nps}
 
 
  Now, we'll extend the model from @eq-hifabase in a similar way to when we added $\mu$ to manipulate the signal scale, but this time, it's in order to be able to model uncertainties. There are many different types of uncertainties, so we'll cover them all in-turn.
