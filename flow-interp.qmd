@@ -15,6 +15,22 @@ How many models are there to test? In general, there's no upper limit -- arXiv g
 
 Well, if we're interested in some signature from the model in a particular set of variables, we could generate that data for a set of parameters, then find some way to interpolate between them. Specifically, this can be viewed as trying to estimate the probability density (or *shape*) of a variable of interest, where we want to *condition* on the physics parameters involved in the generation of that shape. This is the approach taken here.
 
+It's worth noting that physics analyses typically don't interpolate on the level of the statistical model, and instead just interpolate the result of the search itself, e.g. in the space of $p$-values or on limits for the signal strength $\mu$ across a grid of e.g. different signal masses. This is often quoted without error (a different issue), and does not take into account the fact that we'd expect to be less sensitive to new physics in the regions that we don't have high-quality simulations for. However, if one can interpolate the signal model in some way *before* calculating the final result, then incorporate a predictive uncertainty from that interpolation into the statistical treatment of the data, we should hopefully be able to have a more grounded representation of our sensitivity between simulated signal model points.
+
 ## Problem statement
 
-Given a set of physics quantities of interest produced from a signal model ${x_i}_{i=1}^n$, where generally $x_i \in \mathbb{R}$, we take interest in the density $p({x_i}_{i=1}^n | \theta)$, where $\theta$ represents the free parameters of that physics process. We can partition $\theta$ as $\theta = [\phi, \nu]$, where $\phi$ parametrizes the hypothesis of the new physics model (e.g. through the mass of a new particle), and $\nu$ represents parameters that are needed to specify the physics conditions, but are not of interest (e.g. a jet energy scale). We focus on conditioning with respect to $\phi$ here, and leave treatment of $\nu$ as part of the statistical modelling process (see @sec-hifa-nps for more on this).
+Say a simulated signal process outputs a set $\mathbf{x}$ of per-event physics quantities (or **observables**), where each quantity is typically a real number (e.g. kinematics). We're interested in making a statistical model of this process, and so take interest in the distribution over $\mathbf{x}$, which we'll denote $p_s(\mathbf{x} | \theta)$, with $\theta$ representing the free parameters of the physical model (and $s$ standing for signal). We can partition $\theta$ as $\theta = [\phi, \nu]$, where $\phi$ effectively parametrizes the hypothesis of the new physics model (e.g. through the mass of a new particle), and $\nu$ represents parameters that are needed to specify the physics conditions, but are not of interest (e.g. a jet energy scale). We focus on conditioning with respect to $\phi$ here, and leave treatment of $\nu$ as part of the statistical modelling process (see @sec-hifa-nps for more on this).
+
+We don't have a way to calculate this density due to our inability to access the implicit distribution defined by the simulator, but we do have access to the samples themselves (at some finite number of values of $\theta$). This means we can empirically estimate the distribution in some way, provided we have the right tools to do so. If successful, we're free to directly use this empirical estimation of $p_s(\mathbf{x} | \theta)$, but in practice, we're often faced with an additional modelling constraint: many analyses in collider physics operate using *histograms* of observables, and construct a statistical model based on that. As such, it would be desirable if we could find a density estimator that:
+
+- allows for the *conditioning* of side variables (here, this would be conditioning on $\phi$)
+- has a tractable likelihood (e.g. for direct use in "unbinned" analysis)
+- can model discrete densities like a histogram
+    - or, optionally, allow the generation of samples that can be histogrammed later
+- (optionally) comes with a notion of uncertainty
+
+This brings us to normalizing flows!
+
+## Normalizing flows (recap)
+
+A much more extensive motivation for normalizing flows can be found in @sec-flows, but we'll recap the main points here.

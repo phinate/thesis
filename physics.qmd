@@ -1,0 +1,21 @@
+---
+title: "Physics background"
+format:
+  html:
+    code-fold: true
+    default-image-extension: svg
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
+---
+
+
+physics modelled by the (incomplete) standard model
+
+made up of blah
+
+kinematics (pt, eta etc)
+
+
+
+generally have access to simulators (how do they work?)
