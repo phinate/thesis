@@ -1,5 +1,5 @@
 ---
-title: "Differentiable programming"
+title: "Gradient descent"
 format:
   html:
     code-fold: true
@@ -11,7 +11,7 @@ jupyter: python3
 
 Moving forward with the groundwork from the previous section on automatic differentiation, we'll dive into how this enables a particular learning procedure called *gradient descent*. We'll explore what that means, then apply this to a few different scenarios to demonstrate its utility, along with highlighting some more intelligent versions that have arisen as a by-product of the recent deep learning revolution. Importantly, this will also set the stage to show the main mechanism for how neural networks are able to train.
 
-## Gradient descent
+## Introduction
 
 Say we have a ball on a hill, and we wanted to roll it down. How would you go about this task? Well, I imagine you'd probably just give it some initial kick, and then let gravity do the rest. Alright then -- let's take away gravity. What then? Look for the bottom of the hill and try to push it there? But what if you can't see the hill itself? This is the situation we find ourself in when trying to optimize a workflow. We're able to see what point we're at during optimization, but we don't know where the bottom of the hill is (minimum of our objective), or what the surrounding landscape looks like (could be very expensive to scan over the space).
 
@@ -172,15 +172,15 @@ ax.set_ylabel("density")
 ax.set_title(f"negative log-likelihood = {new_loss(new_pars, data):.3g}")
 ax.legend(fontsize="small");
 ```
-### Batching and mini-batching
+## Batching and mini-batching
 
-### Beyond standard gradient descent
+## Beyond standard gradient descent
 
-#### Momentum {-}
-#### Adam {-}
+### Momentum
+### Adam
 
-### How to pick the best parameters
+## How to pick the best parameters
 
-#### Early stopping {-}
+### Early stopping
 
-#### k-fold validation {-}
+### k-fold validation
