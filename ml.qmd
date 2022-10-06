@@ -13,7 +13,7 @@ The blanket term **machine learning** indicates a shift in mindset for how compu
 
 That's machine learning! We find some inspiration for this in a quote from the fantastically written essay in @ml-essay, which is stated in the context of comparing human-written programs to possibly learned ones:
 
-> there are many mental processes that people are called upon to perform that cannot be, or at least have not been, reduced to a simple set of rules. Take the process of playing a game of chess, not of simply adhering to the rules of the game, but rather the process of playing a good game against an intelligent opponent. There are no known procedures for guaranteeing a win, and yet people learn to play the game and some few become very proficient.
+> "there are many mental processes that people are called upon to perform that cannot be, or at least have not been, reduced to a simple set of rules. Take the process of playing a game of chess, not of simply adhering to the rules of the game, but rather the process of playing a good game against an intelligent opponent. There are no known procedures for guaranteeing a win, and yet people learn to play the game and some few become very proficient." -- Arthur L. Samuel
 
 
 The basic idea (also made reference to in that essay) is this: maintain some internal state -- literally just a set of numbers, which could e.g. pick a pre-defined strategy based on a value -- and then update that internal state in some way by checking the performance. This rather simple statement carries a lot of ambiguous ideas, such as
@@ -34,11 +34,78 @@ Machine learning methods follow a shared set of abstract steps: given a dataset,
 - **fit** the model to the dataset through some update rule
 - use the *learned* model to perform **inference** (apply the model to new data)
 
-
-
-
+We can see this workflow reflected in the API of modern software packages, such as `scikit-learn` @sklearn and `keras` @keras. Using this framework and terminology, we'll explore some useful models, reflecting on the developments that have occurred as a by-product of the modern era of computing.
 
 ## Neural networks and deep learning
+
+A model that would certainly be useful is one that can model the solution to any task at all. **Neural networks** are indeed this class of model; inspired by the way the brain handles the processing of information, they are proven to be *universal approximators*, i.e. given a *continuous function* $g(\mathbf{x})$, where $\mathbf{x}$ is an arbitrary-length vector of real-valued inputs, there exists a value of parameters $\varphi$ such that a neural network $f(\mathbf{x}, \varphi)$ satisfies
+
+$$
+|f(\mathbf{x}) - g(\mathbf{x}, \varphi)| < \epsilon~~~\forall~\mathbf{x},~\text{for }\epsilon>0~.
+$$ {#eq-approx}
+
+This is great! But what *is* a neural network in the first place?
+
+At its simplest, a neural network is a sequence of location-scale transforms of the input data, with non-linear "activation" functions applied in-between to allow for non-linear modelling capabilities. This type of neural network is referred to as a **multi-layer perceptron** (MLP) or a **feed-forward network** (both namings given since I use them interchangeably in later sections). Each layer of an MLP represents a round of these computations. At its most complex, there's a lot of funky ways to transform the data, including self-attention, convolutions, graph structure, and all sorts of other stuff. We'll cover that in a little.
+
+The ingredients to a MLP are the **weights** $w$, the **biases** $b$, and the **activation functions** $\sigma$. The weights represent the scale transform, and the bias the location transform. You'll typically see all this represented in a ball-and-stick diagram, e.g. @fig-ballandstick. Each series of balls represents one set of computations with the weights, biases, and activation functions that are within that layer. The outputs from this are called activations (just to reference the application of the activation function). We call this round a **layer**.
+
+![The "ball-and-stick" representation of a MLP.](mlp){#fig-ballandstick}
+
+### What's a "layer" in a MLP?
+
+Here's a compact formula for a computation of a single layer. Given a set of $n$ activations from the previous layer (0th layer meaning just the data points), and $k$ neurons in layer $i$, the output of applying the neurons to the activations to obtain the $i+1$th layer is represented as a matrix equation:
+
+$$
+\textcolor{#17becf}{
+\underbrace{\left[\begin{array}{c}
+a_0^{(i)} \\
+a_1^{(i)} \\
+\vdots \\
+a_n^{(i)}
+\end{array}\right]}_{\text{activations for layer }i+1}} =
+\sigma\left(\textcolor{#ff7f0e}{\underbrace{\left[\begin{array}{cccc}
+w_{0,0} & w_{0,1} & \cdots & w_{0, n} \\
+w_{1,0} & w_{1,1} & \cdots & w_{1, n} \\
+\vdots & \vdots & \ddots & \vdots \\
+w_{k, 0} & w_{k, 1} & \cdots & w_{k, n}
+\end{array}\right]}_{\text{weight matrix}}}\textcolor{#1f77b4}{\underbrace{\left[\begin{array}{c}
+a_0^{(i)} \\
+a_1^{(i)} \\
+\vdots \\
+a_n^{(i)}
+\end{array}\right]}_{\text{activations for layer }i}}+\textcolor{#2ca02c}{\underbrace{\left[\begin{array}{c}
+b_0 \\
+b_1 \\
+\vdots \\
+b_n
+\end{array}\right]}_{\text{bias vector}}}\right)
+$$
+
+$$
+\Rightarrow \textcolor{#17becf}{\mathbf{a}^{(i+1)}} = \sigma\left(\textcolor{#ff7f0e}{\mathbf{W}}\textcolor{#1f77b4}{\mathbf{a}^{(i)}} + \textcolor{#2ca02c}{\mathbf{b}}\right)~,
+$$
+
+where applying the activation $\sigma$ is distributed to its elements, i.e.
+$$
+\sigma\left(\left[\begin{array}{l}
+x \\
+y \\
+z
+\end{array}\right]\right)=\left[\begin{array}{l}
+\sigma(x) \\
+\sigma(y) \\
+\sigma(z)
+\end{array}\right]~.
+$$ {#eq-layer}
+
+This is essentially the definition of a neuron (the ball in the ball-and-stick diagram shown in @fig-ballandstick): a neuron is the $j$th function in a layer $i$ that maps the activations $\mathbf{a}^{(i)}$ from the previous layer into the $j$th element of the $i+1$th activation vector $\mathbf{a}^{(i+1)}$, with a functional form as indicated in @eq-layer. The sticks in that diagram would represent the elements of the weight matrix $\mathbf{W}$, with missing connections between neurons $a$ and $b$ corresponding to zeroing out the $w_{a,b}$ term in the weight matrix.
+
+If we put the weights and biases for each layer all into one vector of parameters, that's what we've been calling $\varphi$, which represents the entire internal state of a neural network. If we then bottle up the way we apply $\varphi$ to the data within the function $f$ -- whether that be as simple as the MLP above or something more complex -- we can compactly represent a neural network as $f(\mathbf{x}, \varphi)$ as above in @eq-approx.
+
+### How do neural networks learn?
+
+Since a neural network is a sequence of applications of @eq-layer, it's differentiable with respect to the parameters
 
 ### Mainstay architectures in the modern era
 

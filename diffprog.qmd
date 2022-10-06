@@ -172,5 +172,15 @@ ax.set_ylabel("density")
 ax.set_title(f"negative log-likelihood = {new_loss(new_pars, data):.3g}")
 ax.legend(fontsize="small");
 ```
+### Batching and mini-batching
 
 ### Beyond standard gradient descent
+
+#### Momentum {-}
+#### Adam {-}
+
+### How to pick the best parameters
+
+#### Early stopping {-}
+
+#### k-fold validation {-}
