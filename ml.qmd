@@ -9,6 +9,35 @@ format:
 jupyter: python3
 ---
 
+The blanket term **machine learning** indicates a shift in mindset for how computers complete a given task. When presented with such a task, one may try to solve it through a pen and paper worked conceptual solution. It is then up to us to tell the computer -- in excruciating detail in it's own language -- each of the individual steps needed to implement the solution we came up with. This is known as *programming* a computer. But what if there was a way to show the computer many examples of our problem, and use an algorithm to *learn* a good solution by updating some internal state?
+
+That's machine learning! We find some inspiration for this in a quote from the fantastically written essay in @ml-essay, which is stated in the context of comparing human-written programs to possibly learned ones:
+
+> there are many mental processes that people are called upon to perform that cannot be, or at least have not been, reduced to a simple set of rules. Take the process of playing a game of chess, not of simply adhering to the rules of the game, but rather the process of playing a good game against an intelligent opponent. There are no known procedures for guaranteeing a win, and yet people learn to play the game and some few become very proficient.
+
+
+The basic idea (also made reference to in that essay) is this: maintain some internal state -- literally just a set of numbers, which could e.g. pick a pre-defined strategy based on a value -- and then update that internal state in some way by checking the performance. This rather simple statement carries a lot of ambiguous ideas, such as
+
+- a notion of internal state
+- some way to combine that state with data to produce a result
+- a performance metric to assess the result after applying the state
+- an update rule to improve the value of the state based on the performance
+
+These ideas form the cornerstone of machine learning approaches, and we'll unpack them all in detail below. Before continuing though, it's worth noting the distinction between *machine* learning and *deep* learning -- the latter is a subset of the former, and refers to a particular paradigm involving complex neural networks. Machine learning makes no assumptions on the form of the machine itself.
+
+## Definitions
+
+Machine learning methods follow a shared set of abstract steps: given a dataset, we
+
+- define a **model** with **parameters** $\varphi$ (where the model is a way to combine $\varphi$ with the data)
+- construct a measure of performance for the model, called the **objective function**
+- **fit** the model to the dataset through some update rule
+- use the *learned* model to perform **inference** (apply the model to new data)
+
+
+
+
+
 ## Neural networks and deep learning
 
 ### Mainstay architectures in the modern era
