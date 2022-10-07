@@ -57,24 +57,23 @@ The ingredients to a MLP are the **weights** $w$, the **biases** $b$, and the **
 Here's a compact formula for a computation of a single layer. Given a set of $n$ activations from the previous layer (0th layer meaning just the data points), and $k$ neurons in layer $i$, the output of applying the neurons to the activations to obtain the $i+1$th layer is represented as a matrix equation:
 
 $$
-\textcolor{#17becf}{
+\textcolor[HTML]{17BECF}{
 \underbrace{\left[\begin{array}{c}
 a_0^{(i)} \\
 a_1^{(i)} \\
 \vdots \\
 a_n^{(i)}
-\end{array}\right]}_{\text{activations for layer }i+1}} =
-\sigma\left(\textcolor{#ff7f0e}{\underbrace{\left[\begin{array}{cccc}
+\end{array}\right]}_{\mathrm{activations for layer }i+1}}=\sigma\left(\textcolor[HTML]{FF7F0E}{\underbrace{\left[\begin{array}{cccc}
 w_{0,0} & w_{0,1} & \cdots & w_{0, n} \\
 w_{1,0} & w_{1,1} & \cdots & w_{1, n} \\
 \vdots & \vdots & \ddots & \vdots \\
 w_{k, 0} & w_{k, 1} & \cdots & w_{k, n}
-\end{array}\right]}_{\text{weight matrix}}}\textcolor{#1f77b4}{\underbrace{\left[\begin{array}{c}
+\end{array}\right]}_{\text{weight matrix}}}\textcolor[HTML]{1F77B4}{\underbrace{\left[\begin{array}{c}
 a_0^{(i)} \\
 a_1^{(i)} \\
 \vdots \\
 a_n^{(i)}
-\end{array}\right]}_{\text{activations for layer }i}}+\textcolor{#2ca02c}{\underbrace{\left[\begin{array}{c}
+\end{array}\right]}_{\text{activations for layer }i}}+\textcolor[HTML]{2CA02C}{\underbrace{\left[\begin{array}{c}
 b_0 \\
 b_1 \\
 \vdots \\
@@ -83,7 +82,7 @@ b_n
 $$
 
 $$
-\Rightarrow \textcolor{#17becf}{\mathbf{a}^{(i+1)}} = \sigma\left(\textcolor{#ff7f0e}{\mathbf{W}}\textcolor{#1f77b4}{\mathbf{a}^{(i)}} + \textcolor{#2ca02c}{\mathbf{b}}\right)~,
+\Rightarrow \textcolor[HTML]{17BECF}{\mathbf{a}^{(i+1)}} = \sigma\left(\textcolor[HTML]{FF7F0E}{\mathbf{W}}\textcolor[HTML]{1F77B4}{\mathbf{a}^{(i)}} + \textcolor[HTML]{2CA02C}{\mathbf{b}}\right)~,
 $$
 
 where applying the activation $\sigma$ is distributed to its elements, i.e.
@@ -105,7 +104,9 @@ If we put the weights and biases for each layer all into one vector of parameter
 
 ### How do neural networks learn?
 
-Since a neural network is a sequence of applications of @eq-layer, it's differentiable with respect to the parameters $\varphi$ (and even if it's more complex, this differentiability is always made to be present). That means we can optimize our neural network with **gradient descent**, which we spent considerable time on
+Since a neural network is a sequence of applications of @eq-layer, it's differentiable with respect to the parameters $\varphi$ (and even if it's more complex, this differentiability is always made to be present). That means we can optimize our neural network with **gradient descent**, which we spent considerable time on in the previous section.
+
+There is the issue of choosing a starting value for the weights before initializing -- common strategies for this include
 
 ### Mainstay architectures in the modern era
 
@@ -169,7 +170,7 @@ The goal is clear: we want to make our base distribution look like the target di
 Recall from @sec-KL that we have a way to measure the divergence between two probability distributions through the expected difference in log-likelihood under the true distribution (or approximate distribution, noting the asymmetric result depending on our choice). Denoting the predicted distribution from the flow as $q_X(\mathbf{x}; \theta)$ (where $\theta$ comprises both the parameters of the base density $\gamma$ and the parameters of the transform $\phi$), and the target density as $p_X(\mathbf{x})$, we can write this explicitly as
 
 $$
-D_{\mathrm{KL}}[p_X(\mathbf{x}) || q_X(\mathbf{x}; \theta) = -\mathbb{E}_{p_X(\mathbf{x})}\left[\log q_X(\mathbf{x}; \theta)\right] + \mathrm{constant}
+D_{\mathrm{KL}}[p_X(\mathbf{x}) || q_X(\mathbf{x}; \theta)] = -\mathbb{E}_{p_X(\mathbf{x})}\left[\log q_X(\mathbf{x}; \theta)\right] + \mathrm{constant}
 $$
 $$
 \Rightarrow = -\mathbb{E}_{p_X}\left[\log p_U(T^{-1}(\mathbf{x} ;\phi); \gamma) + \log |\det J_{T^{-1}}(\mathbf{x}; \phi)|\right] + \mathrm{constant}~,
@@ -179,7 +180,7 @@ where we've substituted our expression for the flow likelihood in @eq-flowlhood.
 
 This is a quantity we'd like to minimize, as to make $p_X$ and $q_X$ as "close" as possible. In practice, we're likely going to have to substitute the expectation over the true (unknown) distribution with a Monte Carlo estimate using our data samples ${x_i}_{i=1}^{N}$, which turns this equation into
 
-$$D_{\mathrm{KL}}[p_X(\mathbf{x}) || q_X(\mathbf{x}; \theta) \approx-\frac{1}{N} \sum_{i=1}^N \log p_{\mathrm{u}}\left(T^{-1}\left(\mathbf{x}_i ; {\phi}\right) ; \gamma\right)+\log \left|\operatorname{det} J_{T^{-1}}\left(\mathbf{x}_i ; {\phi}\right)\right|+ \mathrm{constant}~.$$
+$$D_{\mathrm{KL}}[p_X(\mathbf{x}) || q_X(\mathbf{x}; \theta)] \approx-\frac{1}{N} \sum_{i=1}^N \log p_{\mathrm{u}}\left(T^{-1}\left(\mathbf{x}_i ; {\phi}\right) ; \gamma\right)+\log \left|\operatorname{det} J_{T^{-1}}\left(\mathbf{x}_i ; {\phi}\right)\right|+ \mathrm{constant}~.$$
 
 This comes out to effectively minimizing the negative log-likelihood of the flow model on the data samples -- we're just fitting the model with maximum likelihood, as defined in @sec-mle! This is one example of how we can train a flow -- we minimize this objective with respect to parameters $\theta$, by e.g. gradient descent, since this is a differentiable expression in $\theta$.
 

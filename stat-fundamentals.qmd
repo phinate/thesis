@@ -466,7 +466,7 @@ Say we make a $\mathrm{C.L.}$ = 95% confidence interval of $[\mu_1, \mu_2]$ give
 
 I hope this is clear enough, it took me a little while to see initially! One can then *invert a test* to produce a related confidence interval, which just means taking the set of $\mu$ that aren't rejected in a test using the observed data:
 
-$$ \{\mu: t(x_0, \mu) < t_c \} = \mathrm{confidence~interval~at~C.L.}=1-\alpha ~.$$
+$$ \{\mu: t(x_0, \mu) < t_c \} = \mathrm{confidence~interval~at~C.L.~of~}1-\alpha ~.$$
 
 ### Bayesian procedures {#sec-bayes}
 

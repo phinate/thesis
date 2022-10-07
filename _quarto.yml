@@ -29,7 +29,7 @@ book:
 
 
 bibliography: references.bib
-pdf-engine: pdflatex
+pdf-engine: xelatex
 format:
   html:
     theme: cosmo
