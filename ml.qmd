@@ -50,7 +50,7 @@ At its simplest, a neural network is a sequence of location-scale transforms of 
 
 The ingredients to a MLP are the **weights** $w$, the **biases** $b$, and the **activation functions** $\sigma$. The weights represent the scale transform, and the bias the location transform. You'll typically see all this represented in a ball-and-stick diagram, e.g. @fig-ballandstick. Each series of balls represents one set of computations with the weights, biases, and activation functions that are within that layer. The outputs from this are called activations (just to reference the application of the activation function). We call this round a **layer**.
 
-![The "ball-and-stick" representation of a MLP.](mlp){#fig-ballandstick}
+![The "ball-and-stick" representation of a MLP.](images/mlp){#fig-ballandstick}
 
 ### What's a "layer" in a MLP?
 
@@ -105,7 +105,7 @@ If we put the weights and biases for each layer all into one vector of parameter
 
 ### How do neural networks learn?
 
-Since a neural network is a sequence of applications of @eq-layer, it's differentiable with respect to the parameters
+Since a neural network is a sequence of applications of @eq-layer, it's differentiable with respect to the parameters $\varphi$ (and even if it's more complex, this differentiability is always made to be present). That means we can optimize our neural network with **gradient descent**, which we spent considerable time on
 
 ### Mainstay architectures in the modern era
 
@@ -202,7 +202,7 @@ Here, we’ve arbitrarily labelled our random variables $x_i$ with indicies $i$ 
 
 One can model this relationship using a neural network in a *single forward pass.* By constructing a feed-forward network with equal input and output dimensionality, and assigning the same ordering to the input and output, we can simply drop (or **mask**) those connections for each output $i$ with all input variables that have index $j<i$. This way, there is no possible computational path between each output and the variables that come before that output in the ordering, meaning that the value of that output will be able to capture the nature of the relevant conditional $p(x_i | \mathbf{x}_{j<i})$. These aspects together form a **masked, autoregressive** network.
 
-This idea was first used in @made, which used it to output the density directly in one forward pass by having the outputs correspond to the individual conditional distributions. However, to use this network in a flow, which transforms one distribution to another, we can instead use the outputs of the neural network to parametrize the transform $T$. The result is known as a **masked autoregressive flow** (MAF).
+This idea was first used in @made, which used it to output the density directly in one forward pass by having the outputs correspond to the individual conditional distributions. However, to use this network in a flow, which transforms one distribution to another, we can instead use the outputs of the neural network to parametrize the transform $T$. The result is known as a **masked autoregressive flow** (MAF), and was introduced in @maf.
 
 The MAF as I used it involved a fairly simple implementation of $T$ -- a location scale transform:
 

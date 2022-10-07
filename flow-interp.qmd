@@ -34,3 +34,27 @@ This brings us to normalizing flows!
 ## Normalizing flows (recap)
 
 A much more extensive motivation for normalizing flows can be found in @sec-flows, but we'll recap the main points here.
+
+Normalizing flows are a class of density estimation technique, which attempts to transform a designated *base* density into a *target density with the aid of neural networks. This admits the ability to sample from a flow, since you can just transform the samples from the base density, which is usually of simple form (e.g. normal distribution). Moreover, flows have a tractable likelihood, which can be evaluated by transforming the samples using the learned transform, putting that into the base density, and multiplying by the relevant Jacobian, effectively bending the space into the desired shape to mimic the target density.
+
+All of these properties satisfy most of the bullets above for our criteria, but we're still missing two parts: conditioning and uncertainty.
+
+
+### Implementing conditional density estimation
+
+A few different types of flows allow for conditional density estimation, e.g.
+
+### Estimating predictive uncertainty
+
+If we're using the likelihood (or a histogram of the samples) to make a prediction using the flow, we
+
+
+## Example 1: Following the mean
+
+To test out the MAF as a conditional density estimator, it suffices to model some family of distributions parametrized by some context $\phi$, just as we set out in the problem statement. One thing I thought of when considering this is a 2-D normal distribution, where the mean represents the context. This should be a simple starting problem, and is a similar use case to that which I encountered in a physics context, where the signature left in the invariant mass spectrum clustered around the value of the rest mass of the particles that produced it. We'll add more complexity to this later.
+
+We'll start by sampling a range of normal distributions with different means and unit covariance. We'll also split the points up into points that are used for training, and unseen points that are used for validation and testing (in practice, these should be two distinct tasks, but we'll combine them for these examples to portray the proof-of-concept in a best-case way). These are shown in @fig-normalgrid, where 49 different distributions have been evenly selected across a grid of points for the means.
+
+![A grid of 49 different normal distributions, each with a mean corresponding to a cross on the image, and with unit covariance. The contour representing 0 is omitted for visualization purposes.](images/flows/simple/simple_data_dists){#fig-normalgrid}
+
+## Example 2: Gaussian firework
