@@ -2,7 +2,7 @@ project:
   type: book
 
 book:
-  title: "Analysis in High-Energy Physics as a Differentiable Program"
+  title: "Data Analysis in High-Energy Physics as a Differentiable Program"
   author: "Nathan Simpson"
   date: "15/08/2022"
   chapters:
@@ -35,3 +35,5 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
+    cite-method: biblatex
+    keep-tex: true

@@ -68,7 +68,8 @@ The distributions chosen are shown in @fig-normalgrid, where 49 different means 
 - Batch size of 4000 points
 - 10 layers of linear, autoregressive transforms
     - Each transform's neural network has one hidden layer of 6 neurons
-- Uses adam optimizer with a learning rate of 1e-3
+- Adam optimizer with a learning rate of 1e-3
+- 3000 iterations total (common reasonable plateau point for all examples)
 
 During training, the inputs and context are each scaled to standard normal distributions through fitting a `StandardScaler` from Scikit-Learn @scikit-learn to the train data. Any samples produced from the flow are then transformed back using this same scaler.
 
@@ -92,7 +93,24 @@ We can find this plot in @fig-simple-lhoods, where the plot from @fig-normalgrid
 
 This is a nice visual check, but it's probably more useful to quantify this similarity in some way.
 
-Since we're interested in possibly using the result as a histogram, we can directly compare histograms of samples from the flow with histograms of the original data. Plots of the raw data versus flow differences can be found
+### Histogram similarity
 
+Since we're interested in possibly using the result as a histogram, we can directly compare histograms of samples from the flow with histograms of the original data. Plots of the raw data versus flow differences can be found in @fig-simple-hists-train for training points, and @fig-simple-hists-test for test points. The plots are made using a histogram of the whole dataset for each context point (10k data points in total per histogram) versus a histogram of 100k samples conditioned on the same context points from the flow to get the overall shape, which is then re-normalized back to 10k overall counts. The x-y axes are omitted for a cleaner plot, but the histogram range is around +/- 2.5 in each direction about the mean (imagine a square around one of the distributions in @fig-normalgrid).
+
+![Differences between flow and data histograms across training context points, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.](images/flows/simple/simplehistdifftrain-reallyunscaled){#fig-simple-hists-train}
+
+![Differences between flow and data histograms across unseen, test set context points, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.](images/flows/simple/simplehistdifftest-errors){#fig-simple-hists-test}
+
+The main thing we can get from this visualization is the imprint that subtracting the flow histogram from the data leaves. We can see this more prominently in @fig-simple-hists-test, where there are some biases left from the flow network getting the area around the mean slightly off. Green represents where the data counts are larger, and brown represents where the flow predicts larger counts. The scale of the colorbar in each case is worth noting -- for a histogram of size 10k, these are relatively tame differences.
+
+But these plots are only half the story; we'd much rather see how the flow *uncertainties* affect these results. Instead of doing this bin-by-bin where small localized uncertainties make for difficult visualization, we plot the *pulls* aggregated over all training and test points separately. The pull here for one bin is defined as
+
+$$
+\text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~,
+$$
+
+where the uncertainty $\sigma_{\text{flow}}$ comes from the standard deviation of the counts from the three histograms in that bin, which were produced by sampling each flow in turn. Without making any strong theoretical claim, the reasoning to plot this quantity is to follow the intuition behind the central limit theorem, where we assume that the bin counts will tend to a normal distribution in the limit of many repeated experiments. If the flow is a good predictor of the mean of that normal distribution, we'd observe the data being distributed as approximately $\mathrm{Normal}(\text{flow}, \sigma_{\mathrm{flow}})$. This ballpark statement is somewhat realized in @fig-simple-pulls, where we plot histograms of the pull aggregated across all training contexts (left plot) and testing contexts (right plot). The results are fairly unbiased in either case, with a spread of pulls being fitted a little wider than a standard normal.
+
+![Plot of the pull for training contexts (left plot) and testing contexts (right plot). A fitted normal distribution is also shown for illustrative purposes.](images/flows/simple/simpleflowpulls){#fig-simple-pulls}
 
 ## Example 2: Gaussian firework
