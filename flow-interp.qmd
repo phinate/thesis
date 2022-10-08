@@ -44,11 +44,11 @@ All of the properties of a flow satisfy most of the bullets above for our criter
 
 ### Implementing conditional density estimation
 
-A few different types of flows allow for conditional density estimation, e.g.
+A few different types of models allow for conditional density estimation, e.g. RealNVPs @realnvp, MADE @made, and masked autoregressive flows (MAFs) @maf -- we focus on the latter as the choice for this task. Details on the precise implementation of a MAF can be found in @sec-maf.
 
 ### Estimating predictive uncertainty
 
-If we're using the likelihood (or a histogram of the samples) to make a prediction using the flow, we
+If we're using the likelihood (or a histogram of the samples) to make a prediction using the flow, we don't have a natural way to produce a corresponding uncertainty on that prediction. One way to get around this fact is to take inspiration from the notion of **model ensembles** @ensembles, which combine multiple predictive models into one by averaging their predictions at a given point, then providing an uncertainty through the sample standard deviation across those predictions. The intuition behind this is that one would expect models to have the most mutual variance in the region where there is no training data, as that lies outside of the context that the models learned. There's no particular way in which one needs to form the different elements of an ensemble for it to have some reasonable utility, but one common strategy in the land of neural networks is to train a few models with different weight initializations, and use those as the models to make up the ensemble. This approach is what we do here: both with the likelihood functions, and with the histogram yields produced from samples of those flows.
 
 
 ## Example 1: Following the mean
@@ -188,4 +188,4 @@ We can point at many things that could explain the interpolation failure modes i
 
 Another reason for interpolation failures is that removing the test set points will fundamentally bias the model away from learning to generalize to the points we removed, when we technically had that information to learn from in the first place. This creates a paradox with assuming a train and test split -- in what way should we do this? One could think of an example involving vital medical data, where it's essential to learn from the points provided instead of discounting large numbers of examples for validation.
 
-One way to do this is to just do the train/test split in the *data* instead of in the *context*. That would be akin to more standard practice in traditional machine learning, for instance, but neglects keeping a good measure of the interpolation performance.
+One way to do this is to just do the train/test split in the *data* instead of in the *context*. That would be akin to more standard practice in traditional machine learning, for instance, but neglects keeping a good measure of the interpolation performance. We'd have to blindly trust the flow uncertainty to account for the predictive uncertainty to new points. One could perhaps do some k-fold or leave-one-out cross validation, where the model's generalization ability could be conservatively quantified by training multiple flows on data with one point removed, repeating this across all points in the interpolation regime, and quote the ensemble uncertainty for each of these cases as a better idea of the predictive uncertainty. A caveat to this is that these models are all different to the one that actually would be used in practice, and there would have to also be some kind of secondary interpolation/extrapolation mechanism to produce this cross-validation uncertainty in a continuous way across the context space. These ideas were not tried due to time constraints, but could be the subject of further work.
