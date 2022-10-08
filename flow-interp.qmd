@@ -55,9 +55,7 @@ If we're using the likelihood (or a histogram of the samples) to make a predicti
 
 To test out the MAF as a conditional density estimator, it suffices to model some family of distributions parametrized by some context $\phi$, just as we set out in the problem statement. One thing I thought of when considering this is a 2-D normal distribution, where the mean represents the context. This should be a simple starting problem, and is a similar use case to that which I encountered in a physics context, where the signature left in the invariant mass spectrum clustered around the value of the rest mass of the particles that produced it. We'll add more complexity to this later.
 
-We'll start by sampling a range of normal distributions with different means and unit covariance. The means here are the *context* -- the thing we'll condition on during training and inference. Training data will then consist of pairs of samples from these distributions, and the mean of the distribution that generated the samples.
-
-We'll also split the different distributions up into context points that are used for training, and unseen points that are used for validation and testing (in practice, these should be two distinct tasks, but we'll combine them for these examples to portray the proof-of-concept in a best-case way). Points in the test set are not seen during training; we use them purely to assess performance (and select a good model) when interpolating to a context not seen before.
+We'll start by sampling a range of normal distributions with different means and unit covariance. The means here are the *context* -- the thing we'll condition on during training and inference. Training data will then consist of pairs of samples from these distributions, and the mean of the distribution that generated the samples. We'll also split the different distributions up into context points that are used for training, and unseen points that are used for validation and testing (in practice, these should be two distinct tasks, but we'll combine them for these examples to portray the proof-of-concept in a best-case way). Points in the test set are not seen during training; we use them purely to assess performance (and select a good model) when interpolating to a context not seen before. As a small note here, we also hold out a small number of examples from the training set to use as additional validation in conjunction with the unseen context points, which we will discuss in more detail later on.
 
 The distributions chosen are shown in @fig-normalgrid, where 49 different means have been evenly selected across a grid of points, indicated by crosses colored by the set they belong to. Note that the test set points are chosen such that they're all *inside* the grid -- this is because we're seeking to interpolate our results within the region we have data as opposed to extrapolate outside of it.
 
@@ -101,16 +99,93 @@ Since we're interested in possibly using the result as a histogram, we can direc
 
 ![Differences between flow and data histograms across unseen, test set context points, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.](images/flows/simple/simplehistdifftest-errors){#fig-simple-hists-test}
 
-The main thing we can get from this visualization is the imprint that subtracting the flow histogram from the data leaves. We can see this more prominently in @fig-simple-hists-test, where there are some biases left from the flow network getting the area around the mean slightly off. Green represents where the data counts are larger, and brown represents where the flow predicts larger counts. The scale of the colorbar in each case is worth noting -- for a histogram of size 10k, these are relatively tame differences.
+The main thing we can get from this visualization is the imprint that subtracting the flow histogram from the data leaves. We can see this more prominently in @fig-simple-hists-test, where there are some biases left from the flow network getting the area around the mean slightly off. Green represents where the data counts are larger, and brown represents where the flow predicts larger counts. The scale of the colorbar in each case is worth noting -- for a histogram of size 10k, these are relatively tame differences, but differences nonetheless (relative bin-wise differences would also be nice to view, but are inflated somewhat by small bin counts away from the mean).
 
-But these plots are only half the story; we'd much rather see how the flow *uncertainties* affect these results. Instead of doing this bin-by-bin where small localized uncertainties make for difficult visualization, we plot the *pulls* aggregated over all training and test points separately. The pull here for one bin is defined as
+### Pulls
+
+These plots are only half the story; we'd much rather see how the flow *uncertainties* affect these results. Instead of doing this bin-by-bin where small localized uncertainties make for difficult visualization, we plot the *pulls* aggregated over all training and test points separately. The pull here for one bin is defined as
 
 $$
 \text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~,
 $$
 
-where the uncertainty $\sigma_{\text{flow}}$ comes from the standard deviation of the counts from the three histograms in that bin, which were produced by sampling each flow in turn. Without making any strong theoretical claim, the reasoning to plot this quantity is to follow the intuition behind the central limit theorem, where we assume that the bin counts will tend to a normal distribution in the limit of many repeated experiments. If the flow is a good predictor of the mean of that normal distribution, we'd observe the data being distributed as approximately $\mathrm{Normal}(\text{flow}, \sigma_{\mathrm{flow}})$. This ballpark statement is somewhat realized in @fig-simple-pulls, where we plot histograms of the pull aggregated across all training contexts (left plot) and testing contexts (right plot). The results are fairly unbiased in either case, with a spread of pulls being fitted a little wider than a standard normal.
+where the uncertainty $\sigma_{\text{flow}}$ comes from the standard deviation of the counts from the three histograms in that bin, which were produced by sampling each flow in turn. Without making any strong theoretical claim, the reasoning to plot this quantity is to loosely follow the intuition behind the central limit theorem, where we assume that the bin counts will tend to a normal distribution in the limit of many repeated experiments. If the flow is a good predictor of the mean of that normal distribution, we'd observe the data being distributed as approximately $\mathrm{Normal}(\text{flow}, \sigma_{\mathrm{flow}})$. This ballpark statement is somewhat realized in @fig-simple-pulls, where we plot histograms of the pull aggregated across all training contexts (left plot) and testing contexts (right plot).
+
+The results are fairly unbiased in either case, with a spread of pulls being fitted a little wider than a standard normal. Beyond this, it's clear that if the error in the denominator is of comparable to the difference between data and flow, we're fairly happy that we know where we're wrong to some degree. Using this ensemble uncertainty is then a reasonable way to predict the failure modes of the flow for this simple example.
 
 ![Plot of the pull for training contexts (left plot) and testing contexts (right plot). A fitted normal distribution is also shown for illustrative purposes.](images/flows/simple/simpleflowpulls){#fig-simple-pulls}
 
 ## Example 2: Gaussian firework
+
+We now add a degree of complexity. Keeping with the theme of normal distributions, we'll let the mean influence the covariance matrix such that the distribution will rotate based on its position relative to the origin. More formally, for $\mu = [\mu_x, \mu_y]$, this parametrization $\mathrm{Normal}(\mu, \Sigma)$ can be constructed by the following steps:
+
+$$
+\theta = \arctan (\mu_y / \mu_x);~~~r=\sqrt{\mu_x^2 + \mu_y^2}
+$$
+$$
+\Rightarrow \Sigma = MM^T \text{,     where } M = \left[\begin{array}{cc}
+\cos \theta & \sin \theta \\
+-\sin \theta & \cos \theta
+\end{array}\right] \left[\begin{array}{cc}
+1/r &0 \\
+0 & 1
+\end{array}\right]~.
+$$ {#eq-complex-cov}
+
+This rather weird formula, found using inspiration from a blog post on a geometric interpretation of the covariance in a Gaussian @covariance, applies a rotation and a scaling in proportion to the mean. By generating the same grid of points as in @fig-normalgrid, we end up with the result in @fig-complex-normalgrid. I've affectionately termed it a Gaussian firework, since it makes a wonderful explosive pattern when plotted symmetrically about the origin, which I additionally show some examples of in @fig-firework.
+
+![A grid of 49 different normal distributions, each with a mean corresponding to a cross on the image, and with covariance as defined by @eq-complex-cov. The contour representing 0 is omitted for visualization purposes.](images/flows/complex/non-simple_data_dists){#fig-complex-normalgrid}
+
+::: {#fig-firework layout-ncol=2}
+
+![Some distributions plotted symmetrically about the origin.](images/flows/complex/cont.png)
+
+![Histogram of many samples drawn from a grid of distributions about the origin.](images/flows/complex/disc.png)
+
+A couple of fun plots to show the naming convention of "Gaussian firework".
+:::
+
+Modelling this firework is more challenging for a couple reasons. The first is that we have some kind of symmetry of rotation that the flow needs to pick up on, using only information from the mean. The second is that the distributions are very tight about their means -- a slight mis-guess will show a considerable error when making the same visualizations as in the simple example.
+
+The hyperparameters for the training are the same as the previous example, including the points in the train/test sets, so we jump straight to the results.
+
+### Loss curves
+
+See @fig-complex-loss for a comparison of the negative log-likelihood loss for train and test sets. Again, this is just one of the three flows for illustrative purposes. We notice that the training stops much earlier, which is due to the fact that the difference between train and test sets is much more significant here, with it being easier to overfit to the training samples alone.
+
+![Example loss curves from a single flow trained on the Gaussian firework scenario. The model weights are extracted from the best test loss.](images/flows/complex/non-simple_example_loss){#fig-complex-loss}
+
+### Distribution similarity
+
+We can see the plots of the learned likelihoods from the flow ensemble in @fig-complex-lhoods. The topic of the scale difference is exacerbated further, which I'd guess is due to the concentrated nature of the distribution, allowing for the clustering of all the density in one place to quickly achieve a good loss for the training data.
+
+We note the fairly good modelling of the way the distribution shape varies across the training points in particular. The shape of the distribution far from the mean at the unseen test set points (red crosses) is a little less well-modelled, with the mean being slightly off-center sometimes, and the contours not being as even.
+
+![Left: the same grid of 49 different normal distributions from @fig-complex-normalgrid. Right: the learned likelihood from the flow evaluated with context equal to the values of the means from the grid.](images/flows/complex/non-simpleflowvsdata){#fig-complex-lhoods}
+
+### Histogram similarity
+
+Coming again to histograms, we do the same plots as for the first example, beginning with the raw differences in @fig-complex-hists-train and @fig-complex-hists-test. The scale of the errors in the training set are equivalent to those in the simple example, but we see that the test errors have some vast differences by comparison. Since the distributions are so concentrated, you can effectively see the flow distribution in brown, and the data distribution in green for the test context points. This example is particularly unforgiving for the biases introduced as a result of the flow not having seen these points, since a slight mismodelling introduces a large error. Additionally, from a shape perspective, the centers are roughly coincident, but the rotation inferred from the context is a little different in most cases.
+
+![Differences between flow and data histograms across training context points for the Gaussian firework example, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.](images/flows/complex/non-simplehistdifftrain-reallyunscaled){#fig-complex-hists-train}
+
+![Differences between flow and data histograms across unseen, test set context points for the Gaussian firework example, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.](images/flows/complex/non-simplehistdifftest-errors){#fig-complex-hists-test}
+
+
+### Pulls
+
+Unlike in the simple example, the magnitude of the flow ensemble uncertainty is not great enough to save us in every case when we make the pull plots, which are shown in @fig-complex-pulls. We see that the flow applied to the training distribution is reasonably unbiased in its prediction of the histogram counts, but the test set is far less forgiving -- we have some points that are extremely far from 0, due to the flow difference being large and the uncertainty being comparably small.
+
+![Plot of the pull for training contexts (left plot) and testing contexts (right plot) for the Gaussian firework example. A fitted normal distribution is also shown for illustrative purposes.](images/flows/complex/non-simpleflowpulls){#fig-complex-pulls}
+
+## Discussion
+
+By and large, this method performed fairly well on the two toy examples it was tested on. It's clear that there is some very deliberate contextual inference, which is found from training in a way that conditions on the parameters that generated the samples. This being said, there are definite shortcomings in the test set of the second example, which I'll address with my thoughts below, including how it's inherently linked to some of the training methodology decisions, and why I'm not overwhelmingly pessimistic about it.
+
+We can point at many things that could explain the interpolation failure modes in the second example: flow architectures that are too inflexible to model the very concentrated shapes, the limitation of training data provided, not training with the correct hyperparameters (no tuning was done), or perhaps the flow ensemble was too small.
+
+### What's the true "test set"?
+
+Another reason for interpolation failures is that removing the test set points will fundamentally bias the model away from learning to generalize to the points we removed, when we technically had that information to learn from in the first place. This creates a paradox with assuming a train and test split -- in what way should we do this? One could think of an example involving vital medical data, where it's essential to learn from the points provided instead of discounting large numbers of examples for validation.
+
+One way to do this is to just do the train/test split in the *data* instead of in the *context*. That would be akin to more standard practice in traditional machine learning, for instance, but neglects keeping a good measure of the interpolation performance.
