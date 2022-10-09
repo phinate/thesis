@@ -1,30 +1,39 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3.9.12 64-bit",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "name": "python",
-   "version": "3.10.6"
-  },
-  "orig_nbformat": 4,
-  "vscode": {
-   "interpreter": {
-    "hash": "b0fa6594d8f4cbf19f97940f81e996739fb7646882a419484c72d19e05852a7e"
-   }
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 2
-}
+---
+title: "Search for a heavy scalar particle $X$ decaying to a scalar $S$ and a Higgs boson, with final state $b\\bar{b}\\gamma\\gamma$ in the ATLAS detector"
+pdf-engine: pdflatex
+format:
+  html:
+    code-fold: true
+    default-image-extension: svg
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
+---
+
+As part of my PhD, I made some various contributions to a search for a physics process $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where $X$ and $S$ are scalar particles beyond the Standard Model. My contributions include:
+
+- building a faster framework for data processing
+- assisting with the development of a pipeline to classify signal versus background using a neural network parametrized in the truth-level masses $m_X$ and $m_S$
+- using the method I developed with normalizing flows to interpolate a 2-D signal shape across different signal mass points
+- various small contributions to the statistical analysis
+
+
+The analysis of this data is still ongoing at the time of writing, so only preliminary work will be shown. Moreover, as this is a thesis on my personal work and not a supporting note, only the minimum required information about the analysis will be provided in order to aid the understanding of the applications I contributed to. This means that I will omit many of the pre-processing details for the data, and some things will be stated without justification (but references will be provided where possible).
+
+
+## Overview and motivation
+
+The new particle discovered in 2012 @higgs is widely regarded to represent the Higgs boson as predicted by the Standard Model, which is predicted to have a rest mass of 125GeV. While this is confirmatory of the existence of some flavor of the Standard Model, we know this isn't the end of the story. Many physics theories beyond the Standard Model predict some kind of Higgs sector, where additional scalar bosons could exist and interact with the Higgs in some way, but have yet to be discovered. To this effect, it is useful to probe data taken from proton-proton collisions to see if particles produce states that correspond to e.g. resonances that look like these new scalars.
+
+In particular, this work looks at the process $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where $X$ is a heavy scalar with a mass large enough to produce a Higgs with Standard Model mass (i.e. $m_H = 125 \text{ GeV}$) and a scalar $S$ with mass $m_S$ such that $m_X > m_S + m_H$, which makes the decay $X\rightarrow SH$ satisfy energy conservation. This particular process is predicted by a number of different theories, including but not limited to:
+
+- Next-to-Minimal 2HDM @N2HDM
+- Next-to-Minimal Supersymmetric Standard Model @NMSSM
+- Complex 2HDM model @C2HDM
+- Two-Real-Scalar SM extension @TRSM
+
+It's worth noting the problems that these theories solve (i.e. why they are interesting at all), which span combatting matter-antimatter asymmetry mechanisms in the early universe (@asym1, @asym2) and producing possible dark matter candidates (@dm1, @dm2) amongst other things.
+
+The next thing to address is why it's worth it to look at $b\bar{b}\gamma\gamma$ as a final state. The first reason is that if we assign the di-photon state as originating from a Higgs boson, we would have a a very clear way to select events we want to analyze, as experiments at the Large Hadron Collider have the ability to precisely determine the energies of photons in their electromagnetic calorimeters. Events originating from decays of interest would then leave a fairly sharp peak at 125 GeV in the invariant mass spectrum of the two-photon system, which we can turn into a requirement for including those events in our analysis. This would leave the $b$ quarks (which would be seen in the detector as jets due to hadronization) as originating from the $S$ particle, which is the dominant decay mode of the $S$ when one assumes that it has properties similar to the Standard Model Higgs. Of course, despite all this, choosing any one particular final state is a needle-in-a-high-dimensional-haystack approach, with there being many other choices of theories and states to consider. In that sense, there is no particular reason other than to look where has not been checked yet.
+
+What exactly are we looking for then? As alluded to in @sec-hyptests,

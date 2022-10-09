@@ -4,9 +4,9 @@ pdf-engine: pdflatex
 format:
   html:
     code-fold: true
-    default-image-extension: pdf
+    default-image-extension: svg
   pdf:
-    default-image-extension: tex
+    default-image-extension: pdf
 jupyter: python3
 ---
 

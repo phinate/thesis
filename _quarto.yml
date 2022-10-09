@@ -13,8 +13,8 @@ book:
         - physics.qmd
         - stat-fundamentals.qmd
         - stat-practical.qmd
-        - autodiff.qmd
         - diffprog.qmd
+        - autodiff.qmd
         - ml.qmd
     - part: "Applications"
       chapters:

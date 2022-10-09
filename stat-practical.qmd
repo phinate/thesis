@@ -282,3 +282,6 @@ We can also use our hypothesis test as a mechanism to set an **exclusion limit**
 <!-- In the case of an upper limit, values of $\mu$ that are greater than $\mu_{\mathrm{upper}}$ consider our observed data as extreme, so we term these values as *excluded* at our chosen confidence level.  -->
 
 If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_0$, then $\lambda(x,\mu_0)$ will be different than 1, indicating less compatibility between $H_0$ and $H_1$ since their likelihoods differ.
+
+
+## The $\text{CL}_s$ quantity
