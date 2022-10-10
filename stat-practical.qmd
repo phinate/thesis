@@ -210,7 +210,7 @@ We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathr
 
 
 
-## Hypothesis testing and asymptotic formulae in HEP
+## Hypothesis testing and asymptotic formulae in HEP {#sec-asymptotics}
 
 In @sec-hyptests, which covered frequentist hypothesis tests, we noted that we don't necessarily have access to the *sampling distribution* of the test statistic $p(t(x)|H_0)$ given a particular null hypothesis $H_0$, which is the key quantity we need to be able to set our cutoff value for the test. One way to estimate $p(t(x)|H_0)$ is to simply calculate $t(x)$ for many samples $x \sim p(x|H_0)$, and build up the distribution empirically. However, there exist some choices of $t(x)$ that give us *asymptotic guarantees* as to the form of $p(t(x)|H_0)$, i.e. we can fairly reliably know its shape as long as we have a decent enough sample size of $x$.
 

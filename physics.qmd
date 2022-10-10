@@ -10,6 +10,47 @@ jupyter: python3
 ---
 
 
+What makes up you and me? How do interactions on the smallest scales affect the way the universe was made and how it will end? Why does anything exist at all? Is anyone even reading this? If they do, but no-one is there to see them, will they make a sound?
+
+At least two of these existential questions are explored by the scientific discipline known as **high-energy physics** (HEP). This term encompasses things like **particle physics**, **astrophysics**, and **cosmology**, which are a mix of studying things at the largest and smallest possible scales. We focus here on particle physics, which looks at the very, very small.
+
+## The Standard Model
+
+An innumerable number of particle physics results in the last 10 years or so have shown no signs of deviating from the predictions made from the **Standard Model** of particle physics, a theory proposed and developed by many scientists over many years @sm. We go over an extremely brief overview in the following paragraphs.
+
+I am particles. So are you. Which particles? Textbooks would have us believe that we're made of "atoms", which in turn are made up of "protons, neutrons, and electrons". But like an onion, we have a layer deeper still, with protons and neutrons being made up of different **quarks**, which are another type of particle. Specifically, the proton contains two *up quarks* ($u$), and one down quark ($d$), which we denote using $uud$. The electric charge of $u$ is +2/3, and the charge of $d$ is -1/3, so the overall charge of the proton is +1. In contrast, the neutron has a composition of $udd$, and has an overall neutral electric charge of 0. The electron seems to be more fundamental, and belongs to a species of particle known as **leptons**, which are posited to have no further components. Each lepton is associated with a corresponding neutrino -- a chargeless particle with unknown mass which we denote with $\nu_e$. We're slowly approaching botanical levels of nomenclature, so I'll summarize the rest of the particle types and naming in @fig-standard-model.
+
+To be ever so slightly more precise, the Standard Model is a type of **quantum field theory**, which has a fundamental object defined over all of time and space called a *field*. These fields are described by equations that can be treated as waves, which are restricted to travel in discrete quanta of energy. These quanta are generally what we've been calling "particles", and also serve to mediate what we know as **forces**. In particular, when two bodies of matter as we know it feel a force, it is "carried" by a quantum of energy (i.e. a particle), and the bodies *exchange* the relevant particle, depending on the type of force. These forces, each corresponding to their own field, include:
+
+- The **electromagnetic force**, carried by the **photon** $\gamma$
+- The **weak force**, carried by three particles: the $W^+$, $W^-$, and $Z^0$ bosons
+- The **strong force**, carried by the **gluon** $g$ (named for being the glue that keeps protons together)
+- **Gravity**, which is not described by the Standard Model. Extensions propose a *graviton*, but this has no experimental evidence yet.
+
+On that last point: it is unfortunate that such a well-tested theory does not adequately describe gravity, which, at the time of writing, seems to still be doing its thing. Moreover, Einstein's theory of General Relativity, which describes gravity, doesn't seem to fit well with all this particle talk, but it too is a very well-tested theory. This is one of many frustrating things about having the Standard Model triumph experimentally - we *know* it's not good enough alone^[I've heard water cooler talk about particle physicists even being upset at the Higgs discovery for this very reason -- a nail in the coffin for many other theories.].
+
+To top off our description of the Standard Model, we mention the **Higgs field**: it has a quantum of energy known as the **Higgs boson**, which is the mediator behind mechanisms that can be attributed as being responsible for giving particles *mass*. The particle discovered by the ATLAS and CMS experiments at CERN in 2012 is widely believed to represent the Higgs boson @higgs.
+
+
+
+
+## Properties of particles and their colliders
+
+### Kinematics
+
+
+
+### Spin
+
+### Quantifying collisions
+
+## Particle detectors
+
+
+
+
+
+
 physics modelled by the (incomplete) standard model
 
 made up of blah

@@ -36,4 +36,18 @@ It's worth noting the problems that these theories solve (i.e. why they are inte
 
 The next thing to address is why it's worth it to look at $b\bar{b}\gamma\gamma$ as a final state. The first reason is that if we assign the di-photon state as originating from a Higgs boson, we would have a a very clear way to select events we want to analyze, as experiments at the Large Hadron Collider have the ability to precisely determine the energies of photons in their electromagnetic calorimeters. Events originating from decays of interest would then leave a fairly sharp peak at 125 GeV in the invariant mass spectrum of the two-photon system, which we can turn into a requirement for including those events in our analysis. This would leave the $b$ quarks (which would be seen in the detector as jets due to hadronization) as originating from the $S$ particle, which is the dominant decay mode of the $S$ when one assumes that it has properties similar to the Standard Model Higgs. Of course, despite all this, choosing any one particular final state is a needle-in-a-high-dimensional-haystack approach, with there being many other choices of theories and states to consider. In that sense, there is no particular reason other than to look where has not been checked yet.
 
-What exactly are we looking for then? As alluded to in @sec-hyptests,
+What exactly are we looking for then? As alluded to in @sec-asymptotics, searches for new particles involve calculating $p$-values (or $\text{CL}_s$ values), either trying to reject a background-only hypothesis for discovery, or to set an upper limit on the signal strength.
+
+## The ATLAS detector
+
+## Preprocessing and selection
+
+## Fit strategies
+
+### 2-D fit in the $m_{bb\gamma\gamma}$ and $m_{bb}$ plane
+
+### 1-D fit using a neural network-based summary statistic
+
+#### Parametrized neural network {-}
+
+## Interpolation between signal shapes
