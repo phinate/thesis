@@ -18,7 +18,7 @@ As part of my PhD, I made some various contributions to a search for a physics p
 - various small contributions to the statistical analysis
 
 
-The analysis of this data is still ongoing at the time of writing, so only preliminary work will be shown. Moreover, as this is a thesis on my personal work and not a supporting note, only the minimum required information about the analysis will be provided in order to aid the understanding of the applications I contributed to. This means that I will omit many of the pre-processing details for the data, and some things will be stated without justification (but references will be provided where possible).
+The analysis of this data is still in the preliminary stages at the time of writing, so only initial work will be shown. Moreover, as this is a thesis on my personal work and not a supporting note, only the minimum required information about the analysis will be provided in order to solely aid the understanding of the applications I contributed to.
 
 
 ## Overview and motivation
@@ -51,12 +51,34 @@ Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma
 
 ## Fit strategies {#sec-fit-strategies}
 
+A few strategies were investigated to see which variables provided the most discriminating power when comparing their distribution in signal and in background. The reason for this is that we want to pick a *summary statistic* of the data to use as a foundation for the HistFactory statistical model construction (@sec-hifa), and choosing something that differs in a significant way across signal and background distributions should hopefully give us smaller $p$-values and stronger limits.
+
+We go over the two main approaches explored in the following sections.
+
 ### 2-D fit in the $m_{bb\gamma\gamma}$ and $m_{bb}$ plane
 
-### 1-D fit using a neural network-based summary statistic
+A somewhat natural choice to look at is the variables that, when constructed, recover the mass resonance for each of the proposed new particles $X$ and $S$. We thus look at the invariant mass of the overall final state $m_{bb\gamma\gamma}$ (which should peak at the chosen value of $X$) and the invariant mass of the $b$-tagged jets $m_{bb}$ (which should peak at the chosen value of $S$). Some example plots for the shape of these distributions in the signal Monte-Carlo samples can be found in @fig-signal-examples.
 
-#### Parametrized neural network {-}
+![Some example distributions of the $m_{bb\gamma\gamma}$ and $m_{bb}$ invariant mass plane.](images/sh/){#fig-signal-examples}
+
+
+
+### 1-D fit using a parametrized neural network-based summary statistic
+
+You may have thought based on earlier discussion that it may not be the case that a one-size-fits-all variable (or variables) exists across every combination of $m_X$ and $m_S$ featured in @fig-mass-grid, or indeed across any possible combination of hypothesized masses. It is then of interest to look for an observable that can be *parametrized* in the truth masses $m_X$ and $m_S$ such that the chosen observable can adapt to provide better results depending on the hypothesis we're probing. An example of such an observable is the so-called **parametrized neural network** (pNN), originally proposed in @pnn.
+
+We're interested in neural networks more generally for their ability to provide flexible outputs (here, 1-D) that can learn to perform as we train them to do so, e.g. to discriminate strongly between events coming from signal and background respectively. The way a pNN is structured is no different to that of any other neural network, with the only change being the inclusion of the parameters of your physics model (here, $m_X$ and $m_S$) as additional inputs. This aims to essentially use those inputs as choosing the best model for the use case; when comparing different values of the inputs, the information from one set of values will likely be propagated through the network in a very different way to the other set, which can provide information about the context in which the network is performing inference in. Training a pNN is then no different to standard procedures -- by providing the additional inputs within a batch, the loss structure of choice doesn't have to change in any way to accommodate this, but will optimize for good average performance across all provided contexts. Moreover, if the network is able to infer this context well from the provided physics parameters, the performance of the network should carry over to new, unseen parameter points (which for us would be the gaps between the points in @fig-mass-grid).
+
+#### Practical training considerations {-}
+
+When training this model for our use case, a number of practical issues arose. The first is that we need to provide a set of signal truth masses for *all* events, including those coming from background. Of course, these labels do not exist; following the approach in @pnn, we then circumvented this to some degree by uniformly sampling these labels from the distribution present in the signal events, and assigning these as the labels to background events. The rationale behind this is to try and encode as little additional information as possible, hoping that the network will still be able to pick up the distribution of the signal context instead. Another issue is that of scaling the input variables, with it being common practice to scale all inputs to either reside in the range [0,1], or to have zero mean and unit variance. This scaling also needs to be applied to the truth masses; depending on the method chosen, the distribution of the masses could become very skewed to 0, which has the potential to make it more difficult to encode the context information for having very low values numerically.
+
+Many combinations of input variables were tried, with some examples being kinematics like $p_T$, $\eta$, $\phi$ (for the 2 photons and the 2 jets with highest $p_T$), differences in these variables such as $\Delta\phi(\gamma_1, \gamma_2)$, $\Delta\eta(\gamma_1, \gamma_2)$, and also non-linear quantities like the angular distance between objects $\Delta R = \sqrt{\Delta\phi + \Delta\eta}$. Despite all this, the most effective training input configuration was found to just be the invariant masses $m_{bb\gamma\gamma}$ and $m_{bb}$, which speaks to the power of the 2-D fit approach previously mentioned.
+
+
 
 ## Interpolation between signal shapes
 
-For either strategy in @sec-fit-strategies, we're interested in some kind of way to make inference about points in-between those we've already simulated in @fig-mass-grid
+For either strategy in @sec-fit-strategies, we're interested in some kind of way to make inference about points in-between those we've already simulated in @fig-mass-grid. We would of course like to just simulate points on the fly for any hypothesis we want to probe, but that's time, compute, and CO$_2$ that we'd rather not have in excess. In order to do this simulation-free, we need to produce the expected shape of the counts from simulation of that signal process. We're now in the regime of somehow trying to *interpolate* the shape of the signal in whatever variables we want to use as input to the HistFactory model. Moreover, it would be great if this could come with a notion of uncertainty; by adding this uncertainty to our statistical model, we'll be able to quantify the fact that we're going to have a worse result in the regions for which we didn't simulate data directly.
+
+This is exactly the context in which I developed the method presented in
