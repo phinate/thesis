@@ -1,5 +1,4 @@
 ---
-title: "Search for a heavy scalar particle $X$ decaying to a scalar $S$ and a Higgs boson, with final state $b\\bar{b}\\gamma\\gamma$ in the ATLAS detector"
 pdf-engine: pdflatex
 format:
   html:
@@ -9,6 +8,7 @@ format:
     default-image-extension: pdf
 jupyter: python3
 ---
+# Search for a heavy scalar particle $X$ decaying to a scalar $S$ and a Higgs boson, with final state $b\bar{b}\gamma\gamma$ in the ATLAS detector {#sec-anal}
 
 As part of my PhD, I made some various contributions to a search for a physics process $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where $X$ and $S$ are scalar particles beyond the Standard Model. My contributions include:
 
@@ -44,7 +44,7 @@ What exactly are we looking for then? As alluded to in @sec-asymptotics, searche
 
 Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where the $b$ quarks are associated to the $S$ and the photons are associated to the Higgs boson, was generated at a variety of possible combinations of $m_X$ and $m_S$. We can see the points chosen in @fig-mass-grid, where the upper-left quadrant is kinematically forbidden (there, $m_X < m_S + m_H$).
 
-![A grid of the different points for which data originating from the signal process was simulated.](images/sh/mass-grid.pdf){#fig-mass-grid}
+![A grid of the different points for which data originating from the signal process was simulated.](images/sh/mass-grid){#fig-mass-grid}
 
 
 ## Preprocessing and selection
@@ -81,4 +81,14 @@ Many combinations of input variables were tried, with some examples being kinema
 
 For either strategy in @sec-fit-strategies, we're interested in some kind of way to make inference about points in-between those we've already simulated in @fig-mass-grid. We would of course like to just simulate points on the fly for any hypothesis we want to probe, but that's time, compute, and CO$_2$ that we'd rather not have in excess. In order to do this simulation-free, we need to produce the expected shape of the counts from simulation of that signal process. We're now in the regime of somehow trying to *interpolate* the shape of the signal in whatever variables we want to use as input to the HistFactory model. Moreover, it would be great if this could come with a notion of uncertainty; by adding this uncertainty to our statistical model, we'll be able to quantify the fact that we're going to have a worse result in the regions for which we didn't simulate data directly.
 
-This is exactly the context in which I developed the method presented in
+This is exactly the context in which I developed the method presented in [Chapter -@sec-flow-interp]! I use **normalizing flows** that are conditioned on the truth masses $m_X$ and $m_S$ as a mechanism to interpolate between the signal shapes used for fitting. While this was initially designed as a strategy for the 2-D fit of $m_{bb\gamma\gamma}$ and $m_{bb}$, where samples from the flow would be drawn from the joint conditional distribution $p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)$ and histograms of those samples made for use as 2-D templates, the method works equally well for the 1-D pNN strategy. The reason for this is that we can just draw samples in the same way, and then build up the shape of the pNN output by computing the results given the flow samples, since the flow is defined over the same set of input variables $m_{bb\gamma\gamma}$ and $m_{bb}$. We can then normalize this histogram to the appropriate amount, provided we have access to that factor (more on that later; we have to interpolate that too).
+
+Exactly like in [Chapter -@sec-flow-interp], a train/test split is made across a number of $(m_X, m_S)$ points, which can be seen in @fig-train-test-sh. Here, we don't make any separate valid split that involves the training grid data.
+
+![The train/test split across the grid of the different points for which signal process data was simulated.](images/sh/flow-mass-grid){#fig-train-test-sh}
+
+The training setup is then to look at event-wise pairs of $m_{bb\gamma\gamma}$ and $m_{bb}$, along with the context label $(m_X, m_S)$ representing the parameters at which the event was generated. These will be provided in batches, and used as input to the flow, which assesses its quality though calculating the mean negative log-likelihood across the batch, and then uses the gradient of this to update it's transform parameters. The results from this training procedure are the continuously defined conditional distribution $p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)$, as well as the ability to draw samples from this distribution.
+
+I performed this training procedure for 5 flows, and use their ensemble as the predictive model, with the standard deviations of these predictions acting as an uncertainty.
+
+## Interpolation between overall yields

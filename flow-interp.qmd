@@ -1,5 +1,4 @@
 ---
-title: "Signal Model Interpolation using Normalizing Flows"
 format:
   html:
     code-fold: true
@@ -8,6 +7,7 @@ format:
     default-image-extension: pdf
 jupyter: python3
 ---
+# Signal Model Interpolation using Normalizing Flows {#sec-flow-interp}
 
 One of the primary goals of data analysis in collider physics is to test the viability of proposed models for new physics, which attempt to address the shortcomings of the well-tested Standard Model. We'll call these models the **signal**. Since we don't have access to real data from these hypothesized phenomena, we use high-quality simulations of the underlying physics to generate samples that mimic data collected from major experiments, e.g. the Large Hadron Collider. This then lets us identify the most prominent signature that physics process leaves in the data, such as the shape of the invariant mass of some particular final state. We can compare that signature with data generated to mimic the same final state, but with only standard model processes (which we term **background**), and use this comparison as a mechanism to produce an analysis that *could* discover the signal if it were present. This can then be applied to real data.
 
