@@ -101,7 +101,7 @@ We then would like to see what happens when we incorporate the flow uncertaintie
 
 $$
 \text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~.
-$$
+$$ {#eq-pull2}
 
 
 We'll start by inspecting this bin-by-bin for histograms with bins of size 20 GeV in both directions, which we can see for the training set in @fig-pulls-train-sh and the test set in @fig-pulls-test-sh, where the histograms are formed 300 GeV either side of the mass value in both directions where the majority of the distribution lies.
@@ -120,4 +120,10 @@ In addition to the method presented in @sec-sh-flows, there's a missing componen
 
 ### Gaussian process interpolation
 
-A flexible class of models that come with a notion of uncertainty are **Gaussian processes**. They model a set of data points as normally distributed random variables, and use this
+A flexible class of models that come with a notion of uncertainty are **Gaussian processes** (GPs). I include only a brief description; a working knowledge of GPs is not needed to gauge the quality of the results. To describe how we'd use GPs in this case, give each member the set of signal mass grid points ($m_X, m_S$ values) a corresponding label for the sum of the event weights ($\sum_i w_i$) produced for that mass tuple. Each of these $m_X, m_S$ values represents a random variable that we can model as coming from a normal distribution, where the means are often either zero or centered on the data, and the covariances are determined from a functional form which is called the *kernel*. The kernel is where the magic happens in GPs, and acts as the prior in a Bayesian inference context.
+
+Speaking of inference, we're then interested in inferring the values of $\sum_i w_i$ for new, unseen pairs of $m_X, m_S$ values. By treating the joint distribution of the test and training points as a multivariate normal, with dimensions equal to the size of each set of points combined, we can condition this distribution on just the training data to get the distribution of the points in test set only. Since normal distributions are closed under conditioning, the resulting distribution will also be a multivariate normal; predictions for these points are then just samples from this distribution, which lends itself naturally to the notion of uncertainty, since we can include intervals of our choosing from that distribution along with the predicted samples.
+
+Applying all this leads to the set of predicted values from this conditional distribution shown in @fig-sh-gp, where the left-hand plot shows the interpolated yield predictions, and the right-hand plot shows the corresponding relative uncertainties. The exact functional form of the kernel was chosen somewhat arbitrarily; I took many combinations of common kernels, and applied k-fold validation (with 10 folds) across the training points, then chose the form that minimized the average absolute error divided by the uncertainty from the GP (c.f. the pull from @eq-pull2). We can see that the bottom-left hand corner is white, which represents the model predicting negative yields. This is not considered problematic, as this region is outside the realm of interpolation, which is the planned context in which this would be used. Moreover, one can notice in the right-hand plot the increase in relative uncertainty as we go to the bottom-left hand corner (to nearly 100% for some values) despite that being a region of high data density. This is attributed to the fact that there is a very rapid variation in the yields in this corner of parameter space, which can be seen in the left-hand plot with the concentration of blue lines.
+
+![Left: Plot of the interpolated yields using a Gaussian process model, with the full post-fit kernel function described in the top of the plot. Right: The map of the corresponding uncertainties for the GP predictions.](images/sh/sh-pulls){#fig-pulls-sh}
