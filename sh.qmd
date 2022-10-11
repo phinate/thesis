@@ -87,14 +87,25 @@ Exactly like in [Chapter -@sec-flow-interp], a train/test split is made across a
 
 ![The train/test split across the grid of the different points for which signal process data was simulated.](images/sh/flow-mass-grid){#fig-train-test-sh}
 
-The training setup is then to look at event-wise pairs of $m_{bb\gamma\gamma}$ and $m_{bb}$, along with the context label $(m_X, m_S)$ representing the parameters at which the event was generated. These will be provided in batches, and used as input to the flow, which assesses its quality though calculating the mean negative log-likelihood across the batch, and then uses the gradient of this to update it's transform parameters. The results from this training procedure are the continuously defined conditional distribution $p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)$, as well as the ability to draw samples from this distribution. I performed this training procedure for 5 flows, and use their ensemble as the predictive model, with the standard deviations of these predictions acting as an uncertainty.
+The training setup is then to look at event-wise pairs of $m_{bb\gamma\gamma}$ and $m_{bb}$, along with the context label $(m_X, m_S)$ representing the parameters at which the event was generated. These will be provided in batches, and used as input to the flow, which assesses its quality though calculating the mean negative log-likelihood across the batch, and then uses the gradient of this to update it's transform parameters. The results from this training procedure are the continuously defined conditional distribution $p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)$, as well as the ability to draw samples from this distribution.
 
-One practical aspect of this training procedure that I didn't cover in[Chapter -@sec-flow-interp] is that of *event weights*. When applying this problem to a particle physics context, we're conscious of the fact that events are not supplied alone, but also with a weight that controls its relevance as a proportion of the distributions defined by that physics process. This means that the distributions we're trying to imitate with the flow need to be appropriately scaled according to these weights. A fairly simple way to do this is to just weight the contribution to the loss from a given event proportional to it's event weight, i.e. *multiply the loss of an event by its weight*. The intuition behind this is that one would expect an event with weight 2 to have the contribution to the distribution of two individual events with identical $m_{bb\gamma\gamma}$ and $m_{bb}$ values. It follows that the loss expected from those two events is just two equal contributions of loss at the event values for $m_{bb\gamma\gamma}$ and $m_{bb}$.
+One practical aspect of this training procedure that I didn't cover in[Chapter -@sec-flow-interp] is that of *event weights*. When applying this problem to a particle physics context, we're conscious of the fact that events are not supplied alone, but also with a weight that controls its relevance as a proportion of the distributions defined by that physics process. This means that the distributions we're trying to imitate with the flow need to be appropriately scaled according to these weights. A fairly simple way to do this is to just weight the contribution to the loss from a given event proportional to it's event weight, i.e. *multiply the loss of an event (the negative log-likelihood) by its weight*. The intuition behind this is that one would expect an event with weight 2 to have the contribution to the distribution of two individual events with identical $m_{bb\gamma\gamma}$ and $m_{bb}$ values. It follows that the loss expected from those two events is just two equal contributions of loss at the same values of $m_{bb\gamma\gamma}$ and $m_{bb}$.
 
-We can see some of the results applied to the test points in @fig-flow-vs-data-sh.
+### Results
+
+I performed the training procedure as described for 5 flows with different initializations, and use their ensemble as the predictive model, with the standard deviations of these predictions (for likelihood values or histogram yields) acting as an uncertainty. We can see some of the resulting distributions for the test context points in @fig-flow-vs-data-sh.
 
 ![Example shapes of the distributions for the test set, both from the flow and from data.](images/sh/data-vs-flow){#fig-flow-vs-data-sh}
 
+We then would like to see what happens when we incorporate the flow uncertainties. For this, we'll look at the *binwise pull values* just as in[Chapter -@sec-flow-interp], i.e.
 
+$$
+\text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~.
+$$
+
+
+We'll start by inspecting this bin-by-bin for histograms with bins of size 20 GeV in both directions, which we can see for the training set in @fig-pulls-train-sh and the test set in @fig-pulls-test-sh.
+
+![](images/sh/data-vs-flow){#fig-flow-vs-data-sh}
 
 ## Interpolation between overall yields
