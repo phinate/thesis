@@ -110,7 +110,7 @@ $$
 \frac{dN_i}{dt} = \mathcal{L}(t) \sigma_i~.
 $$
 
-The take-home from this is that for any physics process, the event rate in a collision will be a function of a term that dictates the underlying physics (\sigma_i) and a term that is influenced by beam structure (\mathcal{L}(t)). Moreover, we can define an overall **integrated luminosity** $L$ as a metric of cumulative beam "brightness" up to some time $T$ by integrating @eq-cross-section:
+The take-home from this is that for any physics process, the event rate in a collision will be a function of a term that dictates the underlying physics ($\sigma_i$) and a term that is influenced by beam structure ($\mathcal{L}(t)$). Moreover, we can define an overall **integrated luminosity** $L$ as a metric of cumulative beam "brightness" up to some time $T$ by integrating @eq-cross-section:
 
 $$
 L = \int_0^T \mathcal{L}(t) dt = N/\sigma~.

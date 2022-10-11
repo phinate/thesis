@@ -77,7 +77,7 @@ Many combinations of input variables were tried, with some examples being kinema
 
 
 
-## Interpolation between signal shapes
+## Interpolation between signal shapes {#sec-sh-flows}
 
 For either strategy in @sec-fit-strategies, we're interested in some kind of way to make inference about points in-between those we've already simulated in @fig-mass-grid. We would of course like to just simulate points on the fly for any hypothesis we want to probe, but that's time, compute, and CO$_2$ that we'd rather not have in excess. In order to do this simulation-free, we need to produce the expected shape of the counts from simulation of that signal process. We're now in the regime of somehow trying to *interpolate* the shape of the signal in whatever variables we want to use as input to the HistFactory model. Moreover, it would be great if this could come with a notion of uncertainty; by adding this uncertainty to our statistical model, we'll be able to quantify the fact that we're going to have a worse result in the regions for which we didn't simulate data directly.
 
@@ -115,3 +115,9 @@ We can then have a look at the overall performance by making histograms of the p
 ![Left: Histogram of the bin-by-bin pull accumulated across different context points from the training set. Right: Same for the test set. Both plots have a normal distribution fit overlayed.](images/sh/sh-pulls){#fig-pulls-sh}
 
 ## Interpolation between overall yields
+
+In addition to the method presented in @sec-sh-flows, there's a missing component: the overall normalization of the produced histograms. This is important from the perspective of interpretation of the signal strength $\mu$, which represents the relative overall cross-section of $X\rightarrow SH$ multiplied by the branching ratios for $S \rightarrow bb$ and $H \rightarrow \gamma\gamma$. Why? Consider that events are generated with some assumed cross-section, and that information is encoded in the event weights. If we do not provide this information as a normalization when inputting predicted counts from simulation into our statistical model, then the resulting signal strength limits will not accurately reflect the cross-section used, since the counts are incorrectly normalized. We then desire a second, simpler interpolation across the space of the total event count per process, which is the *sum of the event weights*.
+
+### Gaussian process interpolation
+
+A flexible class of models that come with a notion of uncertainty are **Gaussian processes**. They model a set of data points as normally distributed random variables, and use this
