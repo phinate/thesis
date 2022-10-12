@@ -1,5 +1,4 @@
 ---
-pdf-engine: pdflatex
 format:
   html:
     code-fold: true
@@ -15,10 +14,11 @@ As part of my PhD, I made some various contributions to a search for a physics p
 - building a faster framework for data processing
 - assisting with the development of a pipeline to classify signal versus background using a neural network parametrized in the truth-level masses $m_X$ and $m_S$
 - using the method I developed with normalizing flows to interpolate a 2-D signal shape across different signal mass points
-- various small contributions to the statistical analysis
+- various small contributions to the statistical analysis setup
+- the proposal of a new observable based on normalizing flows
 
 
-The analysis of this data is still in the preliminary stages at the time of writing, so only initial work will be shown. Moreover, as this is a thesis on my personal work and not a supporting note, only the minimum required information about the analysis will be provided in order to solely aid the understanding of the applications I contributed to.
+The analysis of this data is still in the preliminary stages at the time of writing, all on simulated data (to the point where the figures aren't even labeled with the famous "ATLAS Preliminary"), so only this initial work will be shown. Moreover, as this is a thesis on my personal work and not a supporting note, only the minimum required information about the analysis will be provided in order to solely aid the understanding of the applications I contributed to.
 
 
 ## Overview and motivation
@@ -48,6 +48,10 @@ Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma
 
 This simulation was done using the event generator PYTHIA, where the $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$ process was simulated to leading order, i.e. only using the least complicated Feynman diagrams that can make this process happen.
 
+The background can be organized into particular processes:
+
+
+
 ## Preprocessing and selection
 
 There are many different analyses selections being trialed at the time of writing; the results shown below are all performed with a simple "loose" criteria imposed on the data, which requires:
@@ -69,9 +73,16 @@ We go over the two main approaches explored in the following sections.
 
 ### 2-D fit in the $m_{bb\gamma\gamma}$ and $m_{bb}$ plane
 
-A somewhat natural choice to look at is the variables that, when constructed, recover the mass resonance for each of the proposed new particles $X$ and $S$. We thus look at the invariant mass of the overall final state $m_{bb\gamma\gamma}$ (which should peak at the chosen value of $X$) and the invariant mass of the $b$-tagged jets $m_{bb}$ (which should peak at the chosen value of $S$). Some example plots for the shape of these distributions in the signal Monte-Carlo samples can be found in @fig-signal-examples.
+A somewhat natural choice to look at is the variables that, when constructed, recover the mass resonance for each of the proposed new particles $X$ and $S$. We thus look at the invariant mass of the overall final state $m_{bb\gamma\gamma}$ (which should peak at the chosen value of $X$) and the invariant mass of the $b$-tagged jets $m_{bb}$ (which should peak at the chosen value of $S$). Some example plots for the shape of these distributions in the signal and background Monte-Carlo samples can be found in @fig-2d-examples.
 
-![Some example distributions of the $m_{bb\gamma\gamma}$ and $m_{bb}$ invariant mass plane.](images/sh/){#fig-signal-examples}
+::: {#fig-2d-examples layout-ncol=2}
+
+![Total background shape.](images/sh/sh-bkg-shape)
+
+![Some example signal shapes.](images/sh/sh-sig-shapes)
+
+Some example distributions of the $m_{bb\gamma\gamma}$ and $m_{bb}$ invariant mass plane.
+:::
 
 
 
@@ -142,11 +153,70 @@ Speaking of inference, we're then interested in inferring the values of $\sum_i 
 
 Applying all this leads to the set of predicted values from this conditional distribution shown in @fig-sh-gp, where the left-hand plot shows the interpolated yield predictions, and the right-hand plot shows the corresponding relative uncertainties. The exact functional form of the kernel was chosen somewhat arbitrarily; I took many combinations of common kernels, and applied k-fold validation (with 10 folds) across the training points, then chose the form that minimized the average absolute error divided by the uncertainty from the GP (c.f. the pull from @eq-pull2). We can see that the bottom-left hand corner is white, which represents the model predicting negative yields. This is not considered problematic, as this region is outside the realm of interpolation, which is the planned context in which this would be used. Moreover, one can notice in the right-hand plot the increase in relative uncertainty as we go to the bottom-left hand corner (to nearly 100% for some values) despite that being a region of high data density. This is attributed to the fact that there is a very rapid variation in the yields in this corner of parameter space, which can be seen in the left-hand plot with the concentration of blue lines.
 
-![Left: Plot of the interpolated yields using a Gaussian process model, with the full post-fit kernel function described in the top of the plot. Right: The map of the corresponding uncertainties for the GP predictions.](images/sh/sh-pulls){#fig-pulls-sh}
+![Left: Plot of the interpolated yields using a Gaussian process model, with the full post-fit kernel function described in the top of the plot. Right: The map of the corresponding uncertainties for the GP predictions.](images/sh/gp){#fig-sh-gp}
 
-## A new flow-based observable
+## A new flow-based observable $s_{\text{flow}}$
 
-In addition to the work above, I had one more idea for this analysis. The fit strategies proposed are both clearly effective, but they both have their shortcomings:
+In addition to the work above, I had one more idea for this analysis. It results from thinking about the fact that we've trained a continuous likelihood function $p(m_{bb\gamma\gamma}, m_{bb} | m_X, m_S)$, but are in a sense throwing some of this information away by discretizing the result. The idea presented here tries to make use of this information from a practical standpoint, and not necessarily an optimality one.
 
-- The 2-D fit is *simple* and *powerful*, but suffers from the *high number of bins* needed to compute the likelihood.
-- The pNN strategy is much more *efficient*, as a 1-D distribution is far more simple to compute from an inference perspective. However, we need to *assign signal masses to background*, which isn't a desirable thing to encode.
+DThe fit strategies proposed are both clearly effective, but they both have their shortcomings:
+
+- The 2-D fit is *simple* and *powerful*, but suffers from the *high number of bins* needed to compute the likelihood, leading to things like ad-hoc region selection to reduce the bins we include.
+- The pNN strategy is much more *efficient*, as a 1-D distribution is far more simple to compute from an inference perspective. However, we need to *assign signal masses to background*, which don't exist and so could affect our performance.
+
+To address these points, we can be inspired by the literature for **learning likelihood ratios**, e.g. @lr, where we exploit the fact that a perfect 1-D classifier between signal and background trained with binary cross-entropy would learn the distribution
+
+$$
+s^*(x) = \frac{p_{\text{sig}}(x)}{p_{\text{sig}}(x) + p_{\text{bkg}}(x)}~,
+$$
+
+which is then typically rearranged to construct the likelihood ratio of signal and background in terms of $s^*$. Here, $x$ would be our variables of interest for classifying, e.g. $x = m_{bb\gamma\gamma}, m_{bb}$. If we were to do this using our $m_X$ and $m_S$ values (i.e. the pNN classifier), our signal distribution is then parametrized by $m_X$ and $m_S$, so we may expect something more like
+
+$$
+s^*(x | m_X, m_S) = \frac{p_{\text{sig}}(x |m_X, m_S)}{p_{\text{sig}}(x  |m_X, m_S) + p_{\text{bkg}}(x)}~.
+$$
+
+This distribution $p_{\text{sig}}(x | m_X, m_S)$ is directly the product of our work with signal interpolation! If, then, we could learn a background distribution in the same way (e.g. with an unconditional flow), we could construct the observable
+
+$$
+s_{\text{flow}}(x | m_X, m_S) = \frac{q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S)}{q^{({\text{flow}})}_{\text{sig}}(x  |m_X, m_S) + q^{({\text{flow}})}_{\text{bkg}}(x)}~,
+$$ {#eq-sflow}
+
+where the distribution $q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S)$ is the output from training the flow interpolation model, and $q^{({\text{flow}})}_{\text{bkg}}(x)$ comes from training a flow to learn the background distribution over $x$. By constructing $s_{\text{flow}}$, we're making something that -- in the limit of well-modelled distributions for signal and background -- could provide some notion of optimality when it comes to discriminating power. Moreover, unlike the pNN, we'd be explicitly modelling the background component of this, and don't have to assign values of the truth masses to the background points during training. We can also include a notion of uncertainty; if we model the flows using *ensembles* as in @sec-sh-flows, each likelihood value will have separate predictions from each member of the ensemble, which we can average and take the standard deviation of to get uncertainties for each flow. With a bit of error propagation, we then construct the way overcomplicated formula of
+
+$$
+s_{\text{flow}}(x | m_X, m_S) \pm \sigma_{s} = \frac{q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) \pm \sigma^{({\text{flow}})}_{\text{sig}}}{\left(q^{({\text{flow}})}_{\text{sig}}(x  |m_X, m_S) \pm \sigma^{({\text{flow}})}_{\text{sig}}\right) + \left(q^{({\text{flow}})}_{\text{bkg}}(x) \pm \sigma^{({\text{flow}})}_{\text{bkg}}\right)}~,
+$$ {#eq-sflow}
+$$
+\Rightarrow  \sigma_{s} = \sqrt{\frac{\left(q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) \sigma^{({\text{flow}})}_{\text{bkg}}\right)^2 + \left(q^{({\text{flow}})}_{\text{bkg}}(x) \sigma^{({\text{flow}})}_{\text{sig}}\right)^2}{\left( q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) + q^{({\text{flow}})}_{\text{bkg}}(x) \right)^4}}~.
+$$
+
+<!-- For implementation purposes, I include a pseudocoded version of this in @
+
+```
+class Discriminant:
+    sig_flow: FlowEnsemble
+    bkg_flow: FlowEnsemble
+
+    def __init__(self, sig_flow, bkg_flow):
+        self.sig_flow = sig_flow
+        self.bkg_flow = bkg_flow
+
+    @staticmethod
+    def discriminant_err(s, b, serr, berr):  # error propagation
+        return (
+            ((b**2) * (serr**2) + (s**2) * (berr**2)) / ((x + y) ** 4)
+        ) ** 0.5
+
+    def value_and_err(self, input, context):
+        sig, sig_err = self.sig_flow.pdf_and_err(input, context)
+        bkg, bkg_err = self.bkg_flow.pdf_and_err(input)
+
+        return sig / (sig + bkg), self.discriminant_err(sig, bkg, sig_err, bkg_err)
+``` -->
+
+Only a small amount of prototyping of $s_{\text{flow}}$ was carried out, which I'll talk about here. To model @eq-sflow, the crucial ingredient we're missing is the background flow $q^{({\text{flow}})}_{\text{bkg}}(x)$; it may be desirable to split this up into explicitly modelling processes, but this was not explored, and just the overall shape was learned. Following the same prescription as @sec-sh-flows, but without any conditioning and a train/test split on the data points themselves, I trained a flow to model the (weighted) background shape. A comparison between the learned flow distribution and the data histogram can be found in @fig-flow-vs-bkg.
+
+![Left: Background histogram including event weights. Middle: Learned flow distribution. Right: Background histogram without event weights.](images/sh/flowvsbkg.png){#fig-flow-vs-bkg}
+
+Satisfied that the shape is good, we move swiftly on to view some of the example distributions given by @eq-sflow using this flow and one of the results from the many training configuration tried in @sec-sh-flows. We find these distributions in @fig-sflow-shapes, where we plot the value of $s_{\text{flow}}$ for
