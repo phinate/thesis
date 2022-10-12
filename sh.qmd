@@ -219,4 +219,8 @@ Only a small amount of prototyping of $s_{\text{flow}}$ was carried out, which I
 
 ![Left: Background histogram including event weights. Middle: Learned flow distribution. Right: Background histogram without event weights.](images/sh/flowvsbkg.png){#fig-flow-vs-bkg}
 
-Satisfied that the shape is good, we move swiftly on to view some of the example distributions given by @eq-sflow using this flow and one of the results from the many training configuration tried in @sec-sh-flows. We find these distributions in @fig-sflow-shapes, where we plot the value of $s_{\text{flow}}$ for
+Satisfied that the shape is good, we move swiftly on to view some of the example distributions given by @eq-sflow using this flow and one of the results from the many training configuration tried in @sec-sh-flows. We find these distributions in @fig-sflow-shapes, where we plot the value of $s_{\text{flow}}$ for an equal number of points from both background and signal distributions, using their values of $m_{bb\gamma\gamma}, m_{bb}$ as input. Note that the points shown are all unseen points from the perspective of the signal flow, and the background data is also from the test set partition from the training, so none of the data has been seen by either flow.
+
+![Plots of the distribution of $s_{\text{flow}}$ for a variety of test set signal points, where an even number of points are provided of either signal or background.](images/sh/conditioned_sflow_all){#fig-sflow-shapes}
+
+We may also be curious what happens when we condition on the wrong point, i.e. when the data comes from a different $m_X$ and $m_S$; such a case can be seen in
