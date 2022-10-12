@@ -46,8 +46,20 @@ Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma
 
 ![A grid of the different points for which data originating from the signal process was simulated.](images/sh/mass-grid){#fig-mass-grid}
 
+This simulation was done using the event generator PYTHIA, where the $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$ process was simulated to leading order, i.e. only using the least complicated Feynman diagrams that can make this process happen.
 
 ## Preprocessing and selection
+
+There are many different analyses selections being trialed at the time of writing; the results shown below are all performed with a simple "loose" criteria imposed on the data, which requires:
+
+- at least two selected photons
+- no leptons
+- at least 2 central jets (central = originating from the primary vertex)
+- less than 6 central jets
+- at least one jet above the 70% working point threshold for $b$-tagging
+- less than 3 $b$-tagged jets at the 77% working point
+
+We also accept any data with exactly 2 $b$-jets at the 77% working point threshold, as this will likely allow us to reconstruct the invariant mass $m_{bb}$ well.
 
 ## Fit strategies {#sec-fit-strategies}
 
@@ -73,7 +85,9 @@ We're interested in neural networks more generally for their ability to provide 
 
 When training this model for our use case, a number of practical issues arose. The first is that we need to provide a set of signal truth masses for *all* events, including those coming from background. Of course, these labels do not exist; following the approach in @pnn, we then circumvented this to some degree by uniformly sampling these labels from the distribution present in the signal events, and assigning these as the labels to background events. The rationale behind this is to try and encode as little additional information as possible, hoping that the network will still be able to pick up the distribution of the signal context instead. Another issue is that of scaling the input variables, with it being common practice to scale all inputs to either reside in the range [0,1], or to have zero mean and unit variance. This scaling also needs to be applied to the truth masses; depending on the method chosen, the distribution of the masses could become very skewed to 0, which has the potential to make it more difficult to encode the context information for having very low values numerically.
 
-Many combinations of input variables were tried, with some examples being kinematics like $p_T$, $\eta$, $\phi$ (for the 2 photons and the 2 jets with highest $p_T$), differences in these variables such as $\Delta\phi(\gamma_1, \gamma_2)$, $\Delta\eta(\gamma_1, \gamma_2)$, and also non-linear quantities like the angular distance between objects $\Delta R = \sqrt{\Delta\phi + \Delta\eta}$. Despite all this, the most effective training input configuration was found to just be the invariant masses $m_{bb\gamma\gamma}$ and $m_{bb}$, which speaks to the power of the 2-D fit approach previously mentioned.
+Many combinations of input variables were tried, with some examples being kinematics like $p_T$, $\eta$, $\phi$ (for the 2 photons and the 2 jets with highest $p_T$), differences in these variables such as $\Delta\phi(\gamma_1, \gamma_2)$, $\Delta\eta(\gamma_1, \gamma_2)$, and also non-linear quantities like the angular distance between objects $\Delta R = \sqrt{\Delta\phi + \Delta\eta}$. Despite all this, the most effective training input configuration was found to just be using only the invariant masses $m_{bb\gamma\gamma}$ and $m_{bb}$, which speaks to the power of the 2-D fit approach previously mentioned. An example pNN output for one of the signal points (evaluated on unseen test data only) can be found in @fig-laura, created by my collaborator Laura Pereira Sánchez, who spearheads this work.
+
+![Example pNN showing discriminating power post-training when conditioned on the signal point $m_X$ = 250 GeV, $m_S$ = 100 GeV. (Attribution: Laura Pereira Sánchez, Stockholm University)](images/sh/laura-pnn.png){#fig-laura}
 
 
 
@@ -81,7 +95,7 @@ Many combinations of input variables were tried, with some examples being kinema
 
 For either strategy in @sec-fit-strategies, we're interested in some kind of way to make inference about points in-between those we've already simulated in @fig-mass-grid. We would of course like to just simulate points on the fly for any hypothesis we want to probe, but that's time, compute, and CO$_2$ that we'd rather not have in excess. In order to do this simulation-free, we need to produce the expected shape of the counts from simulation of that signal process. We're now in the regime of somehow trying to *interpolate* the shape of the signal in whatever variables we want to use as input to the HistFactory model. Moreover, it would be great if this could come with a notion of uncertainty; by adding this uncertainty to our statistical model, we'll be able to quantify the fact that we're going to have a worse result in the regions for which we didn't simulate data directly.
 
-This is exactly the context in which I developed the method presented in [Chapter -@sec-flow-interp]! I use **normalizing flows** that are conditioned on the truth masses $m_X$ and $m_S$ as a mechanism to interpolate between the signal shapes used for fitting. While this was initially designed as a strategy for the 2-D fit of $m_{bb\gamma\gamma}$ and $m_{bb}$, where samples from the flow would be drawn from the joint conditional distribution $p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)$ and histograms of those samples made for use as 2-D templates, the method works equally well for the 1-D pNN strategy. The reason for this is that we can just draw samples in the same way, and then build up the shape of the pNN output by computing the results given the flow samples, since the flow is defined over the same set of input variables $m_{bb\gamma\gamma}$ and $m_{bb}$. We can then normalize this histogram to the appropriate amount, provided we have access to that factor (more on that later; we have to interpolate that too).
+This is exactly the context in which I developed the method presented in [Chapter -@sec-flow-interp]! I use **normalizing flows** that are conditioned on the truth masses $m_X$ and $m_S$ as a mechanism to interpolate between the signal shapes used for fitting. While this was initially designed as a strategy for the 2-D fit of $m_{bb\gamma\gamma}$ and $m_{bb}$, where samples from the flow would be drawn from the joint conditional distribution $p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)$ and histograms of those samples made for use as 2-D templates, the method works equally well for the 1-D pNN strategy. The reason for this is that we can just draw samples in the same way, and then build up the shape of the pNN output by computing the results given the flow samples, since the flow is defined over the same set of input variables $m_{bb\gamma\gamma}$ and $m_{bb}$. The resulting interpolation uncertainty can be found from averaging the yields from the 5 sets of samples, and the uncertainty from their standard deviation. We can then normalize this histogram to the appropriate amount, provided we have access to that factor (more on that later; we have to interpolate that too).
 
 Exactly like in [Chapter -@sec-flow-interp], a train/test split is made across a number of $(m_X, m_S)$ points, which can be seen in @fig-train-test-sh. Here, we don't make any separate valid split that involves the training grid data.
 
@@ -93,18 +107,20 @@ One practical aspect of this training procedure that I didn't cover in[Chapter -
 
 ### Results
 
-I performed the training procedure as described for 5 flows with different initializations, and use their ensemble as the predictive model, with the standard deviations of these predictions (for likelihood values or histogram yields) acting as an uncertainty. We can see some of the resulting distributions for the test context points in @fig-flow-vs-data-sh.
+I performed the training procedure as described for 5 flows with different initializations, and use their ensemble as the predictive model, with the standard deviations of these predictions (for likelihood values or histogram yields) acting as an uncertainty.
 
-![Example shapes of the distributions for the test set, both from the flow and from data.](images/sh/data-vs-flow){#fig-flow-vs-data-sh}
+<!-- We can see some of the resulting distributions for the test context points in @fig-flow-vs-data-sh.
 
-We then would like to see what happens when we incorporate the flow uncertainties. For this, we'll look at the *binwise pull values* just as in[Chapter -@sec-flow-interp], i.e.
+![Example shapes of the distributions for the test set, both from the flow and from data.](images/sh/data-vs-flow){#fig-flow-vs-data-sh} -->
+
+We'll start by looking at the *binwise pull values* just as in[Chapter -@sec-flow-interp], i.e.
 
 $$
 \text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~.
 $$ {#eq-pull2}
 
 
-We'll start by inspecting this bin-by-bin for histograms with bins of size 20 GeV in both directions, which we can see for the training set in @fig-pulls-train-sh and the test set in @fig-pulls-test-sh, where the histograms are formed 300 GeV either side of the mass value in both directions where the majority of the distribution lies.
+We can inspect this bin-by-bin for histograms with bins of size 20 GeV in both directions, which we can see for the training set in @fig-pulls-train-sh and the test set in @fig-pulls-test-sh, where the histograms are formed 300 GeV either side of the mass value in both directions where the majority of the distribution lies. Note that green is where the flow histogram is overpredicting, and brown is where it underpredicts. Immediately, we can notice the difference between the training and test set points; while many of the training points have a wide scatter
 
 ![Plots of the bin-by-bin pull across different context points from the training set. The axes are omitted for legibility, but the histogram range is +/- 300 GeV in both directions from the red cross (without including negative values).](images/sh/sh-train-diff){#fig-pulls-train-sh}
 
@@ -120,10 +136,17 @@ In addition to the method presented in @sec-sh-flows, there's a missing componen
 
 ### Gaussian process interpolation
 
-A flexible class of models that come with a notion of uncertainty are **Gaussian processes** (GPs). I include only a brief description; a working knowledge of GPs is not needed to gauge the quality of the results. To describe how we'd use GPs in this case, give each member the set of signal mass grid points ($m_X, m_S$ values) a corresponding label for the sum of the event weights ($\sum_i w_i$) produced for that mass tuple. Each of these $m_X, m_S$ values represents a random variable that we can model as coming from a normal distribution, where the means are often either zero or centered on the data, and the covariances are determined from a functional form which is called the *kernel*. The kernel is where the magic happens in GPs, and acts as the prior in a Bayesian inference context.
+A flexible class of models that come with a notion of uncertainty are **Gaussian processes** (GPs). I include only a brief description; a working knowledge of GPs is not needed to gauge the quality of the results, but one can find that in the excellent article in @gps. To describe how we'd use GPs in this case, give each member the set of signal mass grid points ($m_X, m_S$ values) a corresponding label for the sum of the event weights ($\sum_i w_i$) produced for that mass tuple. Each of these $m_X, m_S$ values represents a random variable that we can model as having a normal distribution over the yields, where the means are often either zero or centered on the data, and the covariances are determined from a functional form which is called the *kernel*. The kernel is where the magic happens in GPs, and acts as the prior in a Bayesian inference context. The kernel parameters are subsequently fit to the training data.
 
 Speaking of inference, we're then interested in inferring the values of $\sum_i w_i$ for new, unseen pairs of $m_X, m_S$ values. By treating the joint distribution of the test and training points as a multivariate normal, with dimensions equal to the size of each set of points combined, we can condition this distribution on just the training data to get the distribution of the points in test set only. Since normal distributions are closed under conditioning, the resulting distribution will also be a multivariate normal; predictions for these points are then just samples from this distribution, which lends itself naturally to the notion of uncertainty, since we can include intervals of our choosing from that distribution along with the predicted samples.
 
 Applying all this leads to the set of predicted values from this conditional distribution shown in @fig-sh-gp, where the left-hand plot shows the interpolated yield predictions, and the right-hand plot shows the corresponding relative uncertainties. The exact functional form of the kernel was chosen somewhat arbitrarily; I took many combinations of common kernels, and applied k-fold validation (with 10 folds) across the training points, then chose the form that minimized the average absolute error divided by the uncertainty from the GP (c.f. the pull from @eq-pull2). We can see that the bottom-left hand corner is white, which represents the model predicting negative yields. This is not considered problematic, as this region is outside the realm of interpolation, which is the planned context in which this would be used. Moreover, one can notice in the right-hand plot the increase in relative uncertainty as we go to the bottom-left hand corner (to nearly 100% for some values) despite that being a region of high data density. This is attributed to the fact that there is a very rapid variation in the yields in this corner of parameter space, which can be seen in the left-hand plot with the concentration of blue lines.
 
 ![Left: Plot of the interpolated yields using a Gaussian process model, with the full post-fit kernel function described in the top of the plot. Right: The map of the corresponding uncertainties for the GP predictions.](images/sh/sh-pulls){#fig-pulls-sh}
+
+## A new flow-based observable
+
+In addition to the work above, I had one more idea for this analysis. The fit strategies proposed are both clearly effective, but they both have their shortcomings:
+
+- The 2-D fit is *simple* and *powerful*, but suffers from the *high number of bins* needed to compute the likelihood.
+- The pNN strategy is much more *efficient*, as a 1-D distribution is far more simple to compute from an inference perspective. However, we need to *assign signal masses to background*, which isn't a desirable thing to encode.
