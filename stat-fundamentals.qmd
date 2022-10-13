@@ -1,5 +1,7 @@
 ---
 title: "Probability and Statistics, in theory"
+execute:
+  echo: false
 format:
   html:
     code-fold: true
@@ -14,7 +16,7 @@ jupyter: python3
 
 It must be said that I have no desire to subject you, the reader, to the same philosophical torment that I have undergone in my pursuit of clarity of this topic, which I could not even claim to have reached. Moreover, given that this is an *experimental* physics thesis, it is exceedingly likely that you are a pragmatist, and wish to move swiftly on to the sections that may be useful to your life. Nonetheless, I’d like you to allow me the courtesy of proposing that there may in fact be something truly useful in revisiting these foundations, if only to reaffirm their non-utility.
 
-Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of Nested Sampling to inferring the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof. This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just
+Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of *nested sampling* @ns to inferring the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof (if you're planning to be indisposed for a time, you may find @bayesrant of interest as reading material, but do make sure to dilute it with things like @freq and @mayo). This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just
 
 $$
 P(A) = \frac{\mathrm{number~of~occurences~of~}A}{\mathrm{total~number~of~occurences}}~,
@@ -254,7 +256,7 @@ from jaxopt import OptaxSolver
 from optax import adam
 import matplotlib.pyplot as plt
 
-subplot_settings = dict(figsize=[7, 3], dpi=200, tight_layout=True)
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
 def pdf(x, mu):
     return jsc.stats.norm.pdf(x, mu, 0.2 * mu)
 

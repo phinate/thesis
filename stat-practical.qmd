@@ -1,5 +1,7 @@
 ---
 title: "Probability and Statistics, in practice"
+execute:
+  echo: false
 format:
   html:
     code-fold: true
@@ -65,6 +67,8 @@ It's a pretty simple but powerful idea: for each data point, define some *kernel
 There are many different choices of kernel function, each with their own tradeoffs, but the most common one in practice is indeed the standard normal distribution $\mathrm{Normal}(0, 1)$. If we specify the mean as the data, then there's one missing ingredient -- the *width* of these distributions. That number is called the **bandwidth**, and controls the width of every kernel at once. Interestingly, the choice of bandwidth affects the resulting shape in general much more than the choice of kernel -- see @fig-kde for some examples of the bandwidth's influence on the distribution.
 
 ```{python}
+#| label: fig-kde
+#| fig-cap: "KDE of some bi-modal data $x$, shown with different bandwidths."
 from scipy.stats import gaussian_kde
 
 grid = np.linspace(-3,6, 500)
@@ -186,29 +190,15 @@ which is simply a product over Poisson distribution for each bin within a histog
 ### Uncertainty modelling through nuisance parameters {#sec-hifa-nps}
 
 
- Now, we'll extend the model from @eq-hifabase in a similar way to when we added $\mu$ to manipulate the signal scale, but this time, it's in order to be able to model uncertainties. There are many different types of uncertainties, so we'll cover them all in-turn.
+ Now, we'll extend the model from @eq-hifabase in a similar way to when we added $\mu$ to manipulate the signal scale, but this time, it's in order to be able to model uncertainties.
 
- #### Systematic uncertainties {-}
-
- The origin of systematic uncertainties in simulation is this: we're uncertain as to the true values of the physics parameters that we should put into the simulator. Let's denote an example parameter with $\alpha$. To quantify how varying $\alpha$ changes the likelihood in the ideal world, we would just include those parameters of the simulator within our likelihood model. However, this would require the ability to simulate data on-the-fly at any given value of the physics parameter, and then propagate that change all the way through our analysis selection requirements. This is difficult from both a practical and a computational perspective (the simulators we use are expensive to evaluate), plus it would have to be done for all the parameters we may want to model in this way. So what do we do instead?
+ The origin of systematic uncertainties in simulation is this: we're uncertain as to the true values of the physics parameters that we should put into the simulator. Let's denote an example parameter with $\alpha$. To quantify how varying $\alpha$ changes the likelihood in the ideal world, we would just include those parameters of the simulator within our likelihood model. However, this would require the ability to simulate data on-the-fly at any given value of the physics parameter, and then propagate that change all the way through our analysis selection requirements. This is difficult from both a practical and a computational perspective (the simulators we use are expensive to evaluate), plus it would have to be done for all the parameters we may want to model in this way. So what do we do instead? Here I give one example.
 
 We may have a best prediction for $\alpha$ from studies carried out by e.g. a performance group in your collaboration that focuses on measuring $\alpha$, but we'll also have some notion of uncertainty on that value, perhaps in the form of a distribution on $\alpha$. An example procedure that we often do in this case is to just simulate our physics data at the best guess for that parameter $\alpha$ -- we'll refer to this as the **nominal** value $\alpha_{\mathrm{nom}}$ -- and then also simulate data for values at $\alpha_{\mathrm{nom}}+\sigma_{\alpha} = \alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{nom}}-\sigma_{\alpha} = \alpha_{\mathrm{down}}$, where $\sigma_{\alpha}$ is some notion of a standard deviation on $\alpha$ (e.g. calculated arithmetically on a  sample or fitted as part of a normal distribution).
 
-We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{down}}$, but it's pretty commonplace as a quick way to get a rough idea of the influence of $\alpha$ on the histograms. And that's the point -- we really only care about how varying $\alpha$ changes the resulting histogram for that process -- either $\mathbf{h}^{\mathrm{sig}}$ or $\mathbf{h}^{\mathrm{bkg}}$. We can then estimate the effect of $\alpha$ as a continuous change by some kind of *interpolation between the resulting histogram yields*. More on the methods of interpolation later.
+We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{down}}$, but it's pretty commonplace as a quick way to get a rough idea of the influence of $\alpha$ on the histograms. And that's the point -- we really only care about how varying $\alpha$ changes the resulting histogram for that process -- either $\mathbf{h}^{\mathrm{sig}}$ or $\mathbf{h}^{\mathrm{bkg}}$. We can then estimate the effect of $\alpha$ as a continuous change by some kind of *interpolation between the resulting histogram yields*. All of this results in the addition of as many extra factors as you like to @eq-hifabase, which can be broken up into *mulitplicative terms* and *additive terms*.
 
-
-
-
-
-
-
-
-
-
-#### Interpolation {-} {#sec-interp}
-
-
-
+### Constraint terms
 
 ## Hypothesis testing and asymptotic formulae in HEP {#sec-asymptotics}
 
@@ -280,8 +270,10 @@ where we have a null hypothesis of $\mu_0 = 0$, i.e. we test the background-only
 We can also use our hypothesis test as a mechanism to set an **exclusion limit** on the signal strength $\mu$, which is conventionally done through an upper limit, as defined in @sec-conf-intervals. We could equally well look at other ordering choices, e.g. a central interval for $\mu$, though the upper limit may have more implications from a physics perspective as a yardstick for the maximum plausible amount of the signal that could exist in nature.
 
 <!-- In the case of an upper limit, values of $\mu$ that are greater than $\mu_{\mathrm{upper}}$ consider our observed data as extreme, so we term these values as *excluded* at our chosen confidence level.  -->
+<!--
+If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_0$, then $\lambda(x,\mu_0)$ will be different than 1, indicating less compatibility between $H_0$ and $H_1$ since their likelihoods differ. -->
 
-If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_0$, then $\lambda(x,\mu_0)$ will be different than 1, indicating less compatibility between $H_0$ and $H_1$ since their likelihoods differ.
 
+## Useful formulae from the Asimov dataset
 
 ## The $\text{CL}_s$ quantity

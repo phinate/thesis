@@ -35,5 +35,6 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
-    # cite-method: biblatex
+    cite-method: biblatex
     keep-tex: true
+    biblatexoptions: citestyle=numeric-comp

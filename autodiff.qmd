@@ -1,6 +1,7 @@
 ---
+execute:
+  echo: false
 title: "Automatic differentiation"
-pdf-engine: pdflatex
 format:
   html:
     code-fold: true

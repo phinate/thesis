@@ -1,7 +1,13 @@
 ---
+execute:
+  echo: false
 format:
   html:
     code-fold: true
+    default-image-extension: svg
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
 ---
 
 # Physics Analysis as a Differentiable Program
@@ -41,7 +47,115 @@ But this is all talk... let's prove it!
 
 ### A simplified analysis example, both with and without uncertainty
 
+Let's define an analysis with a predicted number of signal and background events (e.g. from simulation), with some uncertainty on the background estimate. We'll abstract the analysis configuration into a single parameter $\phi$ like so:
 
+$$s = 15 + \phi $$
+$$b = 45 - 2 \phi $$
+$$\sigma_b = 0.5 + 0.1*\phi^2 $$
+
+Note that $s \propto \phi$ and $\propto -2\phi$, so increasing $\phi$ corresponds to increasing the signal/backround ratio. However, our uncertainty scales like $\phi^2$, so we're also going to compromise in our certainty of the background count as we do that. This kind of tradeoff between $s/b$ ratio and uncertainty is important for the discovery of a new signal, so it may be that can't get away with optimizing $s/b$ alone, as the $p$-value may be worse!
+
+Let's start by visualizing the model itself, which we do for three values of $\phi$ as an example in @fig-simple-model.
+
+```{python}
+#| label: fig-simple-model
+#| fig-cap: "Plot of the predicted counts from our model at three values of $\\phi$."
+import jax
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import optax
+from jaxopt import OptaxSolver
+import relaxed
+from functools import partial
+import matplotlib.lines as mlines
+from plothelp import autogrid
+
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
+
+
+# model definition
+def yields(phi, uncertainty=True):
+    s = 15 + phi
+    b = 45 - 2 * phi
+    db = (
+        0.5 + 0.1 * phi**2 if uncertainty else jnp.zeros_like(phi) + 0.001
+    )  # small enough to be negligible
+    return jnp.asarray([s]), jnp.asarray([b]), jnp.asarray([db])
+
+# just plotting code
+def yield_plot(dct):
+    ax, phi, i = list(dct.values())
+    s, b, db = yields(phi)
+    s, b, db = s.ravel(), b.ravel(), db.ravel()  # everything is [[x]] for pyhf
+    ax.set_ylim((0, 80))
+    b1 = ax.bar(0.5, b, facecolor="C1", label="b")
+    b2 = ax.bar(0.5, s, bottom=b, facecolor="C9", label="s")
+    b3 = ax.bar(
+        0.5, db, bottom=b - db / 2, facecolor="k", alpha=0.5, label=r"$\sigma_b$"
+    )
+    ax.set_title(r"$\phi = $" + f'{phi}')
+    ax.set_xlabel("x")
+    if i ==0 :
+        ax.set_ylabel("yield")
+    ax.set_xticks([])
+    if i==2:
+        ax.legend([b1, b2, b3], ["b", "s", r"$\sigma_b$"], frameon=False, bbox_to_anchor=(1.04, 0.5), loc="center left", borderaxespad=0)
+
+autogrid(
+    [0,5,10],
+    yield_plot,
+    subplot_kwargs={**subplot_settings, **dict(sharex=True, sharey=True)},
+);
+
+```
+
+Using this very simple histogram, we can form a statistical model as if we're using @sec-hifa principles, which would look something like
+
+$$
+p(x | \mu) = \mathrm{Poisson}(x | \mu x^{\mathrm{sig}}  + \gamma x^{\mathrm{bkg}})~,
+$$ {#eq-simplemodel}
+
+where $\gamma$ is a continuous description of $\sigma_b$ that we get from interpolating between the yields, just like in the HistFactory approach.
+
+Using this likelihood, we can calculate the expected discovery $p$-value by doing a hypothesis test using the observed data as the Asimov dataset for the nominal model $\mu, \gamma = 1$. We can plot this across all the values of $\phi$, and see what value gives us the lowest $p$-value (in practice, scanning over the space is computationally impossible for a given analysis configuration and a complicated model). We do this in @fig-simple-model-pval, where we include the result using a model both with and without uncertainty. Notice how much the curves differ; if we optimized the model without uncertainty (i.e. optimize for signal/background separation only), we'd end up at the *worst* solution! This is pathologically constructed of course, but it goes to show that these objectives don't talk to each other directly.
+
+```{python}
+# calculate p-values for a range of phi values
+phis = jnp.linspace(0, 10, 100)
+
+# with uncertainty
+pipe = partial(pipeline, return_yields=True, uncertainty=True)
+pvals, ys = jax.vmap(pipe)(phis)  # map over phi grid
+
+# without uncertainty
+pipe_no_uncertainty = partial(pipeline, uncertainty=False)
+pvals_no_uncertainty = jax.vmap(pipe_no_uncertainty)(phis)
+fig, ax = plt.subplots()
+axs = [ax]
+axs[0].plot(phis, pvals, label="with uncertainty", color="C2")
+axs[0].plot(phis, pvals_no_uncertainty, label="no uncertainty", color="C4")
+axs[0].set_ylabel("$p$-value")
+# plot vertical dotted line at minimum of p-values + s/b
+best_phi = phis[jnp.argmin(pvals)]
+axs[0].axvline(x=best_phi, linestyle="dotted", color="C2", label="optimal p-value")
+axs[0].axvline(
+    x=phis[jnp.argmin(pvals_no_uncertainty)],
+    linestyle="dotted",
+    color="C4",
+    label=r"optimal $s/b$",
+)
+axs[0].legend(loc="upper left", ncol=2)
+# s, b, db = ys
+# s, b, db = s.ravel(), b.ravel(), db.ravel()  # everything is [[x]] for pyhf
+# axs[1].fill_between(phis, s + b, b, color="C9", label="signal")
+# axs[1].fill_between(phis, b, color="C1", label="background")
+# axs[1].fill_between(phis, b - db, b + db, facecolor="k", alpha=0.2, label=r"$\sigma_b$")
+axs[0].set_xlabel("$\phi$")
+# axs[1].set_ylabel("yield")
+# axs[1].legend(loc="lower left")
+plt.suptitle("Discovery p-values, with and without uncertainty")
+plt.tight_layout()
+```
 
 This motivates a search for an objective function that can capture these sources of uncertainty.
 
