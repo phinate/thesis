@@ -207,9 +207,3 @@ $$
 where $\mathbf{\alpha}, \mathbf{\beta}$ are the scale and location parameter vectors respectively. These are *vectors* because there's one entry corresponding to each entry in $\mathbf{u}$, where the individual parameters $\alpha_i, \beta_i$ are coming from the $i$th output of a neural network (or more precisely, the $i$th pair of outputs, since we have two values $\alpha_i, \beta_i$ for every one input $u_i$), which has parameters itself $\phi$. Training the flow is then done as in @sec-trainflow, with the masking mechanism from earlier in this section being put in place.
 
 As a bonus, there's a simple way to condition this transform on side information $\mathbf{y}$ that provides context: we can just add $\mathbf{y}$ as an extra input to the network (or multiple inputs if there's more than one variable), and have it mix with every input, since each conditional distribution would also include $\mathbf{y}$. We then have a MAF that can perform **conditional density estimation**, i.e. estimate $p(x_1, \dots, x_N| \mathbf{y})$.
-
-
-## Neural networks parametrized by physics quantities
-
-- PNN (POIs)
-- Uncert-aware

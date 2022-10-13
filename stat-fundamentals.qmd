@@ -38,7 +38,9 @@ $$
 P(A \cap B) = P(A | B)P(B)~.
 $$ {#eq-conditionalprob}
 
-Depending on whose axioms you follow, this quantity may be either derived (as in [@kolmogorov]) or axiomatically stated (as in [@definetti]). A pictorial demonstration of this and other probability quantities can be found in @fig-probs.
+Depending on whose axioms you follow, this quantity may be either derived (as in [@kolmogorov-thing]) or axiomatically stated (as in [@definetti]).
+
+<!-- A pictorial demonstration of this and other probability quantities can be found in @fig-probs. -->
 
 
 
@@ -76,8 +78,25 @@ Now, doing things the Bayesian way doesn't mean we assign probabilites to facts 
 
 ### Probability density
 
-We now shift our discussion from the big $P$ to the small $p$, which is used to indicate the **probability density function** (pdf).
-ß
+We now shift our discussion from the big $P$ to the small $p$, which is used to indicate the **probability density function** (pdf), defined implicitly through
+
+$$
+P(a \leqslant X \leqslant b) = \int_{a}^{b} p(x') dx'~.
+$$
+
+We can also define  the **cumulative density function**, defined for random variable $X$ as $P(X \leq x)$. We can then write this in terms of the probability density function:
+
+$$
+P(X \leqslant x) = \int_{-\infty}^{x} p(x') dx'~.
+$$
+
+This gives us the relation
+
+$$
+p(x) = \frac{dP(X \leq x)}{dx}~.
+$$
+
+Pretty much all the same relations for big $P$ also hold for small $p$, which can be attributed to many reasons (it's a rabbit hole involving measure theory and similar concepts -- see @kolmogorov-thing for more, it's well-written!)
 
 #### i.i.d.
 A common expression you'll see about a set of random variables is that they're **i.i.d.**, which stands for *independently and identically distributed*. This refers to the situation when
@@ -199,8 +218,6 @@ The prefactor of 2 leads to some nice theoretical properties via Wilk's theorem,
 - It has a *Normal sampling distribution* in the asymptotic limit (so we can easily quote errors using a sample standard deviation)
 - In the finite data regime, the MLE is effective for many distributions we care about (e.g. Normal, Poisson)
 - Simple to understand and debug!
-
-For more on maximum likelihood methods, see [@mle].
 
 Other methods of point estimation could be as simple as quoting the *mode* (value with highest density), *median* (value that partitions the distribution into equal segments of probability), or *arithmetic mean* (sum of the data divided by the size of the data). These are more useful in the absence of a good probability model.
 
@@ -431,7 +448,7 @@ One more thing we can deduce from the above: our statements on how extreme the o
 
 So if our testing revolves around $H_0$, where does the alternative $H_1$ come into play? We can see the presence of $H_1$ in commonly used orderings, such as the *likelihood ratio* of the two hypothesis: $t(x, \mu) = p(x | H_0)/p(x|H_1)$. Furthermore, we can define a measure of *error* in relation to $H_1$: given $H_1$ is true, what's the probability of accepting $H_0$, even when the data come from $H_1$? This quantity is known as $\beta$ -- a *powerful* test would have low $\beta$, i.e. often rejects $H_0$ in favour of $H_1$ when it is true, leading to the quantity $1-\beta$ being known as the **power** of a test.
 
-<!-- ![Visualization of a hypothesis test](visualtest){#fig-visualtest} -->
+![Visualization of a hypothesis test](images/alphabeta){#fig-visualtest}
 
 When framing things in terms of error, we can see that the confidence level $\alpha$ also represents an error: *the probability of rejecting $H_0$ given that it's true.* Why? If the observed data was truly generated from $H_0$, it will fall in the extreme proportion of the data exactly $\alpha$ of the time, since that's the way we designated the proportions to begin with. This would lead to the erroneous statement of rejecting $H_0$ (though we know this stops short of a *decision* on $H_1$).  We can see a representation of both $\alpha$ and $\beta$ in [@fig-visualtest].
 
@@ -470,7 +487,7 @@ $$ \{\mu: t(x_0, \mu) < t_c \} = \mathrm{confidence~interval~at~C.L.~of~}1-\alph
 
 ### Bayesian procedures {#sec-bayes}
 
-I won't talk much about the Bayesian methodology here since I didn't explicitly use it in my PhD, but it's worth mentioning for contrast. Moreover, if you're a student within HEP reading this, I don't want to make it seem like there's only one way of doing things -- there are analyses that use these methods, and I think they should be explored more!
+I won't talk much about the Bayesian methodology here since I didn't explicitly use it in my PhD, but it's worth mentioning for contrast. Moreover, if you're a student within HEP reading this, I don't want to make it seem like there's only one way of doing things -- there are analyses that use these methods, and I think they should be explored more! See something like @sivia for a comprehensive introduction.
 
 As I've mentioned a few times, the Bayesian interpretation of probability admits distributions for facts; one can ask "how likely is supersymmetry?" or "what's the distribution for my signal strength?" These questions are often answered via use of Bayes theorem, which states that for probability distribution $p(\cdot)$, data ${x}$, and model parameters ${\mu} = \{ \mu_1, \mu_2, \dots, \mu_n\}$,
 $$
@@ -493,10 +510,10 @@ One thing to note: Bayes theorem does not use the Bayesian definition of probabi
 
 Armed with this equation, Bayesian procedures include:
 
-- **Posterior estimation** (e.g. through Markov chain monte carlo and it's variants [@MCMC])
+- **Posterior estimation** (e.g. through Markov chain monte carlo and it's variants)
     - Can then perform point estimation via *maximum a posteriori* (the mode of the posterior)
 - **Credible intervals**: in contrast to confidence intervals where the endpoints are random variables, $\mu$ itself is now the random variable, and the interval is constructed such that it contains the true value $\mu_T$ with some allocated probability.
-- **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here. See e.g. [@bayestest] for more information.
+- **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here.
 
 
 ## Metrics of probability
