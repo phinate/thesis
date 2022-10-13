@@ -120,6 +120,32 @@ where $\gamma$ is a continuous description of $\sigma_b$ that we get from interp
 Using this likelihood, we can calculate the expected discovery $p$-value by doing a hypothesis test using the observed data as the Asimov dataset for the nominal model $\mu, \gamma = 1$. We can plot this across all the values of $\phi$, and see what value gives us the lowest $p$-value (in practice, scanning over the space is computationally impossible for a given analysis configuration and a complicated model). We do this in @fig-simple-model-pval, where we include the result using a model both with and without uncertainty. Notice how much the curves differ; if we optimized the model without uncertainty (i.e. optimize for signal/background separation only), we'd end up at the *worst* solution! This is pathologically constructed of course, but it goes to show that these objectives don't talk to each other directly.
 
 ```{python}
+# our analysis pipeline, from phi to p-value
+def pipeline(phi, return_yields=False, uncertainty=True):
+
+    # grab the yields at the value of phi we want
+    y = yields(phi, uncertainty=uncertainty)
+
+    # use a dummy version of pyhf for simplicity + compatibility with jax
+    model = relaxed.dummy_pyhf.uncorrelated_background(*y)
+
+    # calculate expected discovery significance
+    nominal_pars = jnp.array([1.0, 1.0])  # sets gamma, mu =1 in gamma*b + mu*s
+    data = model.expected_data(nominal_pars)  # Asimov data
+
+    # do the hypothesis test (and fit model pars with gradient descent)
+    pvalue = relaxed.infer.hypotest(
+        0.0,  # value of mu for the alternative hypothesis (background-only)
+        data,
+        model,
+        test_stat="q0",  # discovery significance test
+        lr=1e-3,  # learning rate for the minimization loop
+        expected_pars=nominal_pars,  # optionally providing MLE pars in advance
+    )
+    if return_yields:
+        return pvalue, y
+    else:
+        return pvalue
 # calculate p-values for a range of phi values
 phis = jnp.linspace(0, 10, 100)
 
@@ -157,22 +183,20 @@ plt.suptitle("Discovery p-values, with and without uncertainty")
 plt.tight_layout()
 ```
 
-This motivates a search for an objective function that can capture these sources of uncertainty.
+If we optimize this analysis then, we want to arrive at the value of $\phi$ at the dotted green line (around ~4.3 or so), which gives us the benefit of rejecting the background hypothesis more strongly when the signal exists in the data. This is made possible if we use the $p$-value as our objective -- it clearly accounts for the uncertainty!
 
-### How do we optimize in an uncertainty-aware way?
+<!-- ### How do we optimize in an uncertainty-aware way?
 
 Attempts:
 - Asimov sig with assumptions on bkg uncert: [@asimovuncert]
 - Learning to pivot: [@pivot]
-- Directly incorporate NPs: [@uncert]
+- Directly incorporate NPs: [@uncert] -->
 
-But, don't we already have the goal we're looking for?
+ The reason for this makes sense: in these physics likelihoods, we're  careful to include all the details of the systematic uncertainties that we're able to quantify by constructing nuisance parameters that vary the shape and normalization of the model. From here, to calculate the $p$-value, we then construct the **profile likelihood ratio** as a test statistic, which accounts for these systematic uncertainties by fitting the value of the nuisance parameters depending on the hypothesis you test (see @sec-hyptests for more).
 
-We assess physics results by their **significance**, which is a quantity that's one-to-one with a $p$-value coming from a hypothesis test of just background events v.s. additional events from the existence of the signal process. This implies a likelihood model for both of these cases, typically covered in collider physics by the HistFactory setup for building likelihoods based on event counts. In these likelihoods, we're also careful to include all the details of the systematic uncertainties that we're able to quantify by constructing nuisance parameters that vary the shape and normalization of the model. From here, to calculate the $p$-value, we then construct the **profile likelihood ratio** as a test statistic, which accounts for these systematic uncertainties by fitting the value of the nuisance parameters depending on the hypothesis you test (link detail from section).
+All this makes the $p$-value seem like a good candidate for an objective function! So why haven't we used this already?
 
-This seems like a good candidate for an objective function! So why haven't we done this already?
-
-As made clear in (ref sec), if we want to perform optimization using gradient-based methods (footnote: don't have to use gradient based methods!), then we need the objective that we optimize to be *differentiable*. This is not immediately the case for the significance -- we would have to be able to differentiate through all stages of the full calculation, including model building, profiling, and even histograms, which are not generally known for their smoothness. But say we were able to decompose this complicated pipeline into bite-size chunks, each of which we can find a way to take gradients of. What becomes possible then? This begins our view of **physics analysis as a differentiable program**.
+As emphasized in @sec-gradient-descent, if we want to perform optimization using gradient-based methods,^[We don't have to use gradient based methods! They're just very well implemented and studied, as well as enabling things like this paradigm.] then we need the objective that we optimize to be *differentiable*. This is not immediately the case for the $p$-value -- we would have to be able to differentiate through all stages of the full calculation, including model building, profiling, and even histograms, which are not generally known for their smoothness. But say we were able to decompose this complicated pipeline into bite-size chunks, each of which we can find a way to take gradients of. What becomes possible then? This begins our view of **physics analysis as a differentiable program**.
 
 In the following sections, we'll take a collider physics analysis apart step-by-step, then see how we can employ tricks and substitutes to recover gradients for each piece. After that, we'll explore the ways that we can use the result to perform gradient-based optimization of different parts of the analysis with respect to physics goals. We'll then do it all at once by*optimizing a toy physics analysis from end-to-end*, exploring the common example of a summary statistic based on a neural network, accounting for uncertainties all the while.
 
