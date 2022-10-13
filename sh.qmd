@@ -38,18 +38,23 @@ The next thing to address is why it's worth it to look at $b\bar{b}\gamma\gamma$
 
 What exactly are we looking for then? As alluded to in @sec-asymptotics, searches for new particles involve calculating $p$-values (or $\text{CL}_s$ values), either trying to reject a background-only hypothesis for discovery, or to set an upper limit on the signal strength. We concentrate on the latter, with the steps ahead demonstrating the task of the analyzer to optimize the workflow for this purpose.
 
-## The ATLAS detector
-
 ## Simulated data
 
-Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where the $b$ quarks are associated to the $S$ and the photons are associated to the Higgs boson, was generated at a variety of possible combinations of $m_X$ and $m_S$. We can see the points chosen in @fig-mass-grid, where the upper-left quadrant is kinematically forbidden (there, $m_X < m_S + m_H$).
+Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where the $b$ quarks are associated to the $S$ and the photons are associated to the Higgs boson, was generated at a variety of possible combinations of $m_X$ and $m_S$. We can see the points chosen in @fig-mass-grid, where the upper-left quadrant is kinematically forbidden (there, $m_X < m_S + m_H$). Sensitivity to this process is forecast to be reasonable up to around $m_X \approx$ 900 GeV and $m_S \approx$ 300 GeV (by @sh-sens), which we conservatively extended to 1000 GeV and 500 GeV respectively. We began with just the grid on the bottom-left, and later extended this sparsely to the high mass region.
 
 ![A grid of the different points for which data originating from the signal process was simulated.](images/sh/mass-grid){#fig-mass-grid}
 
-This simulation was done using the event generator PYTHIA, where the $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$ process was simulated to leading order, i.e. only using the least complicated Feynman diagrams that can make this process happen.
+This simulation was done where the $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$ process was simulated to leading order, i.e. only using the least complicated Feynman diagrams that can make this process happen.
 
-The background can be organized into particular processes:
+The background can be organized into particular processes, all coming from the Standard Model. The main contributions that were simulated:
+- Generic events with two photons and two jets ($\gamma\gamma jj$)
+- Associated production of a Higgs boson and two top quarks ($tt(bb)H(\gamma \gamma)$)
+- Fusion of two gluons to a Higgs, where a gluon in the process fragments to a $bb$ pair of jets ($ggH$)
+- Associated production of a $Z$ boson that and a Higgs, where the $Z$ decays hadronically ($Z(qq)H(\gamma \gamma)$)
 
+Despite this separation, when event weights are produced, the $\gamma\gamma jj$ background completely dominates all the others (> 99% of the contribution to the total event weights).
+
+The different specific event generator tools used for all of the simulation were PYTHIA @pythia, SHERPA @sherpa, EvtGen @evtgen, and NNPDF @nnpdf. Exact details on the breakdown are omitted.
 
 
 ## Preprocessing and selection
@@ -159,7 +164,7 @@ Applying all this leads to the set of predicted values from this conditional dis
 
 In addition to the work above, I had one more idea for this analysis. It results from thinking about the fact that we've trained a continuous likelihood function $p(m_{bb\gamma\gamma}, m_{bb} | m_X, m_S)$, but are in a sense throwing some of this information away by discretizing the result. The idea presented here tries to make use of this information from a practical standpoint, and not necessarily an optimality one.
 
-DThe fit strategies proposed are both clearly effective, but they both have their shortcomings:
+The fit strategies proposed are both clearly effective, but they both have their shortcomings:
 
 - The 2-D fit is *simple* and *powerful*, but suffers from the *high number of bins* needed to compute the likelihood, leading to things like ad-hoc region selection to reduce the bins we include.
 - The pNN strategy is much more *efficient*, as a 1-D distribution is far more simple to compute from an inference perspective. However, we need to *assign signal masses to background*, which don't exist and so could affect our performance.
@@ -219,8 +224,8 @@ Only a small amount of prototyping of $s_{\text{flow}}$ was carried out, which I
 
 ![Left: Background histogram including event weights. Middle: Learned flow distribution. Right: Background histogram without event weights.](images/sh/flowvsbkg.png){#fig-flow-vs-bkg}
 
-Satisfied that the shape is good, we move swiftly on to view some of the example distributions given by @eq-sflow using this flow and one of the results from the many training configuration tried in @sec-sh-flows. We find these distributions in @fig-sflow-shapes, where we plot the value of $s_{\text{flow}}$ for an equal number of points from both background and signal distributions, using their values of $m_{bb\gamma\gamma}, m_{bb}$ as input. Note that the points shown are all unseen points from the perspective of the signal flow, and the background data is also from the test set partition from the training, so none of the data has been seen by either flow.
+Satisfied that the shape is good, we move swiftly on to view some of the example distributions given by @eq-sflow using this flow and one of the results from the many training configuration tried in @sec-sh-flows. We find these distributions in @fig-sflow-shapes, where we plot the value of $s_{\text{flow}}$ for an equal number of points from both background and signal distributions (244637 -- the length of the background test set), using their values of $m_{bb\gamma\gamma}, m_{bb}$ as input. Note that the points shown are all unseen points from the perspective of the signal flow, and the background data is also from the test set partition from the training, so none of the data has been seen by either flow. Despite this, the observable shows some great promise for discriminating between signal and background, with the distributions being largely separated. The cases that perform slightly worse are those where the background Monte Carlo distribution peaks, e.g. the point $m_X$ = 300 GeV, $m_S$ = 170 GeV, but even then the performance is still highly discriminatory.
 
 ![Plots of the distribution of $s_{\text{flow}}$ for a variety of test set signal points, where an even number of points are provided of either signal or background.](images/sh/conditioned_sflow_all){#fig-sflow-shapes}
 
-We may also be curious what happens when we condition on the wrong point, i.e. when the data comes from a different $m_X$ and $m_S$; such a case can be seen in
+<!-- We may also be curious what happens when we condition on the wrong point, i.e. when the data comes from a different $m_X$ and $m_S$; such a case can be seen in -->
