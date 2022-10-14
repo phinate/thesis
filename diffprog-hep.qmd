@@ -250,9 +250,11 @@ ax.set_ylabel("count")
 ax.legend();
 ```
 
-A quintessential operation for data filtering in HEP is the simple threshold, also called a **cut**: we keep all data above (or below) a certain value of the quantity we're concerned with. To increase the significance (e.g. as defined by @eq-asimov-significance), we can try to remove data such that we increase the overall ratio of signal to background. In @fig-exp-bkg, it looks like there's not much signal for low values of $x$, which motivates us to put a cut at say $x$=1. We can see the result of applying this cut in @fig-compare-cut, where we've increased the Asimov significance compared to using no cut at all.
+A quintessential operation for data filtering in HEP is the simple threshold, also called a **cut**: we keep all data above (or below) a certain value of the quantity we're concerned with. To increase the significance (e.g. as defined by @eq-asimov-significance), we can try to remove data such that we increase the overall ratio of signal to background. In @fig-exp-bkg, it looks like there's not much signal for low values of $x$, which motivates us to put a cut at say $x=1$. We can see the result of applying this cut in @fig-compare-cut, where we've increased the Asimov significance compared to using no cut at all.
 
 ```{python}
+#| label: fig-compare-cut
+#| fig-cap: "Comparing the significance resulting from applying a cut to no cut at all."
 def significance_after_cut(cut):
     # treat analysis as a one-bin counting experiment
     s = len(sig[sig > cut]) + 1e-1
@@ -272,7 +274,7 @@ def make_cut_plot(cut, ax):
     ax.text(
         0.7,
         0.2,
-        f"significance at cut = {significance:.2f}",
+        f"significance = {significance:.2f}",
         ha="center",
         va="center",
         transform=plt.gca().transAxes,
@@ -288,10 +290,44 @@ ax.hist(
 )
 ax.set_xlabel("x")
 ax.set_ylabel("count")
+significance = significance_after_cut(0)
+ax.text(
+    0.7,
+    0.2,
+    f"significance = {significance:.2f}",
+    ha="center",
+    va="center",
+    transform=plt.gca().transAxes,
+)
 ax.legend()
 make_cut_plot(cut, axs[1])
-
 ```
+
+We had a nice go at a guess, but how do we pick the *best* cut? For this simple problem, it suffices to scan over the different significances we'll get by cutting at each value of $x$, then just use the value with the highest significance. We do this in @fig-cut-scan, where the optimal cut seems to be around $x=1.54$.
+
+```{python}
+#| label: fig-cut-scan
+#| fig-cap: "A scan over all cut values to find the best resulting Asimov significance."
+# plot significance for all cut values
+cut_values = jnp.linspace(0, 8, 100)
+significances_hard = jnp.array([significance_after_cut(cut) for cut in cut_values])
+
+fig, ax = plt.subplots(**subplot_settings)
+ax.plot(cut_values, significances_hard, label="significance")
+optimal_cut = cut_values[jnp.argmax(significances_hard)]
+ax.axvline(x=optimal_cut, color="k", linestyle="--", alpha=0.5, label="optimal cut")
+ax.text(
+    0.7,
+    0.5,
+    f"optimal cut = {optimal_cut:.2f}",
+    ha="center",
+    va="center",
+    transform=plt.gca().transAxes,
+)
+ax.set_xlabel("x")
+ax.set_ylabel("Asimov significance")
+```
+
 
 - Cuts are step functions from logical less than or more than statements
 - Basically applies weights to the data -- 0 on one side of the threshold, and 1 on the other
