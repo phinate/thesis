@@ -345,7 +345,7 @@ cut_val = 5  # translates on the x-axis
 fig, ax = plt.subplots(**subplot_settings)
 ax.plot(cut_values, cut_values > cut_val, label="hard cut")
 ax.plot(
-    cut_values, relaxed.cut(cut_values, cut_val, slope=1), label="sigmoid", color="C1"
+    cut_values, relaxed.cut(cut_values, cut_val, slope=1), label="sigmoid (slope=1)", color="C1"
 )
 ax.plot(
     cut_values,
@@ -394,12 +394,12 @@ soft = partial(significance_after_soft_cut, slope=slope)
 significances = jax.vmap(soft, in_axes=(0))(cut_values)
 ax.plot(cut_values, significances_hard, label="hard cut")
 ax.plot(cut_values, significances, label="sigmoid (slope=2.7)")
-ax.set_xlabel("x")
+ax.set_xlabel("cut value")
 ax.set_ylabel("$Z_A$")
 ax.legend();
 ```
 
-Now that we've done the groundwork, we can do the optimization and see if we converge to the correct result! Using gradient descent and the Adam optimizer with a learning rate of 1e-3, we find the cut shown in @fig-optimized-cut. The significance (calculated with the *hard* cut) is extremely close to the best possible value, so I'd call this a success!
+Now that we've done the groundwork, we can do the optimization and see if we converge to the correct result! Using gradient descent and the Adam optimizer with a learning rate of 1e-3, we find the cut shown in @fig-optimized-cut (we optimize $1/Z_A$ since we're doing minimization). The significance (calculated with the *hard* cut) is extremely close to the best possible value, so I'd call this a success!
 
 
 ```{python}
@@ -500,4 +500,34 @@ In the case of an observable that has well-defined gradients with respect to $\p
 
 ### Binned density estimation (histograms)
 
-Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. To demonstrate this, we can think about happens to a histogram when we shift the underlying distribution by a constant factor.
+Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. Similarly to the cut example with the sigmoid, we're assigning a number (there the weight, and here a count in a bin) in a discrete way to the data -- to make this differentiable, we need to come up with a smooth version of this.
+
+The solution that we developed to this involves a **kernel density estimate** (KDE). We discussed this in @sec-kde, but just to recap: a KDE is essentially the average of a set of normal distributions centered at each data point, with their width controlled by a global parameter called the **bandwidth**. There's a neat way to take this and cast it into a bin-like form (i.e. defined over intervals): We can calculate the "count" in an interval by taking the area under the KDE between the interval endpoints. We can do this using the cumulative density function (cdf), as $P(a \leqslant X \leqslant b) = P(X \leqslant b) - P(X \leqslant a)$. Since the KDE is the mean over some normal distributions, its cdf is also just the mean of the cdfs for each normal distribution. Moreover, to turn this into a histogram-like object, we can multiply the result by the total number of events, which just changes the mean into a sum. We put this all together in @fig-bkde-code, where a pseudocoded implementation of a **binned KDE** (bKDE) can be found.
+
+```{python}
+#| label: fig-bkde-code
+#| echo: true
+#| eval: false
+#| fig-cap: "Implementation of a bKDE using Pythonic pseudocode."
+def bKDE(data: Array, bins: Array, bandwidth: float) -> Array:
+    edge_hi = bins[1:]  # ending bin edges ||<-
+    edge_lo = bins[:-1]  # starting bin edges ->||
+    # get cumulative counts (area under kde) for each set of bin edges
+    cdf_hi = norm.cdf(edge_hi.reshape(-1, 1), loc=data, scale=bandwidth)
+    cdf_lo = norm.cdf(edge_lo.reshape(-1, 1), loc=data, scale=bandwidth)
+    return (cdf_hi - cdf_lo).sum(axis=1) # sum cdfs over each kernel
+```
+
+We know what happens to a KDE when we change the bandwidth, but how does that impact the bKDE? We can quantify this relative to the bin width by examining the shape of the bKDE relative to a "hard" histogram, which is shown in @fig-bkde-bandwidth. For low bandwidths, we recover something almost exactly resembling a regular histogram. In fact, in the limit of zero bandwidth, we will *exactly* get a histogram! The reason is that zero bandwidth would turn each normal distribution into an infinite spike at each data point, which, when integrated over to get the counts, would have a contribution of 1 if the event lies in the bin, and 0 otherwise.
+
+![Illustration of the bias/smoothness tradeoff when tuning the bandwidth of a bKDE, defined over 200 samples from a bi-modal Gaussian mixture. All distributions are normalized to unit area. The individual kernels that make up the KDE are scaled down for visibility.](images/relaxed_hist){#fig-bkde-bandwidth}
+
+#### Bandwidth vs number of data points {-}
+
+
+
+### Differentiable likelihood construction
+
+Now, I must confess, I have told you somewhat of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
+
+### Taking the gradient of the profile likelihood ratio

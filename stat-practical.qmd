@@ -58,7 +58,7 @@ I [asked this question on Twitter](https://twitter.com/phi_nate/status/125112404
 
 There was also more in that thread on ease parallel computation, the fact that histograms are good at respecting physical boundaries, and some birds-eye view perspectives on how things are (and could be) done in the field. Many thanks to Kyle Cranmer, Jim Pivarski, Stan Seibert, Nick Smith, and Pablo De Castro for contributing to that discussion -- I encourage you to check out the thread!
 
-### Kernel density estimation
+### Kernel density estimation {@sec-kde}
 
 If you wanted a smooth distribution instead of a discrete one, the *kernel density estimate* (KDE) has you covered.
 
