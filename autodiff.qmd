@@ -169,16 +169,9 @@ We'll discuss both of these in the following sections.
 
 ## Building the computation graph
 
-There are two main existing strategies to represent a series of code computations as a graph. One involves letting the user build up the graph structure manually via library-provided primitives -- called **define-and-run**; the resulting construct is known as a *static graph*, and is the approach taken by libraries like [Theano]() and [TensorFlow]() (when run without eager execution). This has the unfortunate side effect of making code much more difficult to read and write, since you have to use symbolic proxies for operations like control flow and looping (e.g. `tf.while_loop` instead of Python's `while`) in order to instantiate that operation in the graph.
+There are two main existing strategies to represent a series of code computations as a graph. One involves letting the user build up the graph structure manually via library-provided primitives -- called **define-and-run**; the resulting construct is known as a *static graph*, and is the approach taken by libraries like [Theano](https://github.com/Theano/Theano) and [TensorFlow](https://github.com/google/tensorflow) (when run without eager execution). This has the unfortunate side effect of making code much more difficult to read and write, since you have to use symbolic proxies for operations like control flow and looping (e.g. `tf.while_loop` instead of Python's `while`) in order to instantiate that operation in the graph.
 
-The other approach, known as **define-by-run**, builds up a *dynamic graph* structure during a program's execution. How does this work? The program is *traced* at runtime, meaning that the autodiff framework is watching which operations occur when a function is run in order to build up the computation graph for that function. When done this way, incorporating loops and conditional structure within the graph is no longer needed: at runtime, loops are unrolled into sequences, and the branching induced by conditional logic will collapse to one branch when the program is actually ran. These properties make define-by-run the more popular approach to autodiff, and is the approach taken by libraries such as [JAX](), [PyTorch](), and [Tensorflow (eager execution mode)]().
-
-### What happens at runtime?
-
-- Evaluating the gradients requires tracing the program, i.e. evaluating the function
-- Runtime cost for the gradient calculation is of the order of the program. Why? For each primitive in the program, there's a corresponding step in the gradient computation (e.g. wherever you see a $\log{x}$ in your program, there'll be a $1/x$ somewhere in the JVP/VJP call).
-
-## Checkpointing
+The other approach, known as **define-by-run**, builds up a *dynamic graph* structure during a program's execution. How does this work? The program is *traced* at runtime, meaning that the autodiff framework is watching which operations occur when a function is run in order to build up the computation graph for that function. When done this way, incorporating loops and conditional structure within the graph is no longer needed: at runtime, loops are unrolled into sequences, and the branching induced by conditional logic will collapse to one branch when the program is actually ran. These properties make define-by-run the more popular approach to autodiff, and is the approach taken by libraries such as [JAX](https://github.com/google/jax), [PyTorch](https://github.com/pytorch/pytorch), and [Tensorflow (eager execution mode)](https://ai.googleblog.com/2017/10/eager-execution-imperative-define-by.html). It's worth noting that since evaluating the gradients requires tracing the program, i.e. evaluating the function, the runtime cost for the gradient calculation is usually of the same order as the program itself. Why? For each primitive in the program, there's a corresponding step in the gradient computation (e.g. wherever you see a $\log{x}$ in your program, there'll be a $1/x$ somewhere in the JVP/VJP call), so the computations are almost totally identical in compute^[This may not hold when you're doing fancy things like checkpointing, which I haven't covered here.].
 
 ## Differentiating fixed points
 
@@ -205,21 +198,38 @@ In practice, we'd take many steps to reach this minimum, which corresponds to ma
 To get around this computational issue, we can employ the use of the **implicit function theorem**. The full details of the theorem are beyond the scope of this application, but it guarantees some things that we'll state here. To be consistent with later sections, we will now switch symbols from $x$ to $\theta$ (which will denote parameters we're optimizing), and include $\varphi$ as parameters that *implicitly* define part of $f$ (e.g. that define the objective function used in optimization).Now, for a different function $g(\theta, \varphi)$, where there exists some solution $g(\theta_0, \varphi_0) = 0$, then the following holds:
 
 A *solution mapping function* exists in the form of $\theta^*(\varphi)$ such that
+
 - $\theta^*(\varphi_0) = \theta_0$
-- $g(\theta^*(\varphi), \varphi) =0~\forall \varphi $
+- $g(\theta^*(\varphi), \varphi) =0~~~\forall \varphi$
 - $\theta^*$ is *differentiable* with respect to $\varphi$!
 
 To put this into words: as long as there exists *some* solution that makes $g(\theta, \varphi) = 0$, we get a mapping for the *general solution* as a function of $\varphi$, which is differentiable. This means that as long as we find a way to calculate that gradient, we can directly access the gradients of the solution $\theta_0$ that we found during optimization with respect to the particular $\varphi_0$ that we used, all thanks to the general function $\theta^*$.
 
-Now, notice that we wrote this holding for $g(\theta, \varphi) = 0$, which we don't have quite yet. But we can define this for our update state $f$ by simply letting $g(\theta, \varphi) = f(\theta, \varphi) - \theta$. Now, when we arrive at our solution $\theta_0$ as the fixed point of $f$ for some $\varphi_0$, we'll get $g(\theta_0, \varphi_0) = \theta_0 - \theta_0 = 0$, and we get all those nice properties! We just need to explicitly calculate the gradient of $\theta^*$ now, which we can do by differentiating both sides of $g(\theta^*(\varphi), \varphi) =0$:
+Now, notice that we wrote this holding for $g(\theta, \varphi) = 0$, which we don't have quite yet. But we can define this for our update state $f$ by simply letting $g(\theta, \varphi) = f(\theta, \varphi) - \theta$. Now, when we arrive at our solution $\theta_0$ as the fixed point of $f$ for some $\varphi_0$, we'll get $g(\theta_0, \varphi_0) = \theta_0 - \theta_0 = 0$, and in turn have access to all those nice properties! We just need to explicitly calculate the gradient of $\theta^*$ now, which we can do by differentiating both sides of $g(\theta^*(\varphi), \varphi) =0$:
 
 $$
-\frac{\partial g(\theta^*(\varphi), \varphi)}{\partial\varphi} = \frac{\partial g}{\partial \theta^*}\frac{\partial \theta^*}{\partial \varphi} + \frac{\partial g}{\partial\varphi}
+\frac{\partial g(\theta^*(\varphi), \varphi)}{\partial\varphi} = \frac{\partial g}{\partial \theta^*}\frac{\partial \theta^*}{\partial \varphi} + \frac{\partial g}{\partial\varphi}~.
 $$
 
+Then in practice, we'll have $\theta_0$ as our optimization solution and $\varphi_0$ as our implicit parameters, which we can plug in, and then rearrange for $\partial\hat{\theta}/\partial\varphi$:
+
+
+
 $$
-    \frac{\partial\hat{\theta}}{\partial\varphi} = -\left[\frac{\partial g}{\partial \theta}\right]^{-1}  \frac{\partial g}{\partial \phi} = \left[I - \frac{\partial f}{\partial \theta} \right]^{-1} \frac{\partial f}{\partial \varphi}
+    \frac{\partial\theta^*}{\partial\varphi} = \frac{\partial\theta_0}{\partial\varphi_0}= -\left[\frac{\partial g}{\partial \theta_0}\right]^{-1}  \frac{\partial g}{\partial \varphi_0} ~.
 $$
+
+Finally, we can substitute in our definition of $g$ in terms of $f$ to get
+
+$$
+\frac{\partial\theta_0}{\partial\varphi_0}= \left[I - \frac{\partial f}{\partial \theta_0} \right]^{-1} \frac{\partial f}{\partial \varphi_0}~.
+$${#eq-fixed-point}
+
+We've constructed an expression for the gradient of the fixed point $\theta_0$ of an update rule $f$, and with respect to the parameters $\varphi$ that define the objective used in the optimization! This is a fantastic result, as it means we can just use this expression instead of unrolling the entire optimization loop itself, saving us lots of memory and compute in the process.
+
+In practice, we can implement this through moving the goalposts for what we call a primitive: for optimization loops like this, we can define that as a primitive of sorts, and then give it the known gradient as defined by @eq-fixed-point. This is the kind of approach taken by `jaxopt` [@jaxopt], which is a library that's used a few times in this thesis.
+
+To read more about this construction, and some of the finer details of the implementation on the autodiff side (note how we skipped over the conversation about the fact that we have VJPs and not gradients directly), I would thoroughly recommend [@implicit], which I based this section upon.
 
 ## Other approaches to taking gradients of programs
 
@@ -237,7 +247,7 @@ We can see how well this performs on an example problem in [@fig-finite-1] for d
 #| fig-cap: "Finite difference gradient calculations for the function `y=sin(x)`, varying the distance between the evaluated points."
 import numpy as np
 import matplotlib.pyplot as plt
-
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
 eval_grid = np.linspace(0,10, 30)
 
 def finite_diff(func, x, delta_x = 1e-4):
