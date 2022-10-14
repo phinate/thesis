@@ -203,9 +203,6 @@ The goal of this section is to study components within a HEP analysis chain that
 
 First, we're going to jump right in with an example to illustrate how we can take advantage of gradient descent to optimize a typical problem faced in collider physics analyses: choosing the best selection criteria.
 
-<!-- - something about surrogates vs gradient tricks (e.g. approximations or using theoretical results)
-
-- something about the fact that surrogates can be used *just* for optimization if the hard version of the op isn't desirable, e.g. assuming the histogram bins follow a poisson distribution (not true if you're approximating the underlying binning process) -->
 
 ### A simple example: cut optimization with gradient descent
 
@@ -338,7 +335,8 @@ Practically, we introduce slope and intercept terms that control the sigmoid's $
 
 ```{python}
 #| label: fig-sigmoid
-#| fig-cap: "Comparing the sigmoid to a regular, "hard" cut for different values of the sigmoid slope."
+#| fig-cap: "Comparing the sigmoid to a regular hard cut for different values of the sigmoid slope."
+
 # plot significance for all cut values
 cut_val = 5  # translates on the x-axis
 fig, ax = plt.subplots(**subplot_settings)
@@ -370,6 +368,7 @@ Now that we have a differentiable cut, we can see what the significance scan fro
 ```{python}
 #| label: fig-cut-scan-2
 #| fig-cap: "A scan over all cut values to find the best resulting Asimov significance -- both for the regular cut, and for the sigmoid."
+
 # plot significance for all cut values
 def significance_after_soft_cut(cut, slope):
     s_weights = (
@@ -397,7 +396,7 @@ ax.set_ylabel("$Z_A$")
 ax.legend();
 ```
 
-Now that we've done the groundwork, we can do the optimization and see if we converge to the correct result! Using gradient descent and the Adam optimizer with a learning rate of 1e-3, we find the cut shown in @fig-optimized-cut.
+Now that we've done the groundwork, we can do the optimization and see if we converge to the correct result! Using gradient descent and the Adam optimizer with a learning rate of 1e-3, we find the cut shown in @fig-optimized-cut. The significance (calculated with the *hard* cut) is extremely close to the best possible value, so I'd call this a success!
 
 
 ```{python}
@@ -460,7 +459,7 @@ ax.legend();
 
 ### Examining a typical analysis
 
-Given a pre-filtered dataset, a commonly used analysis pipeline in HEP involves the
+Now that we've looked at an example of the kind of thing we may want to do, we can zoom out and look at the big picture. Given a pre-filtered dataset, a commonly used analysis pipeline in HEP involves the
 following stages:
 
 
@@ -489,10 +488,10 @@ $$ {#eq-neos}
 Is this going to be differentiable? To calculate $\partial \text{CL}_s / \partial \varphi$, we'll have to split this up by the chain rule into the different components:
 
 $$
-
+d
 $${#eq-analysis-chain-rule}
 
-In the case of an observable defined gradients with respect to $\phi$ (e.g. a neural network), the
+In the case of an observable that has well-defined gradients with respect to $\phi$ (e.g. a neural network), the last term is possible to calculate through automatic differentiation. But none of the other terms are differentiable by default! We're going to have to figure out some way to either *relax* (make differentiable) these operations, or use tricks to make the gradient easier to calculate. This is explored in the following sections, starting with the histogram.
 
 
 
