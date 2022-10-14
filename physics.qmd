@@ -67,7 +67,7 @@ $$
 where $m$ is the object **rest mass**, and $\tau$ is the **proper time**, defined by applying the relativistic factor $\gamma$ to time as
 
 $$
-t = \gamma\tau;~~~ \gamma = \frac{1}{\sqrt{1-\v^2}}
+t = \gamma\tau;~~~ \gamma = \frac{1}{\sqrt{1-v^2}}
 $$
 
 for magnitude of the object's three-velocity $v = |\mathbf{v}|$. This leads to an equivalent notation of

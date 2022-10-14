@@ -206,7 +206,7 @@ First, we're going to jump right in with an example to illustrate how we can tak
 
 ### A simple example: cut optimization with gradient descent
 
-We begin with a toy signal and background distribution over some variable $x$, where the signal lies as a peak on top of an exponentially decaying background, as shown in @fig-exp-bkg
+We begin with a toy signal and background distribution over some variable $x$, where the signal lies as a peak on top of an exponentially decaying background, as shown in @fig-exp-bkg.
 
 ```{python}
 #| label: fig-exp-bkg
@@ -482,51 +482,19 @@ We can express this workflow as a direct function of the input dataset
 $\mathcal{D}$ and observable parameters $\phi$:
 
 $$
-    \mathrm{CL_s} = f(\mathcal{D},\phi) = (f_{\mathrm{sensitivity}} \circ f_{\mathrm{test\,stat}} \circ f_{\mathrm{likelihood}}  \circ f_{\mathrm{histogram}}  \circ f_{\mathrm{observable}})(\mathcal{D},\phi).
+    \mathrm{CL}_s = f(\mathcal{D},\phi) = (f_{\mathrm{sensitivity}} \circ f_{\mathrm{test\,stat}} \circ f_{\mathrm{likelihood}}  \circ f_{\mathrm{histogram}}  \circ f_{\mathrm{observable}})(\mathcal{D},\phi).
 $$ {#eq-neos}
 
-Is this going to be differentiable? To calculate $\partial \text{CL}_s / \partial \varphi$, we'll have to split this up by the chain rule into the different components:
+Is this going to be differentiable? To calculate $\partial \text{CL}_s / \partial \varphi$, we'll have to split this up by the chain rule into the different components, which can be written verbosely as
 
 $$
-d
+\frac{\partial\,\mathrm{CL}_s}{\partial \varphi} = \frac{\partial f_{\mathrm{sensitivity}}}{\partial f_{\mathrm{test\,stat}}}\frac{\partial f_{\mathrm{test\,stat}}}{\partial f_{ \mathrm{likelihood}}} \frac{\partial f_{\mathrm{likelihood}}}{\partial f_{\mathrm{histogram}}}   \frac{\partial f_{\mathrm{histogram}}}{\partial f_{\mathrm{observable}}}  \frac{\partial f_{\mathrm{observable}}}{\partial \varphi}~.
 $${#eq-analysis-chain-rule}
 
-In the case of an observable that has well-defined gradients with respect to $\phi$ (e.g. a neural network), the last term is possible to calculate through automatic differentiation. But none of the other terms are differentiable by default! We're going to have to figure out some way to either *relax* (make differentiable) these operations, or use tricks to make the gradient easier to calculate. This is explored in the following sections, starting with the histogram.
+In the case of an observable that has well-defined gradients with respect to $\phi$ (e.g. a neural network), the last term in @eq-analysis-chain-rule is possible to calculate through automatic differentiation. But none of the other terms are differentiable by default! We're going to have to figure out some way to either *relax* (make differentiable) these operations, or use tricks to make the gradient easier to calculate. This is explored in the following sections, starting with the histogram.
 
 
 
 ### Binned density estimation (histograms)
 
-Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. To demonstrate this, let's examine what happens to a histogram when we shift the underlying distribution by a constant factor.
-
-
-
-
-
-
-
-We address
-this inherent non-differentiability through implementing a
-differentiable surrogate: a histogram based on a *kernel density
-estimate* (KDE).
-
-A KDE is a "non-parametric\" density estimate based on defining a kernel
-function $K$ centred on each data point. Then, the density at an
-evaluation point $x$ is the average of the contributions of each kernel
-function at that point.
-
-a with the full density given as $p(t) = 1/n\sum_i K(t,t_i)$. Normally,
-a popular kernel function choice is the standard normal distribution,
-which comes with a parameter called the **bandwidth** that affects the
-smoothness of the resulting density estimate.
-
-Coming back to gradients: in our case, the data $t_i$ we construct the
-density estimate over are themselves functions of the summary statistic
-parameters, i.e. $t_i = f(x_i;\phi)$. The resulting density estimate
-$p(t|\phi)$ will then be differentiable as long as the kernel $K$ is
-differentiable with respect to $t_i$, and by extension with respect to
-$\phi$. To extend this differentiability in a binned fashion, we can
-accumulate the probability mass of the KDE within the bin edges of the
-original histogram -- equivalent to evaluations of the Gaussian
-cumulative density function -- to convert $p(t|\phi)$ to a **binned KDE
-(bKDE)**, i.e. a set of discrete per-bin probabilities $p_i(\phi)$.
+Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. To demonstrate this, we can think about happens to a histogram when we shift the underlying distribution by a constant factor.

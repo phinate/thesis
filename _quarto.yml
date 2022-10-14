@@ -29,9 +29,9 @@ book:
 
 
 bibliography: references.bib
-pdf-engine: xelatex
-cite-method: biblatex
-biblatexoptions: citestyle=numeric
+pdf-engine: pdflatex
+# cite-method: biblatex
+# biblatexoptions: citestyle=numeric
 format:
   html:
     theme: cosmo
