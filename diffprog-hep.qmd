@@ -160,7 +160,7 @@ pvals, ys = jax.vmap(pipe)(phis)  # map over phi grid
 # without uncertainty
 pipe_no_uncertainty = partial(pipeline, uncertainty=False)
 pvals_no_uncertainty = jax.vmap(pipe_no_uncertainty)(phis)
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(**subplot_settings)
 axs = [ax]
 axs[0].plot(phis, pvals, label="with uncertainty", color="C2")
 axs[0].plot(phis, pvals_no_uncertainty, label="no uncertainty", color="C4")
@@ -252,6 +252,7 @@ A quintessential operation for data filtering in HEP is the simple threshold, al
 ```{python}
 #| label: fig-compare-cut
 #| fig-cap: "Comparing the significance resulting from applying a cut to no cut at all."
+
 def significance_after_cut(cut):
     # treat analysis as a one-bin counting experiment
     s = len(sig[sig > cut]) + 1e-1
@@ -274,7 +275,7 @@ def make_cut_plot(cut, ax):
         f"significance = {significance:.2f}",
         ha="center",
         va="center",
-        transform=plt.gca().transAxes,
+        transform=ax.transAxes,
     )
     ax.set_xlabel("x")
     ax.legend()
@@ -294,18 +295,18 @@ ax.text(
     f"significance = {significance:.2f}",
     ha="center",
     va="center",
-    transform=plt.gca().transAxes,
+    transform=ax.transAxes,
 )
 ax.legend()
 make_cut_plot(cut, axs[1])
 ```
 
 We had a nice go at a guess, but how do we pick the *best* cut? For this simple problem, it suffices to scan over the different significances we'll get by cutting at each value of $x$, then just use the value with the highest significance. We do this in @fig-cut-scan, where the optimal cut seems to be around $x=1.54$.
-
+<!--
 ```{python}
 #| label: fig-cut-scan
 #| fig-cap: "A scan over all cut values to find the best resulting Asimov significance."
-# plot significance for all cut values
+
 cut_values = jnp.linspace(0, 8, 100)
 significances_hard = jnp.array([significance_after_cut(cut) for cut in cut_values])
 
@@ -322,9 +323,9 @@ ax.text(
     transform=plt.gca().transAxes,
 )
 ax.set_xlabel("x")
-ax.set_ylabel("$Z_A$")
+ax.set_ylabel(r"$Z_A$")
 ```
-
+-->
 In reality, this could be an expensive procedure to do for a wide range of $x$ and for many different cut variables. This prompts the search for some kind of intelligent optimization that can handle large dimensional parameter spaces. Gradient descent is just that! But, to make it work, we need to be able to calculate the gradient of the significance with respect to the cut value -- something only possible if the cut itself is differentiable (it isn't).
 
 To see this, note that cuts are step functions, i.e. logical less than or more than statements. These can be viewed as applying weights to the data -- 0 on one side of the threshold, and 1 on the other. If we change the cut value, the events either keep their weight (0 change in significance) or sharply gain/lose their weight value (discrete jump in significance). We would then like to replace this thresholding with a *smooth* weight assignment such that the cut value varies smoothly with the weights applied. What kind of operation can do this? We have such a candidate in the *sigmoid function* $1/(1+e^{-x})$.
@@ -332,6 +333,8 @@ To see this, note that cuts are step functions, i.e. logical less than or more t
 Normally, the sigmoid serves as a method to map values on the real line to [0,1], so we leverage this to be used as a cut by applying it to data, which results in a set of weights for each point in [0,1]. (A normal cut does this too, but the weights are all 0 or 1, and you drop the 0s. One could similarly threshold on a minimum weight value here.)
 
 Practically, we introduce slope and intercept terms that control the sigmoid's $x$ position and how "hard" the cut is: $1/(1+e^{-\mathrm{slope}(x-\mathrm{cut~value}})$. This slope allows us to control the degree to which we approximate the cut as a thresholding operation, with higher values of the slope meaning less approximation (but this will also increase the variance of the gradients, as we're getting closer to the discrete situation outlined previously). See the sigmoid plotted with different slopes in @fig-sigmoid.
+
+
 
 ```{python}
 #| label: fig-sigmoid
@@ -464,7 +467,7 @@ following stages:
 
 
 1.  Construction of a learnable 1-D summary statistic from data (with
-    parameters $\phi$)
+    parameters $\varphi$)
 
 2.  Binning of the summary statistic, e.g. through a histogram
 
@@ -479,10 +482,10 @@ following stages:
     analysis
 
 We can express this workflow as a direct function of the input dataset
-$\mathcal{D}$ and observable parameters $\phi$:
+$\mathcal{D}$ and observable parameters $\varphi$:
 
 $$
-    \mathrm{CL}_s = f(\mathcal{D},\phi) = (f_{\mathrm{sensitivity}} \circ f_{\mathrm{test\,stat}} \circ f_{\mathrm{likelihood}}  \circ f_{\mathrm{histogram}}  \circ f_{\mathrm{observable}})(\mathcal{D},\phi).
+    \mathrm{CL}_s = f(\mathcal{D},\varphi) = (f_{\mathrm{sensitivity}} \circ f_{\mathrm{test\,stat}} \circ f_{\mathrm{likelihood}}  \circ f_{\mathrm{histogram}}  \circ f_{\mathrm{observable}})(\mathcal{D},\varphi).
 $$ {#eq-neos}
 
 Is this going to be differentiable? To calculate $\partial \text{CL}_s / \partial \varphi$, we'll have to split this up by the chain rule into the different components, which can be written verbosely as
