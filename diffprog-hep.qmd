@@ -325,12 +325,16 @@ ax.text(
     transform=plt.gca().transAxes,
 )
 ax.set_xlabel("x")
-ax.set_ylabel("Asimov significance")
+ax.set_ylabel("$Z_A$")
 ```
 
+In reality, this could be an expensive procedure to do for a wide range of $x$ and for many different cut variables. This prompts the search for some kind of intelligent optimization that can handle large dimensional parameter spaces. Gradient descent is just that! But, to make it work, we need to be able to calculate the gradient of the significance with respect to the cut value -- something only possible if the cut itself is differentiable (it isn't).
 
-- Cuts are step functions from logical less than or more than statements
-- Basically applies weights to the data -- 0 on one side of the threshold, and 1 on the other
+To see this, note that cuts are step functions, i.e. logical less than or more than statements. These can be viewed as applying weights to the data -- 0 on one side of the threshold, and 1 on the other. If we change the cut value, the events either keep their weight (0 change in significance) or sharply gain/lose their weight value (discrete jump in significance). We would then like to replace this thresholding with a *smooth* weight assignment such that the cut value varies smoothly with the weights applied. What kind of operation can do this? We have such a candidate in the *sigmoid function* $1/(1+e^{-x})$.
+
+Normally, the sigmoid serves as a method to map values on the real line to [0,1], so we leverage this to be used as a cut by applying it to data, which results in a set of weights for each point in [0,1]. (A normal cut does this too, but the weights are all 0 or 1, and you drop the 0s. One could similarly threshold on a minimum weight value here.)
+
+Practically, we introduce slope and intercept terms that control the sigmoid's x position and how "hard" the cut is: $1/(1+e^{-\mathrm{slope}(x-\mathrm{cut~value}})$. High slopes mean less approximate cuts, but at the risk of gradient instability.
 
 --plot
 
