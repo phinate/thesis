@@ -22,7 +22,9 @@ When analysing data in this way, we'll have lots of free parameters to tune. The
 In either case above, there is a notion of <span style="color:#13becf">signal</span> (what you’re looking for) and <span style="color:#ff7f0e">background</span> (everything else).
 Generally, we then try to choose a parameter configuration that can separate (or discriminate) the signal from the background, allowing us to extract just the data we think is relevant to the physics process we're looking at. As an example, machine learning models are often trained using the **binary cross-entropy** loss as an objective, which corresponds to optimizing the ability of the model to identify whether an event originated from signal or background processes. A closely related goal is the **Asimov significance** in the case of signal and background event counts $s$ and $b$ with *no uncertainty* on either quantity. The formula for this stems from assuming a Poisson likelihood function, and is equal to
 
-$$Z_A = \sqrt{2\sum_{i\in bins}((s_i + b_i)(\log{(1 + s_i / b_i)}) - s_i)}.$$
+$$
+Z_A = \sqrt{2\sum_{i\in bins}((s_i + b_i)(\log{(1 + s_i / b_i)}) - s_i)}~.
+$$ {#eq-asimov-significance}
 
 As indicated in the sum, these counts can be spread across different bins in the case where your data is a histogram, but the formula is more commonly reduced to the 1-bin scenario that just deals with the overall numbers of signal and background events. In this case, we can then Taylor expand the logarithm to get
 
@@ -120,6 +122,8 @@ where $\gamma$ is a continuous description of $\sigma_b$ that we get from interp
 Using this likelihood, we can calculate the expected discovery $p$-value by doing a hypothesis test using the observed data as the Asimov dataset for the nominal model $\mu, \gamma = 1$. We can plot this across all the values of $\phi$, and see what value gives us the lowest $p$-value (in practice, scanning over the space is computationally impossible for a given analysis configuration and a complicated model). We do this in @fig-simple-model-pval, where we include the result using a model both with and without uncertainty. Notice how much the curves differ; if we optimized the model without uncertainty (i.e. optimize for signal/background separation only), we'd end up at the *worst* solution! This is pathologically constructed of course, but it goes to show that these objectives don't talk to each other directly.
 
 ```{python}
+#| label: fig-simple-model-pval
+#| fig-cap: "Plot of the calculated $p$-value from using our statistical model across of $\\phi$, both including the uncertainty and neglecting it."
 # our analysis pipeline, from phi to p-value
 def pipeline(phi, return_yields=False, uncertainty=True):
 
@@ -171,14 +175,7 @@ axs[0].axvline(
     label=r"optimal $s/b$",
 )
 axs[0].legend(loc="upper left", ncol=2)
-# s, b, db = ys
-# s, b, db = s.ravel(), b.ravel(), db.ravel()  # everything is [[x]] for pyhf
-# axs[1].fill_between(phis, s + b, b, color="C9", label="signal")
-# axs[1].fill_between(phis, b, color="C1", label="background")
-# axs[1].fill_between(phis, b - db, b + db, facecolor="k", alpha=0.2, label=r"$\sigma_b$")
 axs[0].set_xlabel("$\phi$")
-# axs[1].set_ylabel("yield")
-# axs[1].legend(loc="lower left")
 plt.suptitle("Discovery p-values, with and without uncertainty")
 plt.tight_layout()
 ```
@@ -202,11 +199,111 @@ In the following sections, we'll take a collider physics analysis apart step-by-
 
 ## Making HEP Analysis Differentiable
 
-The goal of this section is to study components within a HEP analysis chain that are not typically differentiable, and show that when we overcome this, we can employ the use of gradient-based optimization methods. From there, we'll examine the typical steps needed to calculate the sensitivity of a physics analysis, and see how we can make that whole chain differentiable at once, opening up a way to incorporate the full inference procedure when finding the best analysis configuration.
+The goal of this section is to study components within a HEP analysis chain that are not typically differentiable, and show that when we overcome this, we can employ the use of gradient-based optimization methods -- both to optimize free parameters jointly, and to use objectives we care about. From there, we'll examine the typical steps needed to calculate the sensitivity of a physics analysis, and see how we can make that whole chain differentiable at once, opening up a way to incorporate the full inference procedure when finding the best analysis configuration.
 
-- something about surrogates vs gradient tricks (e.g. approximations or using theoretical results)
+First, we're going to jump right in with an example to illustrate how we can take advantage of gradient descent to optimize a typical problem faced in collider physics analyses: choosing the best selection criteria.
 
-- something about the fact that surrogates can be used *just* for optimization if the hard version of the op isn't desirable, e.g. assuming the histogram bins follow a poisson distribution (not true if you're approximating the underlying binning process)
+<!-- - something about surrogates vs gradient tricks (e.g. approximations or using theoretical results)
+
+- something about the fact that surrogates can be used *just* for optimization if the hard version of the op isn't desirable, e.g. assuming the histogram bins follow a poisson distribution (not true if you're approximating the underlying binning process) -->
+
+### A simple example: cut optimization with gradient descent
+
+We begin with a toy signal and background distribution over some variable $x$, where the signal lies as a peak on top of an exponentially decaying background, as shown in @fig-exp-bkg
+
+```{python}
+#| label: fig-exp-bkg
+#| fig-cap: "Histogram of a situation with a simple exponentially falling background and a small signal peak."
+import relaxed
+from functools import partial
+from jax.random import PRNGKey
+# generate background data from an exponential distribution with a little noise
+def generate_background(key, n_samples, n_features, noise_std):
+    key, subkey = jax.random.split(key, 2)
+    data = jax.random.exponential(subkey, (n_samples, n_features))
+    key, subkey = jax.random.split(key, 2)
+    data += jax.random.normal(subkey, (n_samples, n_features)) * noise_std
+    return data
+
+
+# generate signal data from a normal distribution close to the background
+def generate_signal(key, n_samples, n_features):
+    key, subkey = jax.random.split(key, 2)
+    data = jax.random.normal(subkey, (n_samples, n_features)) / 2 + 2
+    return data
+
+
+# get 1000 samples from the background and 100 samples from the signal
+bkg = generate_background(PRNGKey(0), 1000, 1, 0.1).ravel()
+sig = generate_signal(PRNGKey(1), 100, 1).ravel()
+
+sig = sig[sig>0]
+bkg = bkg[bkg>0]
+
+fig, ax = plt.subplots(**subplot_settings)
+# plot!
+ax.hist(
+    [bkg, sig], stacked=True, bins=30, histtype="step", label=["background", "signal"]
+)
+ax.set_xlabel("x")
+ax.set_ylabel("count")
+ax.legend();
+```
+
+A quintessential operation for data filtering in HEP is the simple threshold, also called a **cut**: we keep all data above (or below) a certain value of the quantity we're concerned with. To increase the significance (e.g. as defined by @eq-asimov-significance), we can try to remove data such that we increase the overall ratio of signal to background. In @fig-exp-bkg, it looks like there's not much signal for low values of $x$, which motivates us to put a cut at say $x$=1. We can see the result of applying this cut in @fig-compare-cut, where we've increased the Asimov significance compared to using no cut at all.
+
+```{python}
+def significance_after_cut(cut):
+    # treat analysis as a one-bin counting experiment
+    s = len(sig[sig > cut]) + 1e-1
+    b = len(bkg[bkg > cut]) + 1e-1
+    return relaxed.metrics.asimov_sig(s, b)  # stat-only significance
+
+
+cut = 1  # change me to change the plot!
+
+def make_cut_plot(cut, ax):
+    significance = significance_after_cut(cut)
+    ax.hist(
+        [bkg, sig], stacked=True, bins=30, histtype="step", label=["background", "signal"]
+    )
+    ax.axvline(x=cut, color="k", linestyle="--", alpha=0.5, label=f"cut = {cut:.2f}")
+    ax.axvspan(0,cut, hatch='//', color="grey", alpha=0.3,zorder=-999)
+    ax.text(
+        0.7,
+        0.2,
+        f"significance at cut = {significance:.2f}",
+        ha="center",
+        va="center",
+        transform=plt.gca().transAxes,
+    )
+    ax.set_xlabel("x")
+    ax.legend()
+
+fig, axs = plt.subplots(1,2,**subplot_settings, sharey=True)
+ax = axs[0]
+# plot!
+ax.hist(
+    [bkg, sig], stacked=True, bins=30, histtype="step", label=["background", "signal"]
+)
+ax.set_xlabel("x")
+ax.set_ylabel("count")
+ax.legend()
+make_cut_plot(cut, axs[1])
+
+```
+
+- Cuts are step functions from logical less than or more than statements
+- Basically applies weights to the data -- 0 on one side of the threshold, and 1 on the other
+
+--plot
+
+- a differentiable version of this admits real numbers in-between these values, smoothing out the step
+- example: sigmoid
+- you can tune the steepness of the slope by adding a number
+--plot
+
+### Examining a typical analysis
 
 Given a pre-filtered dataset, a commonly used analysis pipeline in HEP involves the
 following stages:
@@ -232,18 +329,17 @@ $\mathcal{D}$ and observable parameters $\phi$:
 
 $$
     \mathrm{CL_s} = f(\mathcal{D},\phi) = (f_{\mathrm{sensitivity}} \circ f_{\mathrm{test\,stat}} \circ f_{\mathrm{likelihood}}  \circ f_{\mathrm{histogram}}  \circ f_{\mathrm{observable}})(\mathcal{D},\phi).
-    $$
+$$ {#eq-neos}
 
-### Thresholding (cuts)
-- Cuts are step functions from logical less than or more than statements
-- Basically applies weights to the data -- 0 on one side of the threshold, and 1 on the other
+Is this going to be differentiable? To calculate $\partial \text{CL}_s / \partial \varphi$, we'll have to split this up by the chain rule into the different components:
 
---plot
+$$
 
-- a differentiable version of this admits real numbers in-between these values, smoothing out the step
-- example: sigmoid
-- you can tune the steepness of the slope by adding a number
---plot
+$${#eq-analysis-chain-rule}
+
+In the case of an observable defined gradients with respect to $\phi$ (e.g. a neural network), the
+
+
 
 ### Binned density estimation (histograms)
 
