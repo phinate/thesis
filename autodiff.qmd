@@ -200,7 +200,26 @@ The first and easiest thing is of course the straight line $f(x) = x$, which has
 
 As above, if our gradient descent is any good, then we'll hopefully converge to the fixed point $x^*$, which is the value of $x$ that lies in some local minimum of the loss function. Further iterations will then not do anything -- we'll still be sitting at $x^*$. How might we take the gradient of this fixed point?
 
-In practice, we'd take many steps to reach this minimum, which corresponds to many sequential applications of $f$ to some initial value of $x$.
+In practice, we'd take many steps to reach this minimum, which corresponds to many sequential applications of $f$ to some initial value of $x$. In the framework of automatic differentiation outlined in previous sections, this would mean we would *unroll* the optimization loop, and decompose *each* of these per-iteration applications of $f$ into their primitives, and compose their vector-Jacobian products or similar. For an optimization loop, this could involve thousands of steps! Moreover, all that work that happens in the early stages of optimization far from the fixed point $x^*$ will likely not impact the gradient of the fixed point itself -- we're much more interested in the steps close to convergence.
+
+To get around this computational issue, we can employ the use of the **implicit function theorem**. The full details of the theorem are beyond the scope of this application, but it guarantees some things that we'll state here. To be consistent with later sections, we will now switch symbols from $x$ to $\theta$ (which will denote parameters we're optimizing), and include $\varphi$ as parameters that *implicitly* define part of $f$ (e.g. that define the objective function used in optimization).Now, for a different function $g(\theta, \varphi)$, where there exists some solution $g(\theta_0, \varphi_0) = 0$, then the following holds:
+
+A *solution mapping function* exists in the form of $\theta^*(\varphi)$ such that
+- $\theta^*(\varphi_0) = \theta_0$
+- $g(\theta^*(\varphi), \varphi) =0~\forall \varphi $
+- $\theta^*$ is *differentiable* with respect to $\varphi$!
+
+To put this into words: as long as there exists *some* solution that makes $g(\theta, \varphi) = 0$, we get a mapping for the *general solution* as a function of $\varphi$, which is differentiable. This means that as long as we find a way to calculate that gradient, we can directly access the gradients of the solution $\theta_0$ that we found during optimization with respect to the particular $\varphi_0$ that we used, all thanks to the general function $\theta^*$.
+
+Now, notice that we wrote this holding for $g(\theta, \varphi) = 0$, which we don't have quite yet. But we can define this for our update state $f$ by simply letting $g(\theta, \varphi) = f(\theta, \varphi) - \theta$. Now, when we arrive at our solution $\theta_0$ as the fixed point of $f$ for some $\varphi_0$, we'll get $g(\theta_0, \varphi_0) = \theta_0 - \theta_0 = 0$, and we get all those nice properties! We just need to explicitly calculate the gradient of $\theta^*$ now, which we can do by differentiating both sides of $g(\theta^*(\varphi), \varphi) =0$:
+
+$$
+\frac{\partial g(\theta^*(\varphi), \varphi)}{\partial\varphi} = \frac{\partial g}{\partial \theta^*}\frac{\partial \theta^*}{\partial \varphi} + \frac{\partial g}{\partial\varphi}
+$$
+
+$$
+    \frac{\partial\hat{\theta}}{\partial\varphi} = -\left[\frac{\partial g}{\partial \theta}\right]^{-1}  \frac{\partial g}{\partial \phi} = \left[I - \frac{\partial f}{\partial \theta} \right]^{-1} \frac{\partial f}{\partial \varphi}
+$$
 
 ## Other approaches to taking gradients of programs
 
@@ -219,7 +238,6 @@ We can see how well this performs on an example problem in [@fig-finite-1] for d
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.rc("figure", dpi=200)
 eval_grid = np.linspace(0,10, 30)
 
 def finite_diff(func, x, delta_x = 1e-4):
@@ -227,10 +245,12 @@ def finite_diff(func, x, delta_x = 1e-4):
 
 for delta in [1e-2,1e-1,1]:
     plt.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=delta), '-o', alpha=0.4, label=f"$\Delta x$ = {delta}")
-plt.plot(eval_grid, np.cos(eval_grid), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
-plt.xlabel("x")
-plt.ylabel("f(x)")
-plt.legend();
+
+fig, ax = plt.subplots(**subplot_settings)
+ax.plot(eval_grid, np.cos(eval_grid), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
+ax.set_xlabel("x")
+ax.set_ylabel("f(x)")
+ax.legend();
 ```
 
 
@@ -240,7 +260,6 @@ plt.legend();
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.rc("figure", dpi=200)
 eval_grid_t = np.linspace(0,10, 30)
 
 def finite_diff(func, x, delta_x = 1e-4):
@@ -249,10 +268,12 @@ def finite_diff(func, x, delta_x = 1e-4):
 for delta in [5,10,15]:
     eval_grid = np.linspace(0,10, delta)
     plt.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=1e-3), '-o', alpha=0.4, label=f"{delta} evaluations")
-plt.plot(eval_grid_t, np.cos(eval_grid_t), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
-plt.xlabel("x")
-plt.ylabel("f(x)")
-plt.legend(loc="upper right");
+
+fig, ax = plt.subplots(**subplot_settings)
+ax.plot(eval_grid_t, np.cos(eval_grid_t), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
+ax.set_xlabel("x")
+ax.set_ylabel("f(x)")
+ax.legend(loc="upper right");
 
 ```
 
