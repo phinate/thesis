@@ -334,14 +334,129 @@ To see this, note that cuts are step functions, i.e. logical less than or more t
 
 Normally, the sigmoid serves as a method to map values on the real line to [0,1], so we leverage this to be used as a cut by applying it to data, which results in a set of weights for each point in [0,1]. (A normal cut does this too, but the weights are all 0 or 1, and you drop the 0s. One could similarly threshold on a minimum weight value here.)
 
-Practically, we introduce slope and intercept terms that control the sigmoid's x position and how "hard" the cut is: $1/(1+e^{-\mathrm{slope}(x-\mathrm{cut~value}})$. High slopes mean less approximate cuts, but at the risk of gradient instability.
+Practically, we introduce slope and intercept terms that control the sigmoid's $x$ position and how "hard" the cut is: $1/(1+e^{-\mathrm{slope}(x-\mathrm{cut~value}})$. This slope allows us to control the degree to which we approximate the cut as a thresholding operation, with higher values of the slope meaning less approximation (but this will also increase the variance of the gradients, as we're getting closer to the discrete situation outlined previously). See the sigmoid plotted with different slopes in @fig-sigmoid.
 
---plot
+```{python}
+#| label: fig-sigmoid
+#| fig-cap: "Comparing the sigmoid to a regular, "hard" cut for different values of the sigmoid slope."
+# plot significance for all cut values
+cut_val = 5  # translates on the x-axis
+fig, ax = plt.subplots(**subplot_settings)
+ax.plot(cut_values, cut_values > cut_val, label="hard cut")
+ax.plot(
+    cut_values, relaxed.cut(cut_values, cut_val, slope=1), label="sigmoid", color="C1"
+)
+ax.plot(
+    cut_values,
+    relaxed.cut(cut_values, cut_val, slope=10),
+    label="sigmoid (slope=10)",
+    color="C2",
+    alpha=0.4,
+)
+ax.plot(
+    cut_values,
+    relaxed.cut(cut_values, cut_val, slope=0.5),
+    label="sigmoid (slope=0.5)",
+    color="C3",
+    alpha=0.4,
+)
+ax.set_ylabel("weight applied at x")
+ax.set_xlabel("x")
+ax.legend();
+```
 
-- a differentiable version of this admits real numbers in-between these values, smoothing out the step
-- example: sigmoid
-- you can tune the steepness of the slope by adding a number
---plot
+Now that we have a differentiable cut, we can see what the significance scan from @fig-cut-scan looks like for the differentiable case, shown in @fig-cut-scan-2. It's an interesting plot; there's a clear smoothing out of the overall envelope of the significance in comparison to using the hard cut. However, the important thing is the **coincidence of the maxima**: when optimizing, we'll use the differentiable cut, but we'll plug the value of the cut position from the optimization back in to the hard cut for our actual physics results. This is a very important distinction - *we don't use approximate operations in the final calculation!* Moreover, since we can control the degree to which we're approximating the significance landscape, one could even imagine a fine-tuning of the slope when we're close to a local minima during optimization, allowing us to make jumps more in-line with the true optimum value (though this is not explored here).
+
+```{python}
+#| label: fig-cut-scan-2
+#| fig-cap: "A scan over all cut values to find the best resulting Asimov significance -- both for the regular cut, and for the sigmoid."
+# plot significance for all cut values
+def significance_after_soft_cut(cut, slope):
+    s_weights = (
+        relaxed.cut(sig, cut, slope) + 1e-4
+    )  # add small offset to avoid 0 weights
+    b_weights = relaxed.cut(bkg, cut, slope) + 1e-4
+    return relaxed.metrics.asimov_sig(s_weights.sum(), b_weights.sum())
+
+
+# choosing the cut slope: increasing slope reduces bias but also noises gradients.
+# I increased it until gradients were nan in the next step, then went a touch lower.
+# I'll think about a more principled way to do this (suggestions welcome!)
+slope = 2.7
+
+fig, ax = plt.subplots(**subplot_settings)
+
+# plot significance for all cut values
+cut_values = jnp.linspace(0, 8, 100)
+soft = partial(significance_after_soft_cut, slope=slope)
+significances = jax.vmap(soft, in_axes=(0))(cut_values)
+ax.plot(cut_values, significances_hard, label="hard cut")
+ax.plot(cut_values, significances, label="sigmoid (slope=2.7)")
+ax.set_xlabel("x")
+ax.set_ylabel("$Z_A$")
+ax.legend();
+```
+
+Now that we've done the groundwork, we can do the optimization and see if we converge to the correct result! Using gradient descent and the Adam optimizer with a learning rate of 1e-3, we find the cut shown in @fig-optimized-cut.
+
+
+```{python}
+#| label: fig-optimized-cut
+#| fig-cap: "The resulting cut from optimization compared to the true best cut. Significances in both cases are shown."
+from jaxopt import OptaxSolver
+from optax import adam
+
+# define something to minimise (1/significance)
+def loss(cut):
+    s_weights = relaxed.cut(sig, cut, slope) + 1e-4
+    b_weights = relaxed.cut(bkg, cut, slope) + 1e-4
+    return 1 / relaxed.metrics.asimov_sig(s_weights.sum(), b_weights.sum())
+
+
+fig, ax = plt.subplots(**subplot_settings)
+# play with the keyword arguments to the optimiser if you want :)
+solver = OptaxSolver(loss, adam(learning_rate=1e-2), maxiter=10000, tol=1e-6)
+init = 6.0
+cut_opt = solver.run(init).params
+significance = significance_after_cut(cut_opt)
+ax.hist(
+    [bkg, sig], stacked=True, bins=30, histtype="step", label=["background", "signal"]
+)
+ax.axvline(
+    x=cut_opt,
+    color="r",
+    linestyle="-",
+    alpha=0.5,
+    label=f"optimised cut = {cut_opt:.2f}",
+)
+significance = significance_after_cut(cut_opt)
+ax.axvline(
+    x=optimal_cut,
+    color="k",
+    linestyle="--",
+    alpha=0.5,
+    label=f"true best cut = {optimal_cut:.2f}",
+)
+ax.text(
+    0.65,
+    0.3,
+    f"significance at optimised cut = {significance:.2f}",
+    ha="center",
+    va="center",
+    transform=plt.gca().transAxes,
+)
+ax.text(
+    0.65,
+    0.15,
+    f"significance at best cut = {significance_after_cut(optimal_cut):.2f}",
+    ha="center",
+    va="center",
+    transform=plt.gca().transAxes,
+)
+ax.set_xlabel("x")
+ax.set_ylabel("count")
+ax.legend();
+```
 
 ### Examining a typical analysis
 
