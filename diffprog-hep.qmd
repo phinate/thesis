@@ -530,4 +530,25 @@ We know what happens to a KDE when we change the bandwidth, but how does that im
 
 Now, I must confess, I have told you somewhat of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
 
-### Taking the gradient of the profile likelihood ratio
+### Differentiable test statistics (profile likelihood ratio)
+
+Recall from @sec-asymptotics that when we're constructing test statistics, we're using the building block of the *profile likelihood ratio*, which we state once again as
+
+$$
+\lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)}~.
+$$
+
+The variables $\hat{\hat{\theta}}(\mu)$ and $\hat{\mu}, \hat{\theta}$ are the result of two separate maximum likelihood fits. Are these differentiable? Well, yes -- we can leverage the utility of automatic differentiation to trace each iteration of the optimization loop at runtime, and then do the corresponding gradient calculation by composing VJPs and the like. However, that could get really expensive as the number of iterations gets into the thousands, which isn't too uncommon in practice. Do we have a way to get around this?
+
+Thanks to the groundwork we set up in @sec-fixed-points, we worked out that we can take the gradient of **fixed points** (e.g. solutions to minimization algorithms) through a simple analytic formula in terms of the update step $f$, the solution of the optimization problem $\theta_0$ (or $\hat{\theta}$), and some particular value of $\varphi=\varphi_0$ that we used to define the objective:
+
+$$
+\frac{\partial\theta_0}{\partial\varphi_0}= \left[I - \frac{\partial f}{\partial \theta_0} \right]^{-1} \frac{\partial f}{\partial \varphi_0}~.
+$$
+
+What does $\varphi$ mean here? It corresponds to the *same* $\varphi$ that we're talking about in this section (the notation was not a coincidence)! Specifically, these would be the *analysis configuration parameters* (e.g. a combination of neural network parameters, observable binning, cutflow, etc.), which all *implicitly* determine the form of the likelihood. The language of "implicit" refers to the fact that we build the likelihood using the counts of the histograms for each physics process, with those counts in turn being influenced by $\varphi$, but we do not explicitly denote the likelihood as $p(x|\mu, \theta, \varphi)$, for instance.
+
+
+### Differentiable $\text{CL}_s
+
+What's left to get over the line to the result of a hypothesis test? Well, thanks to the formulae outlined in @sec-asymptotics, to extract the expected (read: median) $p$-value from the observed value of the test statistic $t(x_0)$, we

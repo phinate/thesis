@@ -173,15 +173,15 @@ There are two main existing strategies to represent a series of code computation
 
 The other approach, known as **define-by-run**, builds up a *dynamic graph* structure during a program's execution. How does this work? The program is *traced* at runtime, meaning that the autodiff framework is watching which operations occur when a function is run in order to build up the computation graph for that function. When done this way, incorporating loops and conditional structure within the graph is no longer needed: at runtime, loops are unrolled into sequences, and the branching induced by conditional logic will collapse to one branch when the program is actually ran. These properties make define-by-run the more popular approach to autodiff, and is the approach taken by libraries such as [JAX](https://github.com/google/jax), [PyTorch](https://github.com/pytorch/pytorch), and [Tensorflow (eager execution mode)](https://ai.googleblog.com/2017/10/eager-execution-imperative-define-by.html). It's worth noting that since evaluating the gradients requires tracing the program, i.e. evaluating the function, the runtime cost for the gradient calculation is usually of the same order as the program itself. Why? For each primitive in the program, there's a corresponding step in the gradient computation (e.g. wherever you see a $\log{x}$ in your program, there'll be a $1/x$ somewhere in the JVP/VJP call), so the computations are almost totally identical in compute^[This may not hold when you're doing fancy things like checkpointing, which I haven't covered here.].
 
-## Differentiating fixed points
+## Differentiating fixed points {#sec-fixed-points}
 
-A **fixed point** $x^*$ of a function $f$ is defined by the relation
+We spend a bit of time here on the more niche topic of differentiating a fixed point, as we make use of this result later. A **fixed point** $x^*$ of a function $f$ is defined by the relation
 
 $$
 f(x^*) = x^*,
 $$
 
-meaning if we apply $f$ (even multiple times), we remain stationary at the point we applied $f$ to. Why is this of interest, i.e. what kind of functions of importance exhibit this behaviour?
+meaning if we apply $f$ (even multiple times), we remain stationary at the point we applied $f$ to. Why is this of interest, i.e. what kind of functions of importance exhibit this behavior?
 
 The first and easiest thing is of course the straight line $f(x) = x$, which has the whole real line as fixed points. But maybe we're more interested in the case where the fixed point is a quantity of interest -- this is the case for something like an *optimization loop*. Here's an example where $f$ is one gradient descent step:
 
@@ -191,9 +191,9 @@ The first and easiest thing is of course the straight line $f(x) = x$, which has
 \\ \Rightarrow &f(x^*, \mathrm{loss} ) = x^*;~~~x^* = \underset{x}{\mathrm{argmin}}\, \mathrm{loss}.
 \end{align}
 
-As above, if our gradient descent is any good, then we'll hopefully converge to the fixed point $x^*$, which is the value of $x$ that lies in some local minimum of the loss function. Further iterations will then not do anything -- we'll still be sitting at $x^*$. How might we take the gradient of this fixed point?
+As above, if our gradient descent is any good, then we'll hopefully converge to the fixed point $x^*$, which is the value of $x$ that lies in some local minimum of the loss function. Further iterations will then not do anything -- we'll still be sitting at $x^*$. How might we take the gradient of this fixed point? Moreover, what if this gradient is with respect to parameters that implicitly define the loss itself?
 
-In practice, we'd take many steps to reach this minimum, which corresponds to many sequential applications of $f$ to some initial value of $x$. In the framework of automatic differentiation outlined in previous sections, this would mean we would *unroll* the optimization loop, and decompose *each* of these per-iteration applications of $f$ into their primitives, and compose their vector-Jacobian products or similar. For an optimization loop, this could involve thousands of steps! Moreover, all that work that happens in the early stages of optimization far from the fixed point $x^*$ will likely not impact the gradient of the fixed point itself -- we're much more interested in the steps close to convergence.
+The first thing to highlight is that in practice, we'd take many steps to reach the minimum, which corresponds to many sequential applications of $f$ to some initial value of $x$. In the framework of automatic differentiation outlined in previous sections, this would mean taking the gradient (in a define-by-run setting) would *unroll* the optimization loop at runtime, and decompose *each* of these per-iteration applications of $f$ into their primitives, and compose their vector-Jacobian products or similar. For an optimization loop, this could involve thousands of steps! Moreover, all that work that happens in the early stages of optimization far from the fixed point $x^*$ will likely not impact the gradient of the fixed point itself -- we're much more interested in the steps close to convergence.
 
 To get around this computational issue, we can employ the use of the **implicit function theorem**. The full details of the theorem are beyond the scope of this application, but it guarantees some things that we'll state here. To be consistent with later sections, we will now switch symbols from $x$ to $\theta$ (which will denote parameters we're optimizing), and include $\varphi$ as parameters that *implicitly* define part of $f$ (e.g. that define the objective function used in optimization).Now, for a different function $g(\theta, \varphi)$, where there exists some solution $g(\theta_0, \varphi_0) = 0$, then the following holds:
 
@@ -252,11 +252,11 @@ eval_grid = np.linspace(0,10, 30)
 
 def finite_diff(func, x, delta_x = 1e-4):
     return (func(x+delta_x) - func(x)) /  delta_x
+fig, ax = plt.subplots(**subplot_settings)
 
 for delta in [1e-2,1e-1,1]:
-    plt.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=delta), '-o', alpha=0.4, label=f"$\Delta x$ = {delta}")
+    ax.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=delta), '-o', alpha=0.4, label=f"$\Delta x$ = {delta}")
 
-fig, ax = plt.subplots(**subplot_settings)
 ax.plot(eval_grid, np.cos(eval_grid), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
 ax.set_xlabel("x")
 ax.set_ylabel("f(x)")
@@ -274,12 +274,12 @@ eval_grid_t = np.linspace(0,10, 30)
 
 def finite_diff(func, x, delta_x = 1e-4):
     return (func(x+delta_x) - func(x)) /  delta_x
+fig, ax = plt.subplots(**subplot_settings)
 
 for delta in [5,10,15]:
     eval_grid = np.linspace(0,10, delta)
-    plt.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=1e-3), '-o', alpha=0.4, label=f"{delta} evaluations")
+    ax.plot(eval_grid, finite_diff(np.sin, eval_grid, delta_x=1e-3), '-o', alpha=0.4, label=f"{delta} evaluations")
 
-fig, ax = plt.subplots(**subplot_settings)
 ax.plot(eval_grid_t, np.cos(eval_grid_t), linestyle="dotted", label="true gradient", zorder=-999, linewidth=2)
 ax.set_xlabel("x")
 ax.set_ylabel("f(x)")
