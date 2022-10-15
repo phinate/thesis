@@ -223,11 +223,10 @@ Finally, we can substitute in our definition of $g$ in terms of $f$ to get
 
 $$
 \frac{\partial\theta_0}{\partial\varphi_0}= \left[I - \frac{\partial f}{\partial \theta_0} \right]^{-1} \frac{\partial f}{\partial \varphi_0}~.
-$${#eq-fixed-point}
-
+$$
 We've constructed an expression for the gradient of the fixed point $\theta_0$ of an update rule $f$, and with respect to the parameters $\varphi$ that define the objective used in the optimization! This is a fantastic result, as it means we can just use this expression instead of unrolling the entire optimization loop itself, saving us lots of memory and compute in the process.
 
-In practice, we can implement this through moving the goalposts for what we call a primitive: for optimization loops like this, we can define that as a primitive of sorts, and then give it the known gradient as defined by @eq-fixed-point. This is the kind of approach taken by `jaxopt` [@jaxopt], which is a library that's used a few times in this thesis.
+
 
 To read more about this construction, and some of the finer details of the implementation on the autodiff side (note how we skipped over the conversation about the fact that we have VJPs and not gradients directly), I would thoroughly recommend [@implicit], which I based this section upon.
 

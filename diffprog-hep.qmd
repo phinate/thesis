@@ -544,9 +544,11 @@ Thanks to the groundwork we set up in @sec-fixed-points, we worked out that we c
 
 $$
 \frac{\partial\theta_0}{\partial\varphi_0}= \left[I - \frac{\partial f}{\partial \theta_0} \right]^{-1} \frac{\partial f}{\partial \varphi_0}~.
-$$
+$${#eq-fixed-point}
 
 What does $\varphi$ mean here? It corresponds to the *same* $\varphi$ that we're talking about in this section (the notation was not a coincidence)! Specifically, these would be the *analysis configuration parameters* (e.g. a combination of neural network parameters, observable binning, cutflow, etc.), which all *implicitly* determine the form of the likelihood. The language of "implicit" refers to the fact that we build the likelihood using the counts of the histograms for each physics process, with those counts in turn being influenced by $\varphi$, but we do not explicitly denote the likelihood as $p(x|\mu, \theta, \varphi)$, for instance.
+
+In practice, we can implement this through moving the goalposts for what we call a primitive: for optimization loops like this, we can define that as a primitive of sorts, and then give it the known gradient as defined by @eq-fixed-point. This is the kind of approach taken by `jaxopt` [@jaxopt], which is a library that's used a few times in this thesis.
 
 
 ### Differentiable hypothesis tests
