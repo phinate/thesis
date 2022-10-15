@@ -549,6 +549,10 @@ $$
 What does $\varphi$ mean here? It corresponds to the *same* $\varphi$ that we're talking about in this section (the notation was not a coincidence)! Specifically, these would be the *analysis configuration parameters* (e.g. a combination of neural network parameters, observable binning, cutflow, etc.), which all *implicitly* determine the form of the likelihood. The language of "implicit" refers to the fact that we build the likelihood using the counts of the histograms for each physics process, with those counts in turn being influenced by $\varphi$, but we do not explicitly denote the likelihood as $p(x|\mu, \theta, \varphi)$, for instance.
 
 
-### Differentiable $\text{CL}_s
+### Differentiable hypothesis tests
 
-What's left to get over the line to the result of a hypothesis test? Well, thanks to the formulae outlined in @sec-asymptotics, to extract the expected (read: median) $p$-value from the observed value of the test statistic $t(x_0)$, we
+What's left to get us over the line to differentiating the result of a hypothesis test? Well, thanks to the formulae outlined in @sec-asymptotics, to extract the expected (read: median) $p$-value from the observed value of the test statistic $t(x_0)$, we only need to do one last simple algebraic calculation:
+
+- For the **discovery $p$-value** with test statistic $q_0$: $p_0 = 1-\Phi(\sqrt{q_0})$.
+- For the $p$-value associated with setting an **upper limit** using test statistic $q_\mu$: $p_\mu = 1-\Phi(\sqrt{q_\mu})$.
+- For the $\text{CL}_s$ **method**, we can just compose the $p$-values from the previous step using different values of $\mu$ in $q_\mu$ as the point null: $\text{CL}_s = p_{\mu=1} / (1-p_{\mu=0})$.
