@@ -617,7 +617,7 @@ Results from the training process are shown in @fig-neos-results, where each cur
 
 ![Results from training neural networks using the four loss functions highlighted in the legend. Left: the expected $\text{CL}_s$. Middle: The uncertainty on the signal strength $\mu$. Right: The deviation from the nominal width of the nuisance parameter $\gamma$ that controls the background uncertainty.](images/neos-results){#fig-neos-results}
 
-The leftmost plot contains the expected $\mathrm{CL}_s$ for all four methods.
+The leftmost plot contains the expected $\mathrm{CL}_s$ for all four methods. We can see that the absolute lowest value of this is only attained by `neos`, which makes sense -- we're using this as the loss function itself. Both BCE methods reach a fairly low value quite quickly, which can be attributed to the fact that it's not that difficult to isolate most of the signal in this example. Interestingly, INFERNO demonstrated far less stability with it's $\mathrm{CL}_s$ value, with the different training runs having quite large variance in this quantity, causing their average to perform quite poorly. This says more about the interplay between the uncertainty on the signal strength and the $\mathrm{CL}_s$ than it does about what we consider "good performance" -- I'll come back to this in the discussion.
 
 
 

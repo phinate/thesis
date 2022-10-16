@@ -7,7 +7,6 @@ book:
   date: "15/08/2022"
   chapters:
     - index.qmd
-    - intro.qmd
     - part: "Fundamentals"
       chapters:
         - physics.qmd
