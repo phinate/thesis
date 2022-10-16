@@ -41,7 +41,7 @@ We can see this workflow reflected in the API of modern software packages, such 
 A model that would certainly be useful is one that can model the solution to any task at all. **Neural networks** are indeed this class of model; inspired by the way the brain handles the processing of information, they are proven to be *universal approximators*, i.e. given a *continuous function* $g(\mathbf{x})$, where $\mathbf{x}$ is an arbitrary-length vector of real-valued inputs, there exists a value of parameters $\varphi$ such that a neural network $f(\mathbf{x}, \varphi)$ satisfies
 
 $$
-|f(\mathbf{x}) - g(\mathbf{x}, \varphi)| < \epsilon~~~\forall~\mathbf{x},~\text{for }\epsilon>0~.
+|g(\mathbf{x}) - f(\mathbf{x}, \varphi)| < \epsilon~~~\forall~\mathbf{x},~\text{for }\epsilon>0~.
 $$ {#eq-approx}
 
 This is great! But what *is* a neural network in the first place?
@@ -182,7 +182,7 @@ This comes out to effectively minimizing the negative log-likelihood of the flow
 
 A specific type of flow that we'll encounter in the wild later is the **masked autoregressive flow** @maf. The approach that this flow takes to density modelling is as follows:
 
-When modelling a distribution across multiple random variables, one can break down their joint density into a product of conditional distributions through the probability chain rule as in @eq-chainruledensity, and models these conditional distributions explicitly:
+When modelling a distribution across multiple random variables, one can break down their joint density into a product of conditional distributions through the probability chain rule as in @eq-prob-chain-rule, and models these conditional distributions explicitly:
 
 $$
 p(x_1, \dots, x_N) = p(x_1)p(x_2 | x_1)p(x_3|x_2, x_1)\dots p(x_N | x_{N-1}, \dots, x_1)

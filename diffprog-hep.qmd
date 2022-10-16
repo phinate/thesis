@@ -3,7 +3,6 @@ execute:
   echo: false
 format:
   html:
-    code-fold: true
     default-image-extension: svg
   pdf:
     default-image-extension: pdf
@@ -498,7 +497,7 @@ In the case of an observable that has well-defined gradients with respect to $\p
 
 
 
-### Binned density estimation (histograms)
+### Binned density estimation (histograms) {#sec-bkde}
 
 Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. Similarly to the cut example with the sigmoid, we're assigning a number (there the weight, and here a count in a bin) in a discrete way to the data -- to make this differentiable, we need to come up with a smooth version of this.
 
@@ -561,6 +560,16 @@ What's left to get us over the line to differentiating the result of a hypothesi
 
 All of these formulae are differentiable without any extra work, so we're done!
 
+### Bonus: Uncertainties on likelihood parameters {#sec-inferno}
+
+Recall from @sec-fisher that the *Fisher information matrix* $\mathcal{I}(\theta)$ gives us access to the covariance matrix for maximum likelihood estimates, provided we're in the asymptotic limit, through the Cramér–Rao bound:
+
+$$
+\Sigma_\hat{\theta}^2 \geqslant [\mathcal{I}(\theta)]^{-1}~.
+$$
+
+Since $\mathcal{I}(\theta)$ is defined in terms of second-order derivatives of the log-likelihood -- something that we've already made differentiable from a code perspective -- we can then calculate the Fisher information using automatic differentiation. Moreover, since function transformations like the gradient operator are composable in automatic differentiation frameworks, this will itself be differentiable! This gives us access to many other inference-aware quantities that we can use as both diagnostics and as loss functions, including diagonal elements of the covariance matrix, which correspond to the individual uncertainties on each likelihood parameter. This approach was first explored by INFERNO [@inferno], from whom we take much inspiration from in this section.
+
 
 ## Putting it all together!
 
@@ -578,4 +587,48 @@ Equipped with this systematic-aware loss function, we can now apply it to someth
 
 The problem of reducing a whole set of physics quantities into a single number, or **summary statistic**, is not a new one in HEP. The reason for this is two-fold: inference in high-dimensional settings is computationally difficult, and the probability model defined by the underlying physics is intractable to explicitly compute. This leads to practice referenced a few times already, where we construct models via HistFactory, which are almost always based a single quantity, e.g. something like the invariant mass of the final state you're interested in, or the output of a machine learning model. In the latter case, we're typically concerned with optimizing for discriminating signal and background processes. However, we know from the previous sections that we can do much better by optimizing with respect to a $p$-value, especially when we have significant systematic uncertainties to worry about.
 
-To be more concrete: we'll look at optimizing a neural network-based summary statistic for a simple HEP-like situation, including the construction of the uncertainty through interpolating between "up" and "down" variations of the background. The full proposed workflow can be found in @fig-neos.
+To be more concrete: we'll look at optimizing a neural network-based summary statistic for a simple HEP-like situation, including the construction of the uncertainty through interpolating between "up" and "down" variations of the background. We'll refer to this workflow as `neos`^[Originally an acronym for neural end-to-end optimized statistics, but acronyms are annoying, so I don't really make that explicit anymore. Hopefully the rest of this section will also convince you that we don't need to get too caught up with naming anyway.], with the full proposed pipeline shown in @fig-neos.
+
+![Outline of the workflow proposed for `neos`.](images/neos){#fig-neos}
+
+### Example: Gaussian blobs
+
+Pretending our detector only outputs two physics variables $x$ and $y$, we'll generate some toy data from different 2-D normal distributions ("Gaussian blobs") for both signal and background, making sure they overlap a bit as to not be trivially separable. We'll then also sample from Gaussian blobs on either side of the background, and treat these as "up" and "down" variations in the way described in @sec-hifa-nps. We can see the result of sampling 10k points for each blob in @fig-data-space.
+
+![Plot of 10k samples from toy distributions representing imagined signal, background](images/data-space){#fig-data-space}
+
+From here, things follow the diagram in @fig-neos:
+
+- We'll pass the samples of $x, y$ values for each blob through a neural network, which turns each tuple of $(x, y)$ into a single number $f_\varphi(x, y)$, where $f_\varphi$ is our current network with parameters $\varphi$.
+- We'll then have four sets of values of $f_\varphi$ for each blob (signal, nominal background, and the up and down variations of the background), which we then turn into four histograms. During optimization, this histogram will be a bKDE as per @sec-bkde to make the final loss ($\mathrm{CL}_s$) differentiable, but we'll replace it with a regular histogram for calculating our evaluation metrics.
+- Using these histograms, we'll build a HistFactory statistical model in exactly the same fashion as @eq-simplemodel -- with one parameter for the signal strength $\mu$, and one nuisance parameter $\gamma$ that's constructed by interpolating the shape variation between the histograms of the nominal, up, and down variations of the background.
+- We then build the appropriate test statistic based on this likelihood, and perform our hypothesis test -- not on the observed data (we don't have any), but on the Asimov dataset for that hypothesis (i.e. for a null of $\mu=1$, we're going to use the dataset that would result in $\hat{\mu} = 1$ when fitting the likelihood, which would just be the nominal counts $s + b$).
+- The final step is producing the end result of that test (e.g. $\mathrm{CL}_s$), then taking the gradient of that whole chain, which we'd use to update the parameters of the neural network $\varphi$.
+
+We'll feed data in using mini-batches of size 4000, and hold out a group of points for each blob as a test set, which we use to calculate metrics and select the best model (normally we should never use the test set to choose a model, but the distributions are simple enough that there will be almost no macroscopic difference between train, validation, and test sets).
+
+In the graphs about to be shown, we'll benchmark `neos` against optimization against some other loss functions:
+
+- **Binary cross-entropy** (BCE): This will try to discriminate signal versus nominal background samples, and will not be informed about the up/down samples during training.
+- **BCE with data augmentation**: As above, but we indiscriminately label all of the background samples with one label instead of using just the nominal (this should be a very powerful baseline).
+- **INFERNO**: As in @sec-inferno, we'll take our loss to be the diagonal element of the inverse Fisher information that corresponds to the signal strength $\mu$.
+
+Results from the training process are shown in @fig-neos-results, where each curve is the average of that metric across 7 different training runs, all with unique random initializations of the neural network parameters. The figure has three plots, which we'll cover from left to right. Note: these quantities are all computed on the same *test set* (unseen data), and use no approximations to hard operations in their calculation (which basically means the histogram is a normal one for `neos` and INFERNO).
+
+![Results from training neural networks using the four loss functions highlighted in the legend. Left: the expected $\text{CL}_s$. Middle: The uncertainty on the signal strength $\mu$. Right: The deviation from the nominal width of the nuisance parameter $\gamma$ that controls the background uncertainty.](images/neos-results){#fig-neos-results}
+
+The leftmost plot contains the expected $\mathrm{CL}_s$ for all four methods.
+
+
+
+## Discussion
+
+- 1 forward pass is one analysis
+- mini-batch size needs to accurately reflect whole analysis to some degree -> big VRAM constraint
+
+
+### What's the true objective really?
+
+This all ultimately shapes lhood. Goals are related -- miminizing cls will maximise non-centrality parameter (think more about this), which is inv propto mu uncert (but may have better accuracy than fisher info estimate).
+
+gaussianity experiment

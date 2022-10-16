@@ -16,10 +16,10 @@ jupyter: python3
 
 It must be said that I have no desire to subject you, the reader, to the same philosophical torment that I have undergone in my pursuit of clarity of this topic, which I could not even claim to have reached. Moreover, given that this is an *experimental* physics thesis, it is exceedingly likely that you are a pragmatist, and wish to move swiftly on to the sections that may be useful to your life. Nonetheless, I’d like you to allow me the courtesy of proposing that there may in fact be something truly useful in revisiting these foundations, if only to reaffirm their non-utility.
 
-Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of *nested sampling* @ns to inferring the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof (if you're planning to be indisposed for a time, you may find @bayesrant of interest as reading material, but do make sure to dilute it with things like @freq and @mayo). This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just
+Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of *nested sampling* @ns to infer the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof (if you're planning to be indisposed for a time, you may find @bayesrant of interest as reading material, but do make sure to dilute it with things like @freq and @mayo). This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just
 
 $$
-P(A) = \frac{\mathrm{number~of~occurences~of~}A}{\mathrm{total~number~of~occurences}}~,
+P(A) = \frac{\mathrm{number~of~occurrences~of~}A}{\mathrm{total~number~of~occurrences}}~,
 $${#eq-probdef}
 
 right?”
@@ -28,11 +28,11 @@ Alas, the contentious nature of humanity would not allow me such a privilege. Ho
 
 ### Axioms of probability theory
 
-For probability $P$ and possible states of an event $\Omega$, we can say for $A \in \Omega$:
+For probability $P$ (whatever you think it means), and possible states of an event $\Omega$, we can say for $A \in \Omega$:
 
 - $P(A) \geqslant 0$ always
 - $P(\Omega) = 1$ (at least *one* event will occur)
-- $P(A \cup B \cup C) = P(A) + P(B) + P(C)$ for *mutually exclusive* events $A,B,C \in \Omega$ (i.e. only if they cannot occur at the same time)
+- The union ($\cup$) of variables $P(A \cup B \cup C) = P(A) + P(B) + P(C)$ for *mutually exclusive* events $A,B,C \in \Omega$ (i.e. only if they cannot occur at the same time)
 
 The next notion to cover is that of **conditional probability**:
 
@@ -40,7 +40,23 @@ $$
 P(A \cap B) = P(A | B)P(B)~.
 $$ {#eq-conditionalprob}
 
-Depending on whose axioms you follow, this quantity may be either derived (as in [@kolmogorov-thing]) or axiomatically stated (as in [@definetti]).
+Depending on whose axioms you follow, this quantity may be either derived (as in [@kolmogorov-thing]) or axiomatically stated (as in [@definetti]). We can also expand this definition generally to include as many variables as we want, e.g. for 3 variables:
+
+$$
+P(A \cap B \cap) = P(A \cap C | B)P(B) = P(A| C,B)P(C|B)P(B)~,
+$$
+
+and then for N variables:
+
+$$
+P(\Cap_{i=1}^N X_i) = P(X_1 | X_2, ..., X_N)P(X_2 | X_3, ..., X_N)\dots P(X_{N-1} | X_N)P(X_N)
+$$
+
+$$
+\Rightarrow = \prod_{i=1}^N P(X_i | X_{j > i})~,
+$${#eq-prob-chain-rule}
+
+where $X_{j > i} $ represents the set of all $X_j$ for which $j >i$. This is known as the **probability chain rule**.
 
 <!-- A pictorial demonstration of this and other probability quantities can be found in @fig-probs. -->
 
@@ -83,10 +99,10 @@ Now, doing things the Bayesian way doesn't mean we assign probabilites to facts 
 We now shift our discussion from the big $P$ to the small $p$, which is used to indicate the **probability density function** (pdf), defined implicitly through
 
 $$
-P(a \leqslant X \leqslant b) = \int_{a}^{b} p(x') dx'~.
+P(a \leqslant X \leqslant b) = \int_{a}^{b} p_X(x') dx'~.
 $$
 
-We can also define  the **cumulative density function**, defined for random variable $X$ as $P(X \leq x)$. We can then write this in terms of the probability density function:
+Here, we're using capital letters for **random variables** (the thing that follows the distribution), and realizations of that random variable are in lowercase letters. We can also define  the **cumulative density function** (cdf), defined for random variable $X$ as $P(X \leq x)$. We can then write this in terms of the probability density function:
 
 $$
 P(X \leqslant x) = \int_{-\infty}^{x} p(x') dx'~.
@@ -95,7 +111,7 @@ $$
 This gives us the relation
 
 $$
-p(x) = \frac{dP(X \leq x)}{dx}~.
+p_X(x) = \frac{dP(X \leqslant x)}{dx}~.
 $$
 
 Pretty much all the same relations for big $P$ also hold for small $p$, which can be attributed to many reasons (it's a rabbit hole involving measure theory and similar concepts -- see @kolmogorov-thing for more, it's well-written!)
@@ -110,7 +126,41 @@ An example is just drawing some random sample, e.g. `np.random.uniform(size=10)`
 
 ### Change of variables formula
 
+If the distribution over $x$ is $p(x)$, what's the distribution over $\log(x)$? Or, more generally, any monotonic function $y = f(x)$ with corresponding random variable $Y$? Let's look at the cdf:
+
+$$
+P(Y \leqslant y) = P(f(X) \leqslant y) = P(X \leqslant f^{-1}(y))~.
+$$
+
+Differentiating both sides with respect to $y$ to recover the pdfs:
+
+$$
+\frac{dP(Y \leqslant y)}{dy} = \frac{dP(X \leqslant f^{-1}(y))}{df^{-1}(y)}\frac{df^{-1}(y)}{dy}~~~ \Rightarrow ~p_Y(y) = p_X(f^{-1}(y)) \left|\frac{df^{-1}(y)}{dy}\right|~,
+$$
+
+where we've inserted the absolute value to ensure this holds for both monotonically increasing and decreasing functions. The multi-dimensional version of this involves the determinant of the **Jacobian matrix**, defined for a function involving vectors $\mathbf{y}=f(\mathbf{x})$ as
+
+$$
+J_f(\mathbf{x}) = f'(\mathbf{x}) = \left[\begin{array}{ccc}\frac{\partial y_{1}}{\partial x_{1}} & \cdots & \frac{\partial y_{1}}{\partial x_{n}} \\\vdots & \ddots & \vdots \\\frac{\partial y_{m}}{\partial x_{1}} & \cdots & \frac{\partial y_{m}}{\partial x_{n}}\end{array}\right]~.
+$$ {#eq-jacobian}
+
+This leads to the formula
+
+$$
+p_Y(\mathbf{y}) = p_X(f^{-1}(\mathbf{y})) \left|\det{J_{f^{-1}}(\mathbf{y})} \right|~,
+$${#eq-change-of-variables}
+
+which can be thought of as manipulating the space in the $x$-$y$ plane (since determinants are akin to volume transforms) to make the probabilities match. This will be particularly useful when we come to look at normalizing flows.
+
 ### Expectation values
+
+The expectation value for a quantity $f(x)$ over a distribution $p_X(x)$ is defined as
+
+$$
+\mathbb{E}_{p_X}(f(x)) = \int_{-\infty}^{+\infty} f(x) p_X(x) dx~,
+$$
+
+which I loosely think of as the average value that $f(x)$ will have assuming probability distribution $p_X$. Expectation values are useful to extract a definite value from a probability distribution, with many useful quantities such as the mean, variance, skew, and kurtosis all being able to be written in terms of expectation values (see more on this and the "moments" of a distribution in [this thoughtful blog post](https://gregorygundersen.com/blog/2020/04/11/moments/)).
 
 ### Commonly used distributions {#sec-dists}
 
@@ -173,6 +223,40 @@ Here, we're essentially picking our best guess of the value of the nuisance para
 $$p_{\mathrm{marginal}}(x|\mu) = \int_{-\infty}^{+\infty} p(x| \mu, \theta) p(\theta) d\theta ~.$$
 
 Note that this requires a specification of a prior pdf $p(\theta)$. Marginalizing is then a form of averaging of the likelihood and prior across the domain of $\theta$. Despite this technically being a Bayesian procedure due to the specification of the prior, we're free to use the resulting model in a frequentist way -- this is just a model specification step.
+
+
+## Metrics of probability
+
+### Fisher information and the Cramér–Rao bound {#sec-fisher}
+
+A useful quantity in many ways is the **Fisher information matrix**. We can write the definition for an element of this matrix for a likelihood function $p(x ; \theta)$ ($\theta = \{\theta_i\}$) as
+
+$$
+\mathcal{I}(\theta)_{ij}=-\frac{\partial^2}{\partial \theta_i \partial \theta_j} \log p(x ; \theta)~.
+$$
+
+We'll focus on the fact that you can extract *parameter uncertainty estimates* from this quantity. How? We turn to the Cramér–Rao bound, which states that if we have an unbiased estimator for the likelihood parameters $\hat{\theta}$, the Fisher information matrix $\mathcal{I}(\theta)$ satisfies
+
+$$
+\Sigma_\hat{\theta}^2 \geqslant [\mathcal{I}(\theta)]^{-1}~,
+$$
+
+where $\Sigma_\hat{\theta}^2$ is the covariance matrix for the fitted parameters $\hat{\theta}$. In the asymptotic limit, the maximum likelihood estimator will attain this lower bound, and satisfies
+
+$$
+\sqrt{n}(\hat{\theta}-\theta) \rightarrow \text{Normal}(0, [\mathcal{I}(\theta)]^{-1})~
+$$
+
+for sample size $n$. A useful thing about this is that the diagonal elements of the inverse Fisher information will then correspond to the variances of the individual parameters, i.e. $[\mathcal{I}(\theta)]^{-1}_{ii} = \sigma_{\theta_i}^2$. There are also many other interesting quantities we can extract from this equivalence, including the *generalized variance*, which is the determinant of the covariance matrix (or determinant of the inverse Fisher information). These quantities will see a little use later on.
+
+### Kullback-Leibler divergence (KL divergence) {#sec-KL}
+
+
+
+
+
+
+
 
 
 
@@ -516,10 +600,4 @@ Armed with this equation, Bayesian procedures include:
     - Can then perform point estimation via *maximum a posteriori* (the mode of the posterior)
 - **Credible intervals**: in contrast to confidence intervals where the endpoints are random variables, $\mu$ itself is now the random variable, and the interval is constructed such that it contains the true value $\mu_T$ with some allocated probability.
 - **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here.
-
-
-## Metrics of probability
-
-### Fisher information and the Cramér–Rao bound {#sec-fisher}
-
-### Kullback-Leibler divergence (KL divergence) {#sec-KL}
+- **Evidence estimation**, e.g. nested sampling @ns, which also comes with a posterior estimate as a by-product.
