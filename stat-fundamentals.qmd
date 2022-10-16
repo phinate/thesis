@@ -249,18 +249,15 @@ $$
 
 for sample size $n$. A useful thing about this is that the diagonal elements of the inverse Fisher information will then correspond to the variances of the individual parameters, i.e. $[\mathcal{I}(\theta)]^{-1}_{ii} = \sigma_{\theta_i}^2$. There are also many other interesting quantities we can extract from this equivalence, including the *generalized variance*, which is the determinant of the covariance matrix (or determinant of the inverse Fisher information). These quantities will see a little use later on.
 
-### Kullback-Leibler divergence (KL divergence) {#sec-KL}
+### Kullback-Leibler divergence {#sec-KL}
 
+The **Kullback-Leibler divergence** (KL divergence) is a commonly used quantity in machine learning and information theory to represent the "distance" between a probability distribution $p(x)$ and an estimation of that distribution $q(x)$. Related to things like entropy, it can be thought of as the loss of information from using $q$ as an approximation to $p$. It's defined for continuous $x$ as
 
+$$
+D_{KL}(p(x) \| q(x))=\int_{-\infty}^{\infty} p(x) \ln \frac{p(x)}{q(x)} dx~.
+$${#eq-kl-divergence}
 
-
-
-
-
-
-
-
-
+One interesting thing to note is that this is not a distance in the typical sense, since it's an *asymmetric* number, i.e. $D_{KL}(p(x) \| q(x)) \neq D_{KL}(q(x) \| p(x))$.
 
 ## Inference
 
