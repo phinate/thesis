@@ -220,7 +220,7 @@ where we recall that $\hat{\hat{\theta}}(\mu)$ represents fitting the value of $
 
 This quantity (or $-2\ln$ of it at least) forms the basis of all test statistics that we use in tests for the discovery of a new particle, or for setting a limit on a physical quantity (e.g. a particle mass or process cross-section).
 
-### Sampling distributions for $-2 \ln \lambda$
+### Sampling distributions for $-2 \ln \lambda$ {#sec-sampling}
 
 The first result we'll exploit to our advantage is that of Wald @wald, who showed that we can relate $\lambda(x,\mu)$ with the maximum likelihood estimate $\hat{\mu}$ in the following way:
 
@@ -228,7 +228,7 @@ $$
 -2\ln \lambda(x,\mu) = \left(\frac{\mu - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 + \mathcal{O}(\frac{1}{\sqrt{N}})~,
 $$ {#eq-wald}
 
-where $\sigma_{\hat{\mu}}$ is the standard deviation $\hat{\mu}(x)$, which will tend to a normal distribution with sufficient data, and $N$ is our data size. This equation is known as **Wald's relation**. Note that this is just a quadratic in $\hat{\mu}(x)$  -- the plot of $-2\ln \lambda(x,\mu)$ vs $\hat{\mu}(x)$ will be a parabola (to the extent that we can neglect the $\mathcal{O}(1/ \sqrt{N})$ term).
+where $\sigma_{\hat{\mu}}$ is the standard deviation of $\hat{\mu}(x)$, which will tend to a normal distribution of this width with sufficient data (and is assumed to do so here), and $N$ is our data size. This equation is known as **Wald's relation**. Note that this is just a quadratic in $\hat{\mu}(x)$  -- the plot of $-2\ln \lambda(x,\mu)$ vs $\hat{\mu}(x)$ will be a parabola (to the extent that we can neglect the $\mathcal{O}(1/ \sqrt{N})$ term). The uncertainty $\sigma_{\hat{\mu}}$ is an important quantity that we'll talk about in later sections after doing some groundwork.
 
 Another interesting result is that since we're already incorporating nuisance parameters within $\lambda$, the shape of the test statistic against $\hat{\mu}(x)$ will follow this relation independent of the value of the nuisance parameters.
 
@@ -259,7 +259,7 @@ Just to recap notation here, since we're accumulating a few forms of $\mu$:
 The reason to make the distinction between $\mu_0$ and $\mu'$ in particular is that we may not always want the distribution of the test statistic under the null. An example for this is that when we report the expected discovery significance, we're testing a null of $\mu_0=0$, but would like to see if we can discover the signal assuming it exists in the data, which would mean we want $p(-2\ln \lambda(x,\mu_0) | \mu')$, with $\mu'$ usually being taken as the nominal value of 1 for the signal hypothesis. For that, we're able to leverage Wald's result of having a non-central chi-squared distribution, with the non-centrality parameter given as in @eq-wald-noncentral.
 
 
-### The catalog of test statistics
+### The catalog of test statistics {#sec-test-stats}
 
 The results we showed in the previous section hold for a test statistic of $-2\ln \lambda(x,\mu)$. In practice, we tend to use some slight variations on this, depending on the physics task we want to undertake. Here are some examples.
 
@@ -270,11 +270,11 @@ When we are searching to **discover** a new physics process, we will test using
 
 $$
 q_0(x) = \begin{cases}
-    -2\ln \lambda(x,0),& \text{if } \hat{\mu} \geqslant 0\\
-    0,              & \text{if } \hat{\mu} < 0
+    -2\ln \lambda(x,0)& \text{if } \hat{\mu} \geqslant 0,\\
+    0              & \text{if } \hat{\mu} < 0
 \end{cases}
 ~,
-$$
+$${#eq-q0}
 
 where we have a null hypothesis of $\mu_0 = 0$, i.e. we test the background-only model. The reason we set $q_0=0$ when $\hat{\mu} < 0$ is that this would imply that the MLE for the expected number of events is even smaller than the nominal background, so we assume no signal is present. That means rejection of $\mu=0$ would then only indicate a positive signal strength $\mu>0$, indicating the potential presence of some amount of signal.
 
@@ -284,19 +284,92 @@ where we have a null hypothesis of $\mu_0 = 0$, i.e. we test the background-only
 We can also use our hypothesis test as a mechanism to set an **exclusion limit** on the signal strength $\mu$, which is conventionally done through an upper limit, as defined in @sec-conf-intervals^[We could equally well look at other ordering choices, e.g. a central interval for $\mu$.]. For this, we again turn to $-2\ln \lambda(x,\mu)$, but only for fitted values of $\mu$ that are *less* than the value of $\mu$ being tested. The reason for this is that data with $\hat{\mu}$ *above* our tested value would make it even more signal-like than the null, which for the purposes of bounding $\mu$ from above, would not be desirable to be in the "extreme" region of the data, i.e. in the rejection area for the hypothesis test. We can circumvent this by setting the test statistic to 0 for $\hat{\mu} > \mu$, giving us the expression
 
 $$
-q_\mu= \begin{cases}-2 \ln \lambda(x, \mu) & \hat{\mu} \leq \mu \\ 0 & \hat{\mu}>\mu\end{cases}~.
-$$
+q_\mu(x) = \begin{cases}-2 \ln \lambda(x, \mu) & \text{if } \hat{\mu} \leq \mu, \\ 0 & \text{if }\hat{\mu}>\mu\end{cases}~.
+$${#eq-qmu}
+
+
+Alternative test statistics exist in both cases (denoted by $\tilde{q\mu}$) for when the model disallows negative values of $\mu$. These are not discussed here, but only require minor changes to the definitions of @eq-q0 and @eq-qmu.
 
 <!-- In the case of an upper limit, values of $\mu$ that are greater than $\mu_{\mathrm{upper}}$ consider our observed data as extreme, so we term these values as *excluded* at our chosen confidence level.  -->
 <!--
 If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_0$, then $\lambda(x,\mu_0)$ will be different than 1, indicating less compatibility between $H_0$ and $H_1$ since their likelihoods differ. -->
 
 
-## Useful formulae from using the Asimov dataset
+## Asymptotic formulae for simple $p$-value calculations
 
-In @asymptotics, they proposed the notion of the **Asimov dataset**, which is defined for a given value of the signal strength $\mu$ as the dataset that would cause the fitted value $\hat{\mu}$ to equal $\mu$. As a simple example, assuming no background uncertainty in the model, this would just be the expected counts at that value of $\mu$, i.e. $\mu s+b$.
+The formulae presented here all stem from the result by Wald in @eq-wald; they will be stated without lengthy derivation, but the working is mostly algebraic in nature, and builds upon the fact that we neglect the $\mathcal{O}(1/ \sqrt{N})$ term in that equation^[In @asymptotics, they show that $N$ need only be 10 or so for this to work well in their experiments.].
 
-This may not appear that useful at first, but we can use this in conjunction with the results from @sec-asymptotics to produce some simple formulae that let us perform hypothesis tests without much computation at all. We start by remembering the result from Wald, which tells us the distribution of the test statistic $-2\ln \lambda(x,\mu) $ will be a non-central chi-squared distribution.
+We start with the fact that the $p$-value (denoted $p_\mu$ here to highlight the selection of the null hypotheses)from any hypothesis test that we plan to do here can be written as
+
+$$
+p_\mu = 1 - F(t(x, \mu) | \mu')~,
+$$
+
+where $F(t(x, \mu) | \mu')$ is the *cumulative distribution function* for our test statistic $t(x, \mu)$, some chosen value of $\mu$ as our point null, and an assumed signal strength $\mu'$ in the data.
+
+As in @sec-test-stats, when trying to discover a signal, we choose the test statistic $t(x, \mu) = q_0$. In this case, the cumulative distribution $F(q_0 | \mu')$ can be derived from the results in @sec-sampling, which comes out to be
+
+$$
+F\left(q_0 \mid \mu'\right)=\Phi\left(\sqrt{q_0}-\frac{\mu'}{\sigma_{\hat{\mu}}}\right)~,
+$$
+
+where $\Phi$ is the cumulative distribution of the standard Normal distribution. In the case that the data is drawn from the null distribution ($\mu'=0$), this reduces to
+
+$$
+F\left(q_0 \mid \mu'\right)=\Phi\left(\sqrt{q_0}\right)~,
+$${#eq-discovery-cumulative}
+
+meaning our $p$-value is then
+
+$$
+p_0 = 1 - \Phi\left(\sqrt{q_0}\right)~.
+$$
+
+For upper limits, we're switching to using $q_\mu$ as our test statistic. Similarly to $q_0$, this leads to the cumulative distribution
+
+$$
+F\left(q_\mu \mid \mu'\right)=\Phi\left(\sqrt{q_\mu}-\frac{\mu-\mu'}{\sigma_{\hat{\mu}}}\right)~,
+$$
+
+which, if the data is from the null ($\mu=\mu'$), leads to the same result as @eq-discovery-cumulative:
+
+$$
+F\left(q_\mu \mid \mu'\right)=\Phi\left(\sqrt{q_\mu}\right)~.
+$$
+
+Our $p$-value is then just
+
+$$
+p_\mu = 1 - \Phi\left(\sqrt{q_\mu}\right)~.
+$$
+
+These simple formulae underpin pretty much all major data analysis at the Large Hadron Collider -- we too will make use of them later on.
+
+## The Asimov dataset and $\sigma_{\hat{\mu}}$
+
+In @asymptotics, they proposed the notion of the **Asimov dataset** $x_A(\mu')$, which is defined for a given value of the signal strength $\mu'$ as the dataset that would cause the fitted value $\hat{\mu}$ to equal $\mu'$ (and also some value of the nuisances $\theta$ to equal $\theta'$, just to fully specify the parameters). As a simple example, assuming no background uncertainty in the model, this would just be the expected counts at $\mu=\mu'$, i.e. $\mu' s+b$.
+
+This may not appear that useful at first, but we can use this in conjunction with the results from @sec-asymptotics to produce some simple formulae that let us perform hypothesis tests without much computation at all. We start by remembering the result from Wald in @eq-wald, which tells us
+
+$$
+-2\ln \lambda(x,\mu_0) \approx \left(\frac{\mu_0 - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 ~.
+$$
+
+Evaluating this at the Asimov dataset:
+
+$$
+-2\ln \lambda(x_A(\mu'),\mu_0) \approx \left(\frac{\mu_0 - \mu'}{\sigma_{\hat{\mu}}}\right)^2 ~,
+$$
+
+since, by definition of $x_A$, $\hat{\mu}=\mu'$. This is exactly the definition of the non-centrality parameter $\Lambda$ from @eq-wald-noncentral! So using this specific construction of the Asimov dataset, we can get an estimate of $\Lambda$, which characterizes the *general* distribution of $-2\ln \lambda(x,\mu_0)$. Moreover, we can simply rearrange this equation to get
+
+$$
+\sigma^2_{\hat{\mu}} \approx - \frac{(\mu_0 - \mu')^2}{2\ln \lambda(x_A(\mu'),\mu_0)} ~,
+$${#eq-asimov-sigma}
+
+which is an estimate of the variance that characterizes the Normal distribution of $\hat{\mu}$, irrespective of the value it often takes in practice (this will just shift the mean).
+
+Another way to estimate $\sigma^2_{\hat{\mu}}$ is using the Fisher information matrix of the HistFactory likelihood as in @sec-fisher, where the diagonal term in its inverse corresponding to the index in the likelihood for $\mu$ would provide such an estimate, under similar requirements for the asymptotic unbiasedness of the maximum likelihood estimate $\hat{\mu}$. Both approaches are perfectly valid, though @asymptotics claim that @eq-asimov-sigma generally performed better in their experiments.
 
 
 ## The $\text{CL}_s$ quantity
