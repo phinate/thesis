@@ -242,7 +242,21 @@ $$ {#eq-wilks}
 
 We can then say that, under the assumption of $H_0$ (i.e. assuming $x\sim p(x|\mu_0)$), the MLE $\hat{\mu}$ will be normally distributed around $\mu_0$, and $-2\ln \lambda(x,\mu_0)$ then follows a $\chi^2$ distribution with one degree of freedom. This is known as **Wilks' theorem** @wilks, and gives us access to the sampling distribution we need for hypothesis testing.
 
-<!-- What happens when we break our assumption of $H_0$ being true, and want access to the  -->
+What happens when the value of $\mu$ in the data set is different to $\mu_0$, and instead is some value $\mu'$? The result from Wald in @eq-wald allows us to generalize the result from Wilks, where we instead find that have a *non-central chi-square distribution* with one degree of freedom, written as  $\chi^2(\Lambda)$, which is determined by the non-centrality parameter $\Lambda$, given by
+
+$$
+\Lambda = \left(\frac{\mu_0 - \mu'}{\sigma_{\hat{\mu}}}\right)^2 ~.
+$${#eq-wald-noncentral}
+
+We can see that when we're back in the regime of $\mu'=\mu_0$, the non-centrality parameter is 0, which makes the distribution a regular (central) chi-square, as in @eq-wilks. This result will be particularly useful in later sections.
+
+Just to recap notation here, since we're accumulating a few forms of $\mu$:
+
+- $\mu_0$ is the value of $\mu$ being *tested as the null hypothesis*, with the alternative being $\mu\neq\mu_0$.
+- $\hat{\mu}$ is the value *fitted to the observed data* by maximum likelihood.
+- $\mu'$ is the *assumed* value of $\mu$ present in the data itself.
+
+The reason to make the distinction between $\mu_0$ and $\mu'$ in particular is that we may not always want the distribution of the test statistic under the null. An example for this is that when we report the expected discovery significance, we're testing a null of $\mu_0=0$, but would like to see if we can discover the signal assuming it exists in the data, which would mean we want $p(-2\ln \lambda(x,\mu_0) | \mu')$, with $\mu'$ usually being taken as the nominal value of 1 for the signal hypothesis. For that, we're able to leverage Wald's result of having a non-central chi-squared distribution, with the non-centrality parameter given as in @eq-wald-noncentral.
 
 
 ### The catalog of test statistics
@@ -267,7 +281,11 @@ where we have a null hypothesis of $\mu_0 = 0$, i.e. we test the background-only
 
 #### Upper limit setting {-}
 
-We can also use our hypothesis test as a mechanism to set an **exclusion limit** on the signal strength $\mu$, which is conventionally done through an upper limit, as defined in @sec-conf-intervals. We could equally well look at other ordering choices, e.g. a central interval for $\mu$, though the upper limit may have more implications from a physics perspective as a yardstick for the maximum plausible amount of the signal that could exist in nature.
+We can also use our hypothesis test as a mechanism to set an **exclusion limit** on the signal strength $\mu$, which is conventionally done through an upper limit, as defined in @sec-conf-intervals^[We could equally well look at other ordering choices, e.g. a central interval for $\mu$.]. For this, we again turn to $-2\ln \lambda(x,\mu)$, but only for fitted values of $\mu$ that are *less* than the value of $\mu$ being tested. The reason for this is that data with $\hat{\mu}$ *above* our tested value would make it even more signal-like than the null, which for the purposes of bounding $\mu$ from above, would not be desirable to be in the "extreme" region of the data, i.e. in the rejection area for the hypothesis test. We can circumvent this by setting the test statistic to 0 for $\hat{\mu} > \mu$, giving us the expression
+
+$$
+q_\mu= \begin{cases}-2 \ln \lambda(x, \mu) & \hat{\mu} \leq \mu \\ 0 & \hat{\mu}>\mu\end{cases}~.
+$$
 
 <!-- In the case of an upper limit, values of $\mu$ that are greater than $\mu_{\mathrm{upper}}$ consider our observed data as extreme, so we term these values as *excluded* at our chosen confidence level.  -->
 <!--
@@ -276,9 +294,9 @@ If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_
 
 ## Useful formulae from using the Asimov dataset
 
-In @asymptotics, they proposed the notion of the **Asimov dataset**, which is defined for a given value of the signal strength $\mu'$ as the dataset that would cause the fitted value $\hat{\mu}$ to equal $\mu'$. As a simple example, assuming no background uncertainty in the model, this would just be the expected counts with $\mu=\mu'$, i.e. $\mu's+b$.
+In @asymptotics, they proposed the notion of the **Asimov dataset**, which is defined for a given value of the signal strength $\mu$ as the dataset that would cause the fitted value $\hat{\mu}$ to equal $\mu$. As a simple example, assuming no background uncertainty in the model, this would just be the expected counts at that value of $\mu$, i.e. $\mu s+b$.
 
-This may not appear that useful at first, but we can use this in conjunction with the results from @sec-asymptotics to produce some simple formulae that let us perform hypothesis tests without much computation at all. We start by remembering the result from Wald that says
+This may not appear that useful at first, but we can use this in conjunction with the results from @sec-asymptotics to produce some simple formulae that let us perform hypothesis tests without much computation at all. We start by remembering the result from Wald, which tells us the distribution of the test statistic $-2\ln \lambda(x,\mu) $ will be a non-central chi-squared distribution.
 
 
 ## The $\text{CL}_s$ quantity
