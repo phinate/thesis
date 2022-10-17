@@ -199,7 +199,7 @@ $$
 
 We'll use the shorthand of $\mathrm{Uniform}(a,b)$. When we refer to drawing values "at random", we're probably referring to drawing $x\sim \mathrm{Uniform}(0,1)$.
 
-### Nuisance parameters
+### Nuisance parameters {#sec-nps}
 
 When our probability model $p(x|\mu)$ fails to describe the data generating process well, we may add more parameters to our model in order to make it more flexible, and thereby hopefully increase the accuracy of the model. As an example, this could be a parameter that controls the shape of the overall distribution in a way that models a physical effect. Such parameters are called **nuisance parameters**, as they exist only to add model flexibility (we're not interested in inferring their true values), and are then a nuisance to deal (increased dimensionality of any downstream calculations). If we denote the set of nuisance parameters of a model as $\theta$, our likelihood then reads $p(x|\mu,\theta)$.
 

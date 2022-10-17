@@ -196,9 +196,11 @@ which is simply a product over Poisson distribution for each bin within a histog
 
 We may have a best prediction for $\alpha$ from studies carried out by e.g. a performance group in your collaboration that focuses on measuring $\alpha$, but we'll also have some notion of uncertainty on that value, perhaps in the form of a distribution on $\alpha$. An example procedure that we often do in this case is to just simulate our physics data at the best guess for that parameter $\alpha$ -- we'll refer to this as the **nominal** value $\alpha_{\mathrm{nom}}$ -- and then also simulate data for values at $\alpha_{\mathrm{nom}}+\sigma_{\alpha} = \alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{nom}}-\sigma_{\alpha} = \alpha_{\mathrm{down}}$, where $\sigma_{\alpha}$ is some notion of a standard deviation on $\alpha$ (e.g. calculated arithmetically on a  sample or fitted as part of a normal distribution).
 
-We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{down}}$, but it's pretty commonplace as a quick way to get a rough idea of the influence of $\alpha$ on the histograms. And that's the point -- we really only care about how varying $\alpha$ changes the resulting histogram for that process -- either $\mathbf{h}^{\mathrm{sig}}$ or $\mathbf{h}^{\mathrm{bkg}}$. We can then estimate the effect of $\alpha$ as a continuous change by some kind of *interpolation between the resulting histogram yields*. All of this results in the addition of as many extra factors as you like to @eq-hifabase, which can be broken up into *mulitplicative terms* and *additive terms*.
+We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathrm{down}}$, but it's pretty commonplace as a quick way to get a rough idea of the influence of $\alpha$ on the histograms. And that's the point -- we really only care about how varying $\alpha$ changes the resulting histogram for that process -- either $\mathbf{h}^{\mathrm{sig}}$ or $\mathbf{h}^{\mathrm{bkg}}$. We can then estimate the effect of $\alpha$ as a continuous change by some kind of *interpolation between the resulting histogram yields*. All of this results in the addition of as many extra factors as you like to @eq-hifabase, which can be broken up into *mulitplicative terms* and *additive terms* applied to both $s$ and $b$, all of which serve to influence the shape and/or overall normalization of the resulting histogram.
 
 ### Constraint terms
+
+We discussed constraint terms briefly in @sec-nps, where we asserted that if a parameter $\alpha$ had some kind of external measurement that we wanted to incorporate into the *model* (not as a Bayesian prior), then we would have to include the likelihood function for that measurement $p(y|\alpha)$ in the full model, where $y$ is the measured quantity that provides information about $\alpha$. We would then multiply the likelihood in @eq-hifabase (after we added in our nuisance parameter $\alpha$) by $p(y|\alpha)$ -- the only problem is that we don't readily have access to this full likelihood. What we do instead is to introduce an approximate constraint that mirrors
 
 ## Hypothesis testing and asymptotic formulae in HEP {#sec-asymptotics}
 
@@ -341,7 +343,7 @@ Our $p$-value is then just
 
 $$
 p_\mu = 1 - \Phi\left(\sqrt{q_\mu}\right)~.
-$$
+$${#eq-upper-lim-p-value}
 
 These simple formulae underpin pretty much all major data analysis at the Large Hadron Collider -- we too will make use of them later on.
 
@@ -373,3 +375,11 @@ Another way to estimate $\sigma^2_{\hat{\mu}}$ is using the Fisher information m
 
 
 ## The $\text{CL}_s$ quantity
+
+When setting upper limits, instead of calculating $p$-values as in @eq-upper-lim-p-value, the ATLAS experiment mainly uses a modification of $p_\mu$ that divides by the *power of the test* $1-\beta$. Originally proposed in @cls, in which it was termed $\mathrm{CL}_s$, the quantity is defined as the ratio
+
+$$
+\mathrm{CL}_s = \frac{p_{\mu}}{1-p_{\mu=0}}~,
+$$
+
+where $p_{\mu=0}$ is the $p$-value for the background-only hypotheses, which corresponds to the type-II error $\beta$, since $\mu=0$ faithfully represents the alternative when setting limits. At first glance, there's no statistically obvious interpretation of a ratio of two $p$-values, but it does have the desirable property that, for tests with low power (i.e. low sensitivity to the alternative model), the $\mathrm{CL}_s$ value will be higher than the associated $p$-value, and we have less chance to erroneously reject the null when we don't have good test power to begin with.
