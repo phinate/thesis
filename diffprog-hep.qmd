@@ -626,7 +626,7 @@ The final plot on the right shows the squared deviation from the nominal uncerta
 
 ## Discussion
 
-
+Regardless of any results, one immediate concern that you may have thought of while I talked about this method was the scaling aspect. We can't escape that one forward pass and one update step is computationally equivalent to two runs of the whole analysis inference chain, even if on a much smaller pool of data.
 
 
 - 1 forward pass is one analysis
