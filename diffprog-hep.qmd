@@ -300,7 +300,7 @@ ax.legend()
 make_cut_plot(cut, axs[1])
 ```
 
-We had a nice go at a guess, but how do we pick the *best* cut? For this simple problem, it suffices to scan over the different significances we'll get by cutting at each value of $x$, then just use the value with the highest significance. We do this in @fig-cut-scan, where the optimal cut seems to be around $x=1.54$.
+We had a nice go at a guess, but how do we pick the *best* cut? For this simple problem, it suffices to scan over the different significances we'll get by cutting at each value of $x$, then just use the value with the highest significance. Doing this leads to the optimal cut being around $x=1.54$.
 <!--
 ```{python}
 #| label: fig-cut-scan
@@ -325,7 +325,7 @@ ax.set_xlabel("x")
 ax.set_ylabel(r"$Z_A$")
 ```
 -->
-In reality, this could be an expensive procedure to do for a wide range of $x$ and for many different cut variables. This prompts the search for some kind of intelligent optimization that can handle large dimensional parameter spaces. Gradient descent is just that! But, to make it work, we need to be able to calculate the gradient of the significance with respect to the cut value -- something only possible if the cut itself is differentiable (it isn't).
+In reality, though, this could be an expensive procedure to do for a wide range of $x$ and for many different cut variables. This prompts the search for some kind of intelligent optimization that can handle large dimensional parameter spaces. Gradient descent is just that! But, to make it work, we need to be able to calculate the gradient of the significance with respect to the cut value -- something only possible if the cut itself is differentiable (it isn't).
 
 To see this, note that cuts are step functions, i.e. logical less than or more than statements. These can be viewed as applying weights to the data -- 0 on one side of the threshold, and 1 on the other. If we change the cut value, the events either keep their weight (0 change in significance) or sharply gain/lose their weight value (discrete jump in significance). We would then like to replace this thresholding with a *smooth* weight assignment such that the cut value varies smoothly with the weights applied. What kind of operation can do this? We have such a candidate in the *sigmoid function* $1/(1+e^{-x})$.
 
@@ -365,7 +365,7 @@ ax.set_xlabel("x")
 ax.legend();
 ```
 
-Now that we have a differentiable cut, we can see what the significance scan from @fig-cut-scan looks like for the differentiable case, shown in @fig-cut-scan-2. It's an interesting plot; there's a clear smoothing out of the overall envelope of the significance in comparison to using the hard cut. However, the important thing is the **coincidence of the maxima**: when optimizing, we'll use the differentiable cut, but we'll plug the value of the cut position from the optimization back in to the hard cut for our actual physics results. This is a very important distinction - *we don't use approximate operations in the final calculation!* Moreover, since we can control the degree to which we're approximating the significance landscape, one could even imagine a fine-tuning of the slope when we're close to a local minima during optimization, allowing us to make jumps more in-line with the true optimum value (though this is not explored here).
+Now that we have a differentiable cut, we can see what the significance scan looks like for both the differentiable and standard cases, shown in @fig-cut-scan-2. It's an interesting plot; there's a clear smoothing out of the overall envelope of the significance in comparison to using the hard cut. However, the important thing is the **coincidence of the maxima**: when optimizing, we'll use the differentiable cut, but we'll plug the value of the cut position from the optimization back in to the hard cut for our actual physics results. This is a very important distinction - *we don't use approximate operations in the final calculation!* Moreover, since we can control the degree to which we're approximating the significance landscape, one could even imagine a fine-tuning of the slope when we're close to a local minima during optimization, allowing us to make jumps more in-line with the true optimum value (though this is not explored here).
 
 ```{python}
 #| label: fig-cut-scan-2
@@ -565,7 +565,7 @@ All of these formulae are differentiable without any extra work, so we're done!
 Recall from @sec-fisher that the *Fisher information matrix* $\mathcal{I}(\theta)$ gives us access to the covariance matrix for maximum likelihood estimates, provided we're in the asymptotic limit, through the Cramér–Rao bound:
 
 $$
-\Sigma_\hat{\theta}^2 \geqslant [\mathcal{I}(\theta)]^{-1}~.
+\Sigma_{\hat{\theta}}^{2} \geqslant [\mathcal{I}(\theta)]^{-1}~.
 $$
 
 Since $\mathcal{I}(\theta)$ is defined in terms of second-order derivatives of the log-likelihood -- something that we've already made differentiable from a code perspective -- we can then calculate the Fisher information using automatic differentiation. Moreover, since function transformations like the gradient operator are composable in automatic differentiation frameworks, this will itself be differentiable! This gives us access to many other inference-aware quantities that we can use as both diagnostics and as loss functions, including diagonal elements of the covariance matrix, which correspond to the individual uncertainties on each likelihood parameter. This approach was first explored by INFERNO [@inferno], from whom we take much inspiration from in this section.
@@ -580,6 +580,8 @@ As a first example, we can look at the simple analysis from @sec-simple-anal as 
 The results of training this setup to optimize $\phi$ with respect to the discovery $p$-value can be seen in @fig-simple-opt. Immediately, we can see that we've managed to find a point that minimizes the objective we care about, being able to incorporate uncertainty all the while! One thing I really like about this plot is the way it appeals to intuition -- the expected counts that result from this procedure appear to be exactly at some medium compromise between signal to background ratio and uncertainty on the background. The acquired Swede within me would even go as far as to call it "lagom" -- not too little, not too much; just the right amount^[If you're less of a holistic person and would prefer something more quantitative, you can see a real-life carving of the "lagom" amount in Lund, just outside one of the main university buildings.].
 
 ![Left: The resulting point from optimizing $\phi$ with gradient descent. Right: The histogram model at the solution of the optimization.](images/opt){#fig-simple-opt}
+
+One interesting thing to note: we're calculating the discovery $p$-value using the asymptotic formulae outlined in @sec-asymptotics. Minimising this $p$-value corresponds to pushing the observed value of the test statistic as far to the right as possible (i.e. maximizing its value), which will trap smaller and smaller proportions of the distribution of the test statistic. Recall that @eq-wald states that we know an interesting fact about this test statistic: it's approximately equal to $\left((\mu_0 - \hat{\mu}(x))/\sigma_{\hat{\mu}}\right)^2$. Since we're using Asimov data with $\mu'=\hat{\mu}=1$, and probing a null of $\mu_0=0$, the test statistic is actually an (inverse) estimate of the variance of $\hat{\mu}$, which is being minimized during optimization! This has a lot of similarities with INFERNO, since both methods are effectively minimizing the same quantity, but estimated a different way.
 
 Equipped with this systematic-aware loss function, we can now apply it to something a little more complicated.
 
@@ -613,6 +615,8 @@ In the graphs about to be shown, we'll benchmark `neos` against optimization aga
 - **BCE with data augmentation**: As above, but we indiscriminately label all of the background samples with one label instead of using just the nominal (this should be a very powerful baseline).
 - **INFERNO**: As in @sec-inferno, we'll take our loss to be the diagonal element of the inverse Fisher information that corresponds to the signal strength $\mu$.
 
+#### Results {-}
+
 Results from the training process are shown in @fig-neos-results, where each curve is the average of that metric across 7 different training runs, all with unique random initializations of the neural network parameters. The figure has three plots, which we'll cover from left to right. Note: these quantities are all computed on the same *test set* (unseen data), and use no approximations to hard operations in their calculation (which basically means the histogram is a normal one for `neos` and INFERNO).
 
 ![Results from training neural networks using the four loss functions highlighted in the legend. Left: the expected $\text{CL}_s$. Middle: The uncertainty on the signal strength $\mu$. Right: The deviation from the nominal width of the nuisance parameter $\gamma$ that controls the background uncertainty.](images/neos-results){#fig-neos-results}
@@ -626,8 +630,7 @@ The final plot on the right shows the squared deviation from the nominal uncerta
 
 ## Discussion
 
-Regardless of any results, one immediate concern that you may have thought of while I talked about this method was the scaling aspect. We can't escape that one forward pass and one update step is computationally equivalent to two runs of the whole analysis inference chain, even if on a much smaller pool of data.
-
+Regardless of any results, one immediate concern that you may have thought of while I talked about `neos` was the scaling aspect. We can't escape that one forward pass and one update step is computationally equivalent to two runs of the whole analysis inference chain, even if ran on a much smaller pool of data. In practice, this seemed to be around ~3x an increase in performance time for an update to complete compared to BCE, but I'd expect this to increase more when applied to real analyses due to the complexity of the model, which has to be built each time for every set of new parameters (I did some work on trying to cache these models and update them in-place -- if you're interested, see [this `pyhf` issue](https://github.com/scikit-hep/pyhf/issues/1894)).
 
 - 1 forward pass is one analysis
 - mini-batch size needs to accurately reflect whole analysis to some degree -> big VRAM constraint

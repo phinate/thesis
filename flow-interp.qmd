@@ -180,7 +180,7 @@ Unlike in the simple example, the magnitude of the flow ensemble uncertainty is 
 
 ![Plot of the pull for training contexts (left plot) and testing contexts (right plot) for the Gaussian firework example. A fitted normal distribution is also shown for illustrative purposes.](images/flows/complex/non-simpleflowpulls){#fig-complex-pulls}
 
-## Discussion
+## Discussion {#sec-flow-discussion}
 
 By and large, this method performed fairly well on the two toy examples it was tested on. It's clear that there is some very deliberate contextual inference, which is found from training in a way that conditions on the parameters that generated the samples, and generates a good proof of context for the viability of this method. This being said, there are definite shortcomings in the test set of the second example, which I'll address with my thoughts below, including how it's inherently linked to some of the training methodology decisions, and why I'm not overwhelmingly pessimistic about it.
 

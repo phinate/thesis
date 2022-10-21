@@ -21,10 +21,7 @@ book:
       - flow-interp.qmd
       - sh.qmd
     - references.qmd
-  appendices:
-    - software.qmd
-    - trt.qmd
-    - clarinet.qmd
+
 
 
 bibliography: references.bib

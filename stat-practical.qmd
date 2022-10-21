@@ -58,7 +58,7 @@ I [asked this question on Twitter](https://twitter.com/phi_nate/status/125112404
 
 There was also more in that thread on ease parallel computation, the fact that histograms are good at respecting physical boundaries, and some birds-eye view perspectives on how things are (and could be) done in the field. Many thanks to Kyle Cranmer, Jim Pivarski, Stan Seibert, Nick Smith, and Pablo De Castro for contributing to that discussion -- I encourage you to check out the thread!
 
-### Kernel density estimation {@sec-kde}
+### Kernel density estimation {#sec-kde}
 
 If you wanted a smooth distribution instead of a discrete one, the *kernel density estimate* (KDE) has you covered.
 
@@ -112,7 +112,7 @@ If you have a decent idea on a distribution that may reasonably describe your da
 
 We'll talk more about these in the machine learning section, e.g. Gaussian processes and normalizing flows. These are generally reserved for when you need a little bit of extra work in order to get a robust result, or to go beyond 1-D and 2-D variables in a scalable way.
 
-## HistFactory: modelling nature as a set of counts
+## HistFactory: modelling nature as a set of counts {#sec-hifa}
 
 HistFactory [@hifa] is by far the most common statistical modelling tool used for collider physics data analysis. It's known for being difficult to understand at first -- if you've ever seen the full expression for the general likelihood, you'll have wondered if there was a need to extend the Greek alphabet to write down all the symbols that are used. Here, we'll take a slower and more gentle approach, building up the HistFactory likelihood piece-by-piece, until hopefully it's clear enough what's going on.
 
@@ -200,9 +200,9 @@ We're not restricted to the choice of $\alpha_{\mathrm{up}}$ and $\alpha_{\mathr
 
 ### Constraint terms
 
-We discussed constraint terms briefly in @sec-nps, where we asserted that if a parameter $\alpha$ had some kind of external measurement that we wanted to incorporate into the *model* (not as a Bayesian prior), then we would have to include the likelihood function for that measurement $p(y|\alpha)$ in the full model, where $y$ is the measured quantity that provides information about $\alpha$. We would then multiply the likelihood in @eq-hifabase (after we added in our nuisance parameter $\alpha$) by $p(y|\alpha)$ -- the only problem is that we don't readily have access to this full likelihood. What we do instead is to introduce an approximate constraint that makes use of the provided information (e.g. up/down variations). The way this works is that we take a simple distribution like a standard normal, then choose our "units" such that , and the up/down variations are at +/- 1 standard deviation of, for example, a standard Normal distribution. This would then lead to multiplying @eq-hifabase by $\mathrm{Normal}(y | \alpha , 1)$, where the nuisance parameter $\alpha$ is shared betwee both this part and the $\mathrm{Poisson}$ part of the overall likelihood.
+We discussed constraint terms briefly in @sec-nps, where we asserted that if a parameter $\alpha$ had some kind of external measurement that we wanted to incorporate into the *model* (not as a Bayesian prior), then we would have to include the likelihood function for that measurement $p(y|\alpha)$ in the full model, where $y$ is the measured quantity that provides information about $\alpha$. We would then multiply the likelihood in @eq-hifabase (after we added in our nuisance parameter $\alpha$) by $p(y|\alpha)$ -- the only problem is that we don't readily have access to this full likelihood. What we do instead is to introduce an approximate constraint that makes use of the provided information (e.g. up/down variations). The way this works is that we take a simple distribution like a standard normal, then choose our "units" such that , and the up/down variations are at +/- 1 standard deviation of, for example, a standard Normal distribution. This would then lead to multiplying @eq-hifabase by $\mathrm{Normal}(y | \alpha , 1)$, where the nuisance parameter $\alpha$ is shared between both this part and the $\mathrm{Poisson}$ part of the overall likelihood.
 
-To get some intuition for this: if $\hat{\alpha}\neq \alpha_{\text{nom}}$, the value of $\mathrm{Normal}(y | \alpha , 1)$ will be lower than its maximum (since it's centered around 0), and will *penalize* the likelihood for contradicting the information on our best guess of $\alpha$.
+To get some intuition for this: if $\hat{\alpha}\neq 0$ (which would correspond to being different to $\alpha_{\text{nom}}$), the value of $\mathrm{Normal}(y | \alpha , 1)$ will be lower than its maximum (since it's centered around 0), and will *penalize* the likelihood for contradicting the information on our best guess of $\alpha$, i.e. we got a lower likelihood than we could have if we agreed more with our previous information on $\alpha$.
 
 ## Hypothesis testing and asymptotic formulae in HEP {#sec-asymptotics}
 

@@ -238,10 +238,10 @@ $$
 We'll focus on the fact that you can extract *parameter uncertainty estimates* from this quantity. How? We turn to the Cramér–Rao bound, which states that if we have an unbiased estimator for the likelihood parameters $\hat{\theta}$, the Fisher information matrix $\mathcal{I}(\theta)$ satisfies
 
 $$
-\Sigma_\hat{\theta}^2 \geqslant [\mathcal{I}(\theta)]^{-1}~,
+\Sigma_{\hat{\theta}^2} \geqslant [\mathcal{I}(\theta)]^{-1}~,
 $$
 
-where $\Sigma_\hat{\theta}^2$ is the covariance matrix for the fitted parameters $\hat{\theta}$. In the asymptotic limit, the maximum likelihood estimator will attain this lower bound, and satisfies
+where $\Sigma_{\hat{\theta}}^2$ is the covariance matrix for the fitted parameters $\hat{\theta}$. In the asymptotic limit, the maximum likelihood estimator will attain this lower bound, and satisfies
 
 $$
 \sqrt{n}(\hat{\theta}-\theta) \rightarrow \text{Normal}(0, [\mathcal{I}(\theta)]^{-1})~

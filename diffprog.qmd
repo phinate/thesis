@@ -1,5 +1,4 @@
 ---
-title: "Gradient descent"
 format:
   html:
     code-fold: true
@@ -9,6 +8,7 @@ format:
 jupyter: python3
 ---
 
+# Gradient descent {#sec-gradient-descent}
 ## Introduction
 
 Moving forward with the groundwork from the previous section on automatic differentiation, we'll dive into how this enables a particular learning procedure called *gradient descent*. We'll explore what that means, then apply this to a few different scenarios to demonstrate its utility, along with highlighting some more intelligent versions that have arisen as a by-product of the recent deep learning revolution. Importantly, this will also set the stage to show the main mechanism for how neural networks are able to train.
@@ -172,21 +172,44 @@ ax.set_ylabel("density")
 ax.set_title(f"negative log-likelihood = {new_loss(new_pars, data):.3g}")
 ax.legend(fontsize="small");
 ```
-## Batching and mini-batching
+## Mini-batching and stochastic gradients
 
-In reality, we're not generally able to update our parameters using gradients computed over all our data at once, since that data may not fit on the device we're using to compute the program. We'd like to do this if we truly want to calculate the expectation of the gradient (in practice, the empirical mean) across all the training data we have, which has some convergence guarantees for arriving at a local minimum. Instead, we often split our data up into **batches**, which are fixed-size partitions of the data, typically randomly selected. This gives rise to the notion of the **batch size**, which is the size of each partition. We can then compute gradients using their values aggregated across each batch. The intuition is that we're still rolling somewhat down the hill, even if we're not following the exact trajectory defined by the entirety of the training data at once. This method doesn't come with the same convergence guarantees, but in practice will often converge well anyway, given the right hyperparameters like learning rate and initial position.
+In reality, we're not generally able to update our parameters using gradients computed over all our data at once in one batch, since that data may not fit on the device we're using to compute the program. We'd like to do this if we truly want to calculate the expectation of the gradient (in practice, the empirical mean) across all the training data we have, which has some convergence guarantees for arriving at a local minimum. Instead, we often split our data up into **minibatches**, which are fixed-size partitions of the data, typically randomly selected^[There's a funny issue to do with the notion of randomly selecting here; if we select *with replacement*, then we're sampling i.i.d. uniform random variables. This makes the theory of analyzing the performance much neater. But in practice, we never do this, and just shuffle the data and stream it, making it non-i.i.d, and therefore more difficult to analyze.]. When we have seen enough batches such that we cover all the available training data, that number of steps is known as an **epoch**.  This gives rise to the notion of the **batch size** -- the size of each partition -- which then inherently decides how many steps an epoch will take (smaller batch size = more steps and vice-versa).
 
-Now, despite this, the nomenclature used is to refer to the gradient over the whole dataset as "batch gradient descent", and the partitioning of data into batches as "minibatch gradient descent". I will keep referring to the minibatches as just batches though.
+An extreme version of splitting up into batches is **stochastic gradient descent**, which is just setting the batch size to 1. Gradients computed in this way will have very high variance as the name suggests, since parameter updates would be based on the performance on each individual training example. Surprisingly though, this high variance of the gradients can often help when wanting to explore the loss landscape more, and may help in jumping to new local minima that batch gradient descent may ignore.
 
-An extreme version of splitting up into batches is **stochastic gradient descent**, which is just setting the batch size to 1. This is much more stochastic as the name suggests, since it's updating the parameters based on the performance on each individual training example. The high variance of the gradients can often help when wanting to explore the loss landscape more, and may help in jumping to new local minima that batch gradient descent may ignore.
 
-## Beyond standard gradient descent
+
+## Speeding up convergence
+
+To improve upon the rate of convergence in minibatch gradient descent, several variants have been proposed that incorporate additional information to make the gradient update. We'll cover just a couple of them here.
 
 ### Momentum
+
+What happens when we're in a ravine during optimization, i.e. a local minimum with two steep slopes on either side in one dimension? Without modification, gradient descent will typically bounce between the ravines: we're moving in the downward direction, and with a larger step size since the slope is steep. How may we help this converge easier? Well, we could of course modify the learning rate in an adaptive fashion to try to dampen this oscillation about a minimum in a ravine. Something else that is done is to incorporate some amount ($\gamma$) of the *previous update step*, which we can write with a modified update rule through a placeholder variable $v$, defined recursively:
+
+$$
+v_{i} = \gamma v_{i-1} + \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i};~~~ \varphi_{i+1} = \varphi_i - v_i~.
+$$
+
+To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $ \gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life.
+
+
 ### Adam
 
-## How to pick the best parameters
+## How to pick the best $\varphi$
 
 ### Early stopping
 
 ### k-fold validation
+
+
+## Hyperparameter tuning
+
+There are typically free hyperparameters that you need to choose to run gradient descent:
+- Step size (learning rate)
+- Batch size
+- Number of epochs
+
+
+There's no easy way to say what batch size one should use in practice: a bit of uncertainty in the gradient calculation will aid exploration and prevent overfitting, but too much uncertainty (i.e. tiny batch size) will make the calculation impractically inefficient. Generally this should be studied, and will be limited by the (V)RAM of the machine you run it on.
