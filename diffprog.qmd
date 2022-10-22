@@ -192,7 +192,12 @@ $$
 v_{i} = \gamma v_{i-1} + \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i};~~~ \varphi_{i+1} = \varphi_i - v_i~.
 $$
 
-To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $ \gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life.
+To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $ \gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $ \gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes.
+
+### Adagrad
+
+<!-- Given input data $\mathbf{x}$ with multiple dimensions (features), it's very unlikely that these features will have equal importance for the task that you're trying to learn to perform well in. For instance, one could imagine recording the level of precipitation every day, but accidentally only doing this when the temperature hasn't varied much, then wanting to apply some neural network you train on this data as some weather prediction model. Clearly, the temperature is not going to be a reliable predictor of rainfall, so we don't want to waste much time exploring the loss landscape in the parameters that have learned something about the temperature, as they are unlikely to cause an impact on our performance. That's the kind of  -->
+
 
 
 ### Adam

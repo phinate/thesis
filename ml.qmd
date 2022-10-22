@@ -44,7 +44,9 @@ $$
 |g(\mathbf{x}) - f(\mathbf{x}, \varphi)| < \epsilon~~~\forall~\mathbf{x},~\text{for }\epsilon>0~.
 $$ {#eq-approx}
 
-This is great! But what *is* a neural network in the first place?
+This is great! Though, it's not necessarily this property that makes neural networks so popular, it's more the fact that we can practically attain this performance. Said another way, it's not just that there exists $\varphi$, but that we can often find it in real life! This can be attributed both to the effectiveness of *gradient descent* as a learning algorithm, and the software/hardware that we have access to that breathes life into the training process.
+
+So: what *is* a neural network in the first place?
 
 At its simplest, a neural network is a sequence of location-scale transforms of the input data, with non-linear "activation" functions applied in-between to allow for non-linear modelling capabilities. This type of neural network is referred to as a **multi-layer perceptron** (MLP) or a **feed-forward network** (both namings given since I use them interchangeably in later sections). Each layer of an MLP represents a round of these computations. At its most complex, there's a lot of funky ways to transform the data, including self-attention, convolutions, graph structure, and all sorts of other stuff. We'll cover that in a little.
 
