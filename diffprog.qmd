@@ -201,18 +201,34 @@ We return to the idea of *adaptive learning rates*. In the multi-dimensional par
 Adagrad (shorthand for "adaptive gradient") is a method that endeavors to tackle this issue. It scales the learning rate for each parameter in such a way as to increase the step size for parameters in which we have moved less, and decrease it for those in which we have moved more. Specifically, it scales the learning rate by the inverse of the sum of the (squared) gradients. Denoting the gradient of one example parameter $\varphi^{(1)}$ at step $i$ as $g^{(1)}_{i}$, we can write the update step for that parameter as
 
 $$
-\varphi^{(1)}_{i+1} = \varphi^{(1)}_{i} - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}\left(g^{(1)}_{j}\right)^2 + \epsilon}} g^{(1)}_{i} ~,
+\varphi^{(1)}_{i+1} = \varphi^{(1)}_{i} + \Delta\varphi_i^{(1)};~~~ \Delta\varphi_{i}^{(1)} = - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}\left(g^{(1)}_{j}\right)^2 + \epsilon}} g^{(1)}_{i} ~,
 $$
 
-where $\epsilon$ is a very small number just to prevent dividing by zero. For $n$ parameters, we denote $g_{i}$ as the vector of all gradients $[g^{(1)}_{i}, \dots, g^{(n)}_{i}]$. Then, if we treat all the operations as *elementwise*, i.e. as one may expect with `numpy` arrays, we can write this again more compactly for all parameters $\varphi$ as
+where $\epsilon$ is a very small number just to prevent dividing by zero. We've defined the convenient notation of $\Delta\varphi$, which becomes the subject of modification for the methods hereafter. For $n$ parameters, we denote $g_{i}$ as the vector of all gradients $[g^{(1)}_{i}, \dots, g^{(n)}_{i}]$. Then, if we treat all the operations as *elementwise*, i.e. as one may expect with `numpy` arrays, we can write this again more compactly for all parameters $\varphi$ as
 
 $$
-\varphi_{i+1} = \varphi_{i} - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}g^2_{j} + \epsilon}} g_{i} ~,
+\varphi_{i+1} = \varphi_{i} + \Delta \varphi_i ;~~~ \Delta\varphi_i = - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}g^2_{j} + \epsilon}} g_{i} ~.
 $$
 
-<!-- Given input data $\mathbf{x}$ with multiple dimensions (features), it's very unlikely that these features will have equal importance for the task that you're trying to learn to perform well in. For instance, one could imagine recording the level of precipitation every day, but accidentally only doing this when the temperature hasn't varied much, then wanting to apply some neural network you train on this data as some weather prediction model. Clearly, the temperature is not going to be a reliable predictor of rainfall, so we don't want to waste much time exploring the loss landscape in the parameters that have learned something about the temperature, as they are unlikely to cause an impact on our performance. That's the kind of  -->
+One of the main reasons for the appeal in Adagrad is that you don't really need to tune the scalar learning rate $\alpha$ from it's initial value, since it's being done on-the-fly for each parameter. However, an issue arises in that the sum $\sqrt{\sum^{i}_{j=0}g^2_{j}$ is one of positive numbers, and shall grow without bound, which will eventually reduce the learning rate to a crawl and stop learning altogether. Avoiding this is the groundwork for our next optimizers: Adadelta and RMSProp.
 
+### Adadelta/RMSProp
 
+As mentioned, tackling the growing sum of squared gradients is the purpose behind Adadelta and RMSProp, where we'll start with the former.
+
+Instead of maintaining a sum over the gradients $g_i^2$ up to step $i$, we recursively define a *decaying average* $E\left[g^2\right]_i$:
+
+$$
+E\left[g^2\right]_i=\gamma E\left[g^2\right]_{i-1}+(1-\gamma) g_i^2~,
+$$
+
+where we proportionally weight the previous average and the current squared gradient, each by a factor of $\gamma$ and $1-\gamma$ respectively. This is a similar idea to momentum: we're "remembering" the previous steps in some manner that we can tune numerically through $\gamma$. This leads to a $\Delta \varphi_i$ of
+
+$$
+\Delta \varphi_i = - \frac{\alpha}{\sqrt{E\left[g^2\right]_i+ \epsilon}} g_{i} ~.
+$$
+
+We're not quite done yet though;
 
 ### Adam
 
