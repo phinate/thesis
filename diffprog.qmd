@@ -180,9 +180,9 @@ An extreme version of splitting up into batches is **stochastic gradient descent
 
 
 
-## Speeding up convergence
+## Speeding up convergence: different optimizer types
 
-To improve upon the rate of convergence in minibatch gradient descent, several variants have been proposed that incorporate additional information to make the gradient update. We'll cover just a couple of them here.
+To improve upon the rate of convergence in minibatch gradient descent, several variants have been proposed that incorporate additional information to make the gradient update. The methods are generally referred to as **optimizers** -- we'll cover just a couple of the more common ones here.
 
 ### Momentum
 
@@ -192,7 +192,7 @@ $$
 v_{i} = \gamma v_{i-1} + \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i};~~~ \varphi_{i+1} = \varphi_i - v_i~.
 $$
 
-To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $ \gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $ \gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes.
+To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $ \gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $ \gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes. This is termed gradient descent with **momentum**, and was proposed in [@momentum].
 
 ### Adagrad
 
@@ -214,7 +214,7 @@ One of the main reasons for the appeal in Adagrad is that you don't really need 
 
 ### Adadelta/RMSProp
 
-As mentioned, tackling the growing sum of squared gradients is the purpose behind Adadelta and RMSProp, where we'll start with the former.
+As mentioned, tackling the growing sum of squared gradients is the purpose behind Adadelta [@adadelta] and RMSProp [@rmsprop], where we'll start with the former.
 
 Instead of maintaining a sum over the gradients $g_i^2$ up to step $i$, we recursively define a *decaying average* $E\left[g^2\right]_i$:
 
@@ -226,11 +226,47 @@ where we proportionally weight the previous average and the current squared grad
 
 $$
 \Delta \varphi_i = - \frac{\alpha}{\sqrt{E\left[g^2\right]_i+ \epsilon}} g_{i} ~.
+$${#eq-adadelta1}
+
+Coincidentally, this is actually the equation for the *RMSProp* update, developed independently from Adadelta around the same time! For Adadelta though, we're not quite done yet though; the Adadelta authors noted that this update of $\Delta \varphi_i$ -- just like the update in *any* of the methods above -- does not have the same units as the parameters (it's instead dimensionless), which is not in principle an issue, but maybe better behaviour could be had by updating by a quantity of the same scale as the parameters themselves. This led to defining a second decaying average using the definition of @eq-adadelta1 for $\Delta \varphi_i$, which we'll also define recursively:
+
+$$
+E\left[\Delta \varphi^2\right]_i=\gamma E\left[\Delta \varphi^2\right]_{i-1}+(1-\gamma) \Delta \varphi_i^2 ~.
 $$
 
-We're not quite done yet though;
+This expression is then also put under a square root with the same small $\epsilon$, and we use this in place of the static learning rate $\alpha$, i.e. replace it with $\sqrt{E\left[\Delta \varphi^2\right]_i + \epsilon}$. At least, we'd like to -- this would lead to some kind of nested recursion relation between $E\left[\Delta \varphi^2\right]_i$ and $\Delta \varphi_i$, so we need to instead need to approximate this with a value we have access to. The paper does this with the value from the previous iteration: $E\left[\Delta \varphi^2\right]_{i-1}$. This at last gives us the full relation for one Adadelta update:
+
+$$
+\Delta \varphi_i = - \frac{\sqrt{E\left[\Delta \varphi^2\right]_{i-1} + \epsilon}}{\sqrt{E\left[g^2\right]_i+ \epsilon}} g_{i} ~.
+$${#eq-adadelta}
+
+A curious thing to note in @eq-adadelta is the lack of $\alpha$ -- we've removed the scalar learning rate altogether, and instead only need to specify the decay factor $\gamma$ before undergoing optimization.
 
 ### Adam
+
+We've reached **Adam**: by far the most common default choice of optimizer for deep learning, and the one frequently used within this thesis. Adam draws upon ideas from all of the above methods; it keeps track of both a decaying average of gradients *and* squared gradients. We can write their forms explicitly:
+
+\begin{aligned}
+m_i &=\beta_1 m_{i-1}+\left(1-\beta_1\right) g_i \\
+v_i &=\beta_2 v_{i-1}+\left(1-\beta_2\right) g_i^2~,
+\end{aligned}
+
+where we've introduced separate decay factors $\beta_1$ and $\beta_2$ for each quantity. If you remember earlier, we were using $E[g]_i$ notation for these types of quantities, and that's not a coincidence -- they're moving averages, and so are Monte Carlo estimations of expectation values (albeit off by decay terms etc). Specifically, $m_i$ and $v_i$ are estimators of the first moment (mean) and second moment (variance) of the gradients $g_i$, hence their variable names, and the name of Adam (adaptive *moment* estimation).
+
+One thing the Adam authors note is the fact that they used the algorithm through initializing $m_i$ and $v_i$ as vectors of zeroes, and then found that the resulting estimates of the gradient moments were biased towards zero. The paper includes a brief derivation of the actual value of these moments, and shows that in either case of $m_i$ or $v_i$, you can correct for this bias by dividing through by $(1-\beta^i)$, where we explicitly raise $\beta$ to the power of the iteration number $i$ (the paper uses $t$ instead). This results in the bias-corrected version of the previous formula:
+
+\begin{aligned}
+\hat{m}_i &=\frac{m_i}{1-\beta_1^i} \\
+\hat{v}_i &=\frac{v_i}{1-\beta_2^i}~.
+\end{aligned}
+
+We then use these bias-corrected moment estimates to construct an expression for the Adam update, which looks a lot like that for RMSProp in @eq-adadelta1:
+
+$$
+\Delta \varphi_i = - \frac{\alpha}{\sqrt{\hat{v}_i}+ \epsilon} \hat{m}_{i} ~.
+$$
+
+Whew! That was a lot of work. The reason I went through this explicitly was to show that gradient descent has been extremely well-studied during the rise of deep learning, and we often need to go beyond simple gradient descent in order to effectively learn the properties we want from our parameters in practice. In fact, the main work you'll see in the first application later on initially wouldn't learn at all until we switched to using Adam!
 
 ## How to pick the best $\varphi$
 
