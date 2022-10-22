@@ -196,6 +196,20 @@ To give some intuition as to what's happening here, we note that there's still a
 
 ### Adagrad
 
+We return to the idea of *adaptive learning rates*. In the multi-dimensional parameter setting (could even be billions if we're looking at neural networks), some parameters will have higher importance than others, i.e. the loss landscape could be flat in some dimensions, and convex in others. However, there could be parameters that are locally flat in some region, but have more interesting structure at a distance far from that region, or perhaps at least have structure that is more widely spread out. This could happen if that parameter is responsible for information relating to a sparse feature, for instance. If the learning rate makes the stepsize small in comparison to this distance, then we'll never explore that structure well. This then gives rise to the notion of adapting the learning rate on a per-parameter basis to aid more efficient exploration of the loss landscape in search of a local minimum.
+
+Adagrad (shorthand for "adaptive gradient") is a method that endeavors to tackle this issue. It scales the learning rate for each parameter in such a way as to increase the step size for parameters in which we have moved less, and decrease it for those in which we have moved more. Specifically, it scales the learning rate by the inverse of the sum of the (squared) gradients. Denoting the gradient of one example parameter $\varphi^{(1)}$ at step $i$ as $g^{(1)}_{i}$, we can write the update step for that parameter as
+
+$$
+\varphi^{(1)}_{i+1} = \varphi^{(1)}_{i} - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}\left(g^{(1)}_{j}\right)^2 + \epsilon}} g^{(1)}_{i} ~,
+$$
+
+where $\epsilon$ is a very small number just to prevent dividing by zero. For $n$ parameters, we denote $g_{i}$ as the vector of all gradients $[g^{(1)}_{i}, \dots, g^{(n)}_{i}]$. Then, if we treat all the operations as *elementwise*, i.e. as one may expect with `numpy` arrays, we can write this again more compactly for all parameters $\varphi$ as
+
+$$
+\varphi_{i+1} = \varphi_{i} - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}g^2_{j} + \epsilon}} g_{i} ~,
+$$
+
 <!-- Given input data $\mathbf{x}$ with multiple dimensions (features), it's very unlikely that these features will have equal importance for the task that you're trying to learn to perform well in. For instance, one could imagine recording the level of precipitation every day, but accidentally only doing this when the temperature hasn't varied much, then wanting to apply some neural network you train on this data as some weather prediction model. Clearly, the temperature is not going to be a reliable predictor of rainfall, so we don't want to waste much time exploring the loss landscape in the parameters that have learned something about the temperature, as they are unlikely to cause an impact on our performance. That's the kind of  -->
 
 
