@@ -179,7 +179,6 @@ In reality, we're not generally able to update our parameters using gradients co
 An extreme version of splitting up into batches is **stochastic gradient descent**, which is just setting the batch size to 1. Gradients computed in this way will have very high variance as the name suggests, since parameter updates would be based on the performance on each individual training example. Surprisingly though, this high variance of the gradients can often help when wanting to explore the loss landscape more, and may help in jumping to new local minima that batch gradient descent may ignore.
 
 
-
 ## Speeding up convergence: different optimizer types
 
 To improve upon the rate of convergence in minibatch gradient descent, several variants have been proposed that incorporate additional information to make the gradient update. The methods are generally referred to as **optimizers** -- we'll cover just a couple of the more common ones here.
@@ -266,21 +265,9 @@ $$
 \Delta \varphi_i = - \frac{\alpha}{\sqrt{\hat{v}_i}+ \epsilon} \hat{m}_{i} ~.
 $$
 
-Whew! That was a lot of work. The reason I went through this explicitly was to show that gradient descent has been extremely well-studied during the rise of deep learning, and we often need to go beyond simple gradient descent in order to effectively learn the properties we want from our parameters in practice. In fact, the main work you'll see in the first application later on initially wouldn't learn at all until we switched to using Adam!
+As you can see, gradient descent can get pretty complicated! The reason I went through this explicitly was to show that gradient descent has been extremely well-studied during the rise of deep learning, and we often need to go beyond simple update rules in order to effectively learn the properties we want from our parameters in practice. In fact, the main work you'll see in the first application later on initially wouldn't learn at all until we switched to using Adam!
 
-## How to pick the best $\varphi$
 
 ### Early stopping
 
 ### k-fold validation
-
-
-## Hyperparameter tuning
-
-There are typically free hyperparameters that you need to choose to run gradient descent:
-- Step size (learning rate)
-- Batch size
-- Number of epochs
-
-
-There's no easy way to say what batch size one should use in practice: a bit of uncertainty in the gradient calculation will aid exploration and prevent overfitting, but too much uncertainty (i.e. tiny batch size) will make the calculation impractically inefficient. Generally this should be studied, and will be limited by the (V)RAM of the machine you run it on.

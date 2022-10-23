@@ -184,6 +184,41 @@ $$p(n | \lambda) = \frac{\lambda^n e^{-\lambda}}{n!}~,$$
 
 where $\lambda$ is termed the *expected number of events* (both the mean and variance turn out to be $\lambda$). We'll denote this using the shorthand of $\mathrm{Poisson}(\lambda)$.
 
+One commonly used notion is the approximation of a Poisson distribution with a Normal distribution for large $\lambda$. We can see this demonstrated in @fig-poisson, where from $\lambda \approx 10$, we start to see the poisson count
+
+```{python}
+#| label: fig-poisson
+#| fig-cap: Comparison of the Poisson distribution at different values of $\lambda$ with a Normal distribution with mean $\lambda$ and variance $\sqrt{\lambda}}$.
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import jax.scipy as jsc
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
+
+def pos(x):
+    if x > 0:
+        return x
+    else:
+        return 0
+def plot(dct):
+    ax, n, i = list(dct.values())
+
+    grid = jnp.linspace(pos(n-3*jnp.sqrt(n)),n+3*jnp.sqrt(n),100)
+    pdf = jsc.stats.poisson.pmf(grid, n)
+    pdf2 = jsc.stats.norm.pdf(grid, n, jnp.sqrt(n))
+    ax.scatter(grid,pdf, label="Poisson($\lambda$)")
+    ax.plot(grid, pdf2, label="Normal($\lambda,\sqrt{\lambda}$)")
+    ax.set_title(f"$\lambda$={n}")
+    ax.legend()
+
+from plothelp import autogrid
+
+autogrid(
+    [1,10,100],
+    plot,
+    subplot_kwargs=subplot_settings
+);
+```
+
 #### Uniform
 
 The **uniform** distribution is a very simple construct, with pdf
