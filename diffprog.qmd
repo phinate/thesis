@@ -191,7 +191,7 @@ $$
 v_{i} = \gamma v_{i-1} + \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i};~~~ \varphi_{i+1} = \varphi_i - v_i~.
 $$
 
-To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $ \gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $ \gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes. This is termed gradient descent with **momentum**, and was proposed in [@momentum].
+To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $\gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $\gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes. This is termed gradient descent with **momentum**, and was proposed in [@momentum].
 
 ### Adagrad
 
@@ -209,7 +209,7 @@ $$
 \varphi_{i+1} = \varphi_{i} + \Delta \varphi_i ;~~~ \Delta\varphi_i = - \frac{\alpha}{\sqrt{\sum^{i}_{j=0}g^2_{j} + \epsilon}} g_{i} ~.
 $$
 
-One of the main reasons for the appeal in Adagrad is that you don't really need to tune the scalar learning rate $\alpha$ from it's initial value, since it's being done on-the-fly for each parameter. However, an issue arises in that the sum $\sqrt{\sum^{i}_{j=0}g^2_{j}$ is one of positive numbers, and shall grow without bound, which will eventually reduce the learning rate to a crawl and stop learning altogether. Avoiding this is the groundwork for our next optimizers: Adadelta and RMSProp.
+One of the main reasons for the appeal in Adagrad is that you don't really need to tune the scalar learning rate $\alpha$ from it's initial value, since it's being done on-the-fly for each parameter. However, an issue arises in that the sum $\sum^{i}_{j=0}g^2_{j}$ is one of positive numbers, and shall grow without bound, which will eventually reduce the learning rate to a crawl and stop learning altogether. Avoiding this is the groundwork for our next optimizers: Adadelta and RMSProp.
 
 ### Adadelta/RMSProp
 
@@ -245,20 +245,21 @@ A curious thing to note in @eq-adadelta is the lack of $\alpha$ -- we've removed
 
 We've reached **Adam**: by far the most common default choice of optimizer for deep learning, and the one frequently used within this thesis. Adam draws upon ideas from all of the above methods; it keeps track of both a decaying average of gradients *and* squared gradients. We can write their forms explicitly:
 
+$$
 \begin{aligned}
 m_i &=\beta_1 m_{i-1}+\left(1-\beta_1\right) g_i \\
 v_i &=\beta_2 v_{i-1}+\left(1-\beta_2\right) g_i^2~,
 \end{aligned}
-
+$$
 where we've introduced separate decay factors $\beta_1$ and $\beta_2$ for each quantity. If you remember earlier, we were using $E[g]_i$ notation for these types of quantities, and that's not a coincidence -- they're moving averages, and so are Monte Carlo estimations of expectation values (albeit off by decay terms etc). Specifically, $m_i$ and $v_i$ are estimators of the first moment (mean) and second moment (variance) of the gradients $g_i$, hence their variable names, and the name of Adam (adaptive *moment* estimation).
 
 One thing the Adam authors note is the fact that they used the algorithm through initializing $m_i$ and $v_i$ as vectors of zeroes, and then found that the resulting estimates of the gradient moments were biased towards zero. The paper includes a brief derivation of the actual value of these moments, and shows that in either case of $m_i$ or $v_i$, you can correct for this bias by dividing through by $(1-\beta^i)$, where we explicitly raise $\beta$ to the power of the iteration number $i$ (the paper uses $t$ instead). This results in the bias-corrected version of the previous formula:
-
+$$
 \begin{aligned}
 \hat{m}_i &=\frac{m_i}{1-\beta_1^i} \\
 \hat{v}_i &=\frac{v_i}{1-\beta_2^i}~.
 \end{aligned}
-
+$$
 We then use these bias-corrected moment estimates to construct an expression for the Adam update, which looks a lot like that for RMSProp in @eq-adadelta1:
 
 $$

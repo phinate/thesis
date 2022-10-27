@@ -184,16 +184,16 @@ $$p(n | \lambda) = \frac{\lambda^n e^{-\lambda}}{n!}~,$$
 
 where $\lambda$ is termed the *expected number of events* (both the mean and variance turn out to be $\lambda$). We'll denote this using the shorthand of $\mathrm{Poisson}(\lambda)$.
 
-One commonly used notion is the approximation of a Poisson distribution with a Normal distribution for large $\lambda$. We can see this demonstrated in @fig-poisson, where from $\lambda \approx 10$, we start to see the poisson count
+One commonly used notion is the approximation of a Poisson distribution with a normal distribution with mean $\lambda$ and variance $\sqrt{\lambda}$ for large $\lambda$. We can see this demonstrated in @fig-poisson, where from $\lambda \approx 10$, we start to observe the alignment of the shapes of the Poisson and normal distributions. This is the origin of the $\sqrt{n}$ errors that are often quoted on histogram bars of size $n$ -- it assumes they are Poisson modelled (as we do when modelling likelihood functions in HEP), and if $n$ is around 10 or more, then we assign $\sqrt{n}$ as a notion of the standard deviation on the bin count $n$.
 
 ```{python}
 #| label: fig-poisson
-#| fig-cap: Comparison of the Poisson distribution at different values of $\lambda$ with a Normal distribution with mean $\lambda$ and variance $\sqrt{\lambda}}$.
+#| fig-cap: Comparison of the Poisson distribution at different values of $\lambda$ with a normal distribution with mean $\lambda$ and variance $\sqrt{\lambda}$.
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import jax.scipy as jsc
 subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True)
-
+from matplotlib.lines import Line2D
 def pos(x):
     if x > 0:
         return x
@@ -205,15 +205,16 @@ def plot(dct):
     grid = jnp.linspace(pos(n-3*jnp.sqrt(n)),n+3*jnp.sqrt(n),100)
     pdf = jsc.stats.poisson.pmf(grid, n)
     pdf2 = jsc.stats.norm.pdf(grid, n, jnp.sqrt(n))
-    ax.scatter(grid,pdf, label="Poisson($\lambda$)")
-    ax.plot(grid, pdf2, label="Normal($\lambda,\sqrt{\lambda}$)")
+    a = ax.plot(grid,pdf, label="Poisson($\lambda$)")
+    b = ax.plot(grid, pdf2, label="Normal($\lambda,\sqrt{\lambda}$)")
     ax.set_title(f"$\lambda$={n}")
-    ax.legend()
+    if i==3:
+        ax.legend([Line2D([0], [0], color="C0"), Line2D([0], [0], color="C1")], ["Poisson($\lambda$)", "Normal($\lambda,\sqrt{\lambda}$)"], frameon=False, bbox_to_anchor=(1.04, 0.5), loc="center left", borderaxespad=0)
 
 from plothelp import autogrid
 
 autogrid(
-    [1,10,100],
+    [1,5,10,100],
     plot,
     subplot_kwargs=subplot_settings
 );
