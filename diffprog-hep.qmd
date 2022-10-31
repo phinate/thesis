@@ -628,16 +628,20 @@ The middle plot is the uncertainty on the fitted value of the signal strength $\
 The final plot on the right shows the squared deviation from the nominal uncertainty on the background nuisance parameter $\gamma$, which we acquire through the appropriate diagonal term in the inverse Fisher information. In the likelihood modelling stage, this uncertainty also has an associated constraint term of $\mathrm{Normal}(0 | \gamma, 1)$, where the "units" of $\gamma$ are chosen such that $\gamma_{\mathrm{nom}}$ sits at 0, and $\gamma_{\mathrm{up}}/\gamma_{\mathrm{down}}$ lie at +/- 1 respectively. If the standard deviation of the fitted value $\hat{\gamma}$ is different to 1, we then have a contradiction between the fitted model and the implied uncertainty from the constraint term. This is known as over/under-constraining the parameter (depending if the uncertainty is smaller/bigger than 1), and can be associated with model misspecification (although there are cases where it is perfectly reasonable to constrain the nuisance parameter depending on the nature of the measurement). Plotting this term (or $(1-\sigma_{\hat{\gamma}})^2$ to just show the deviations) is then a useful diagnostic to see the learned behaviour of the observable with respect to the nuisance parameter. Training with $\mathrm{CL}_s$ doesn't appear to introduce any pathologies in this regard, and in fact appears to further reduce dissonance between the constraint term and the Fisher information with more training. This is also the case for BCE with augmentation, but vanilla BCE and INFERNO don't appear to exhibit this behaviour, and instead show some differences with the modelled standard deviation. The fact that BCE has no awarness of the background variations makes this less surprising, but I understand this less well for INFERNO at the time of writing (or even if it's a problem at all).
 
 
-### What's *really* the best loss function?
+## What's *really* the best loss function?
 
 The work done in making $\mathrm{CL}_s$ differentiable opened up a variety of new inference-aware losses, including but not limited to:
 
 - $\mathrm{CL}_s$ (and its associated $p$-values)
-- $p$-values for discovery
-- Quantities derived from the Fisher information of the full HistFactory likelihood, such as:
+- $p$-value for discovery ($p_0$)
+- Quantities derived from the Fisher information matrix of the full HistFactory likelihood, such as:
     - uncertainty on the signal strength $\sigma_{\mu}$
     - deviations from the nominal nuisance parameter uncertainty, e.g. $(1-\sigma_{\hat{\gamma}})^2$
-    - the generalized variance, defined as the inverse determinant of the
+    - the generalized variance, defined as the inverse determinant of the Fisher information
+- Deviations from the nominal values of the nuisance parameters from control measurements ("pulls")
+- ...and *any algebraic combination of the above!*
+
+Indeed, since all of these quantities can be calculated in a differentiable way, we can create a hybrid loss function using any of these components, such as $a_1 \mathrm{CL}_s + a_2\sigma_\mu + a_3\log{p_0} + ...$ etc. We can even view this as a regularization effect, where we have one clear loss target, then introduce other components with small linear coefficients to steer away from potentially undesirable pathologies. One example of a quantity that could serve this purpose is the "**Gaussianity**" of a likelihood, which my colleague/supervisor Lukas Heinrich coined as the mean-squared difference across a grid of points between the learned HistFactory likelihood and a Normal distribution defined using the covariance implied by the (inverse) Fisher information matrix (remember the Cramér–Rao bound from @sec-fisher).
 
 ### Exploring different losses: revisiting the `neos` studies
 
