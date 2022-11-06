@@ -585,7 +585,7 @@ One interesting thing to note: we're calculating the discovery $p$-value using t
 
 Equipped with this systematic-aware loss function, we can now apply it to something a little more complicated.
 
-## `neos`: End-to-End Optimized Summary Statistics for High-Energy Physics
+## `neos`: End-to-End Optimized Summary Statistics for High-Energy Physics {#sec-neos}
 
 The problem of reducing a whole set of physics quantities into a single number, or **summary statistic**, is not a new one in HEP. The reason for this is two-fold: inference in high-dimensional settings is computationally difficult, and the probability model defined by the underlying physics is intractable to explicitly compute. This leads to practice referenced a few times already, where we construct models via HistFactory, which are almost always based a single quantity, e.g. something like the invariant mass of the final state you're interested in, or the output of a machine learning model. In the latter case, we're typically concerned with optimizing for discriminating signal and background processes. However, we know from the previous sections that we can do much better by optimizing with respect to a $p$-value, especially when we have significant systematic uncertainties to worry about.
 
@@ -607,7 +607,7 @@ From here, things follow the diagram in @fig-neos:
 - We then build the appropriate test statistic based on this likelihood, and perform our hypothesis test -- not on the observed data (we don't have any), but on the Asimov dataset for that hypothesis (i.e. for a null of $\mu=1$, we're going to use the dataset that would result in $\hat{\mu} = 1$ when fitting the likelihood, which would just be the nominal counts $s + b$).
 - The final step is producing the end result of that test (e.g. $\mathrm{CL}_s$), then taking the gradient of that whole chain, which we'd use to update the parameters of the neural network $\varphi$.
 
-We'll feed data in using mini-batches of size 4000, and hold out a group of points for each blob as a test set, which we use to calculate metrics and select the best model (normally we should never use the test set to choose a model, but the distributions are simple enough that there will be almost no macroscopic difference between train, validation, and test sets).
+We'll feed data in using mini-batches, and hold out a group of points for each blob as a test set, which we use to calculate metrics and select the best model (normally we should never use the test set to choose a model, but the distributions are simple enough that there will be almost no macroscopic difference between train, validation, and test sets). The histogram yields are all divided by the number of data points per-batch, and then re-scaled to be on the order of tens of events, with different factors being applied to signal and background to put us in a more realistic regime (e.g. of low signal and high background).
 
 In the graphs about to be shown, we'll benchmark `neos` against optimization against some other loss functions:
 
@@ -615,9 +615,21 @@ In the graphs about to be shown, we'll benchmark `neos` against optimization aga
 - **BCE with data augmentation**: As above, but we indiscriminately label all of the background samples with one label instead of using just the nominal (this should be a very powerful baseline).
 - **INFERNO**: As in @sec-inferno, we'll take our loss to be the diagonal element of the inverse Fisher information that corresponds to the signal strength $\mu$.
 
+
 #### Results (as shown in the `neos` paper) {-}
 
-Results from the training process are shown in @fig-neos-results, where each curve is the average of that metric across 7 different training runs, all with unique random initializations of the neural network parameters. The figure has three plots, which we'll cover from left to right. Note: these quantities are all computed on the same *test set* (unseen data), and use no approximations to hard operations in their calculation (which basically means the histogram is a normal one for `neos` and INFERNO).
+The full set of hyperparameters for this study are:
+
+- 10000 data points, split evenly between all four blobs,
+- 3-layer neural network of size (1024, 1024, 1),
+- Training with Adam optimiser, learning rate 1e-3,
+- Adam optimiser also used in maximum likelihood fits with learning rate 1e-3,
+- $m_\mathrm{s}=(-1, 1)$, $m_\mathrm{b}=(2.5, 2)$, $m_\mathrm{bup}=(-2.5, -1.5)$, $m_\mathrm{bdown}=(1, -1)$,
+-  Multiplicative histogram scale factors: signal scale=2, background scale=10, global scale=10,
+- ReLU activations, with sigmoid activation on the final layer,
+- 15 epochs, with a batch size of 2000.
+
+Results from the training process using these hyperparameters are shown in @fig-neos-results, where each curve is the average of that metric across 7 different training runs, all with unique random initializations of the neural network parameters. The figure has three plots, which we'll cover from left to right. Note: these quantities are all computed on the same *test set* (unseen data), and use no approximations to hard operations in their calculation (which basically means the histogram is a normal one for `neos` and INFERNO).
 
 ![Results from training neural networks using the four loss functions highlighted in the legend. Left: the expected $\text{CL}_s$. Middle: The uncertainty on the signal strength $\mu$. Right: The deviation from the nominal width of the nuisance parameter $\gamma$ that controls the background uncertainty.](images/neos-results){#fig-neos-results}
 
@@ -665,8 +677,22 @@ As for the other metrics, they generally become lower when $u$ and $d$ become mo
 
 ### Gaussian blobs, again
 
-Inspired by the studies above, I thought it would be useful to try the study from the `neos` paper a second time, but with some additional loss functions that we havent touched on yet (e.g. the discovery significance). Moreover, it may be illustrative to track the metrics of each corresponding loss, so we can view their relationship when training. 
+Inspired by the studies above, I thought it would be useful to try the study from the `neos` paper a second time, but with some additional loss functions that we havent touched on yet (e.g. the discovery significance). Moreover, it may be illustrative to track the values of all the possible loss functions for each training strategy. In this way, we'll be able to capture some idea of the relationships between quantities of interest -- at least within the scope of the example itself.
 
+We'll look at the following choices for the training objective:
+
+- BCE with data augmentation (serving again as a strong baseline)
+- $\mathrm{CL}_s$
+- $p_0$
+- $\sigma_{\mu}$
+- $\mathrm{CL}_s$ + $p_0$ (inspired by the previous section)
+
+The pipeline is exactly the same as in @sec-neos, but with slightly different hyperparameters. The only ones that differ are:
+
+- 4-layer neural network of size (128, 128, 128, 1) (chosen to be less wide than previous to make the learning process less rapid)
+- More epochs (~100) with the same batch size of 2000.
+
+As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable. Moreover, for a fixed number of bins, we'll let the bin edges be *part of the optimization itself* -- our free parameters are now $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used. We could have equivalently let the bin widths vary, and decide the last width as $1-\sum_{i=0}^{\text{# bins - 1}} \text{bin widths}_i$, but this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range (there will be a little bit of spill during optimization but not for a real histogram). In hindsight, though, I think things would be fine without this restriction, which would let the network potentially tightening/widening the region of interest a little, especially since the best network is selected based on the non-approximate pipeline.
 
 #### Resulting histograms from different training strategies
 
