@@ -176,7 +176,7 @@ The normal distribution is exceedingly useful as a modelling tool due to the *ce
 
 The specific normal distribution you end up with from the cental limit theorem is $\mathrm{Normal}(\bar{\mu}, \bar{\sigma}/\sqrt{n}$, where $\bar{\mu}$ and $\bar{\sigma}$ are the sample mean and standard deviation respectively. Part of the power of the central limit theorem is that it works regardless of the shape of the original distribution! So it's pretty impressive that we can get a good idea of how the distribution of the data mean looks, even with a finite sample size.
 
-#### Poisson
+#### Poisson {#sec-poisson}
 
 Another very common distribution in HEP is the **Poisson distribution**. It's useful when you want to model the occurrence rate of an event (and what happens on average). It's defined for *independent events* $n$ as
 

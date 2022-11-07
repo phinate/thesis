@@ -639,10 +639,15 @@ The middle plot is the uncertainty on the fitted value of the signal strength $\
 
 The final plot on the right shows the squared deviation from the nominal uncertainty on the background nuisance parameter $\gamma$, which we acquire through the appropriate diagonal term in the inverse Fisher information. In the likelihood modelling stage, this uncertainty also has an associated constraint term of $\mathrm{Normal}(0 | \gamma, 1)$, where the "units" of $\gamma$ are chosen such that $\gamma_{\mathrm{nom}}$ sits at 0, and $\gamma_{\mathrm{up}}/\gamma_{\mathrm{down}}$ lie at +/- 1 respectively. If the standard deviation of the fitted value $\hat{\gamma}$ is different to 1, we then have a contradiction between the fitted model and the implied uncertainty from the constraint term. This is known as over/under-constraining the parameter (depending if the uncertainty is smaller/bigger than 1), and can be associated with model misspecification (although there are cases where it is perfectly reasonable to constrain the nuisance parameter depending on the nature of the measurement). Plotting this term (or $(1-\sigma_{\hat{\gamma}})^2$ to just show the deviations) is then a useful diagnostic to see the learned behaviour of the observable with respect to the nuisance parameter. Training with $\mathrm{CL}_s$ doesn't appear to introduce any pathologies in this regard, and in fact appears to further reduce dissonance between the constraint term and the Fisher information with more training. This is also the case for BCE with augmentation, but vanilla BCE and INFERNO don't appear to exhibit this behaviour, and instead show some differences with the modelled standard deviation. The fact that BCE has no awarness of the background variations makes this less surprising, but I understand this less well for INFERNO at the time of writing (or even if it's a problem at all).
 
+### Practical issues {#sec-neos-issues}
+
+Regardless of any results, one immediate concern that you may have thought of while I talked about `neos` was the scaling aspect. We can't escape that one forward pass and one update step is computationally equivalent to two runs of the whole analysis inference chain (rembembering that gradients from autodiff are of the order of the forward pass to calculae). In practice, this seemed to be around ~3x an increase in performance time for an update to complete compared to BCE, but I'd expect this to increase more when applied to real analyses due to the complexity of the model, which has to be built each time for every set of new parameters (I did some work on trying to cache these models and update them in-place -- if you're interested, see [this `pyhf` issue](https://github.com/scikit-hep/pyhf/issues/1894)).
+
+Another issue is that these inference-aware metrics require enough data to produce a reasonable reflection of the actual analysis model. With a very small batch size, this is impossible; for medium-size batches, it may be that some kind of proportional scaling needs to occur so the yields maintain the same relative sizes, as was done in practice during the Gaussian blobs example (not using these scale factors actually makes trainining unstable).
 
 ## What's *really* the best loss function?
 
-The work done in making $\mathrm{CL}_s$ differentiable opened up a variety of new inference-aware losses, including but not limited to:
+The work done in making $\mathrm{CL}_s$ differentiable opened up a variety of new inference-aware losses as a by-product, including but not limited to:
 
 - $\mathrm{CL}_s$ (and its associated $p$-values)
 - $p$-value for discovery ($p_0$)
@@ -675,9 +680,9 @@ As for the other metrics, they generally become lower when $u$ and $d$ become mo
 
 ![A projection of the line $u = d$ for all metrics, which are normalized by their maximum value. A small constant noise value is added to each metric in order to see all the lines at once.](images/equal-g){#fig-ud}
 
-### Gaussian blobs, again
+## Gaussian blobs, again
 
-Inspired by the studies above, I thought it would be useful to try the study from the `neos` paper a second time, but with some additional loss functions that we havent touched on yet (e.g. the discovery significance). Moreover, it may be illustrative to track the values of all the possible loss functions for each training strategy. In this way, we'll be able to capture some idea of the relationships between quantities of interest -- at least within the scope of the example itself.
+Inspired by the studies in the previous section, I thought it would be useful to try the study from the `neos` paper a second time, but with some additional loss functions that we havent touched on yet (e.g. the discovery significance). Moreover, it may be illustrative to track the values of all the possible loss functions for each training strategy. In this way, we'll be able to capture some idea of the relationships between quantities of interest -- at least within the scope of the example itself.
 
 We'll look at the following choices for the training objective:
 
@@ -689,23 +694,28 @@ We'll look at the following choices for the training objective:
 
 The pipeline is exactly the same as in @sec-neos, but with slightly different hyperparameters. The only ones that differ are:
 
-- 4-layer neural network of size (128, 128, 128, 1) (chosen to be less wide than previous to make the learning process less rapid)
-- More epochs (~100) with the same batch size of 2000.
+- 4-layer neural network of size (128, 128, 128, 1)^[Initially, this was chosen to be less wide to maybe slow down the learning process a touch, though the extra layer mitigates that to some degree. The honest explanation is that this was just the config that happened to be there when things started working on the technical side.]
+- More epochs (~100) with the same batch size of 2000 to view the learning process over a longer period of time (it looks like some curves in @fig-neos-results would keep reducing with more training)
+- Average over nine random seeds (previously seven -- just a time constraint on both accounts)
 
-As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable. Moreover, for a fixed number of bins, we'll let the bin edges be *part of the optimization itself* -- our free parameters are now $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used. We could have equivalently let the bin widths vary, and decide the last width as $1-\sum_{i=0}^{\text{# bins - 1}} \text{bin widths}_i$, but this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range (there will be a little bit of spill during optimization but not for a real histogram). In hindsight, though, I think things would be fine without this restriction, which would let the network potentially tightening/widening the region of interest a little, especially since the best network is selected based on the non-approximate pipeline.
-
-#### Resulting histograms from different training strategies
-
-### Discussion
-
-Regardless of any results, one immediate concern that you may have thought of while I talked about `neos` was the scaling aspect. We can't escape that one forward pass and one update step is computationally equivalent to two runs of the whole analysis inference chain, even if ran on a much smaller pool of data. In practice, this seemed to be around ~3x an increase in performance time for an update to complete compared to BCE, but I'd expect this to increase more when applied to real analyses due to the complexity of the model, which has to be built each time for every set of new parameters (I did some work on trying to cache these models and update them in-place -- if you're interested, see [this `pyhf` issue](https://github.com/scikit-hep/pyhf/issues/1894)).
-
-- 1 forward pass is one analysis
-- mini-batch size needs to accurately reflect whole analysis to some degree -> big VRAM constraint
+As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable.
 
 
-### What's the true objective really?
+### Results: fixed binning
 
-This all ultimately shapes lhood. Goals are related -- miminizing cls will maximise non-centrality parameter (think more about this), which is inv propto mu uncert (but may have better accuracy than fisher info estimate).
+We'll start by looking at the overall metrics when optimizing a 5-bin observable. These are shown in @fig-newneos-5bin-fixed. To recap the differences to @fig-neos-results:
 
-gaussianity experiment
+The first identifiable difference when looking at the relative performances
+
+
+### Results: variable binning
+
+One thing I also thought to try is, for a fixed number of bins, exploring what happens when the bin edges are made to be *part of the optimization itself*. Our free parameters are then $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used to replace values that were larger than their neighboring edge with something just below it instead. As opposed to bin edges, we could have equivalently let the bin widths vary instead, and decide the last width as $1-\sum_{i=0}^{\text{# bins - 1}} \text{bin widths}_i$. In practice, this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range. In hindsight, though, I think things would be fine without this restriction, especially since the best network is selected based on the the version of the loss with no approximations (i.e. a pipeline that uses a regular histogram with the optimized binning).
+
+
+
+## What's next?
+
+- Upper limits (i've done working prototypes)
+- Scaling (iris-hep)
+- Addressing batching concerns (validity of objective relates to batch size)
