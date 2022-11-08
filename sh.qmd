@@ -163,6 +163,13 @@ Before advancing the discussion further, it's worth touching on another possible
 
 ![Left: Signal grid points colored by the mean of the pulls (using the statistical uncertainty only) for that point. Right: Signal grid points colored by the standard deviation of the pulls for that point.](images/sh/pull-dist-stats){#fig-pull-dist-stats}
 
+
+We can repeat this exercise one more time: instead of choosing one of these two uncertainties, we can just look at the maximum of either one in any given bin to attempt to cover us in the worst case scenario. Those plots are found in
+
+![Left: Histogram of the bin-by-bin pull (using both the statistical and the flow uncertainty) accumulated across different context points from the training set. Right: Same for the test set. Both plots have a normal distribution fit overlayed.](images/sh/sh-pulls-stats-and-flow-more-data){#fig-pulls-sh-both}
+
+![Left: Signal grid points colored by the mean of the pulls (using both the statistical and the flow uncertainty) for that point. Right: Signal grid points colored by the standard deviation of the pulls for that point.](images/sh/pull-dist-both){#fig-pull-dist-both}
+
 ### Discussion
 
 Overall, the flow training here shows clear signs of the ability to interpolate the signal shapes. In terms of criticisms, many of the relevant points from @sec-flow-discussion apply here too, including not using any more advanced flow model, and the significant fact that we're restricting our ability to interpolate by holding out information in what is an inherently sparse feature space. The next thing to try in my view -- which was not tried due to time and compute cost -- would be to do a train/valid/test split in the *data* (so $m_{bb\gamma\gamma}$ and $m_{bb}$ values), then within that training set, doing some kind of k-fold validation to select hyperparameters across the different $m_X, m_S$ points, i.e. removing random permutations of points at a time, then select the hyperparameters that cause the best average generalization to those removed points. Ensembles of flows with those hyperparameters would then be trained, and model selection performed with the valid set, then assessed on the test set. This foregoes our ability to precisely benchmark the interpolation performance as above, but any such assessment would inherently bias both model selection and apparent interpolation ability (the models may not interpolate well in other regions).

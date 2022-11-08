@@ -166,11 +166,11 @@ which I loosely think of as the average value that $f(x)$ will have assuming pro
 
 #### Normal
 
-We define the **normal distribution** with pdf
+We define the **normal distribution** -- commonly known as a "Gaussian" in HEP -- with the pdf
 
 $$ p(x | \mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi} } e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2} .$$
 
-The parameters $\mu$ and $\sigma$ characterize the location and the width of the distribution respectively. In shorthand, we'll denote th as $\mathrm{Normal}(\mu, \sigma)$.
+The parameters $\mu$ and $\sigma$ characterize the location and the width of the normal distribution respectively. In shorthand, we'll denote this as $\mathrm{Normal}(\mu, \sigma)$.
 
 The normal distribution is exceedingly useful as a modelling tool due to the *central limit theorem*, which states that the distribution of the sum (and consequently the mean) of i.i.d. random variables calculated on a sample tends to a normal distribution as the size of your sample goes to infinity. This type of distribution is known as a **sampling distribution** as it involves a quantity that is computed on a per-sample basis.
 
