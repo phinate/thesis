@@ -716,6 +716,11 @@ One thing I also thought to try is, for a fixed number of bins, exploring what h
 
 ## What's next?
 
+A whole world of things could be targets for being made differentiable. As a simple extension to what's already been shown here, one could imagine making upper limits differentiable in the same way as the profile likelihood; there's no conceptual restriction, but since there's an optimization procedure to determine the upper limit (find the value of the parameter that gives a certain $p$-value)
+
+
+Beyond quantities that stem from statistical inference, differentiable simulation is another promising area that could allow simulator-in-the-loop optimization. An example could be tuning your simulator parameters to model data by gradient descent, or perhaps having a pipeline with a loss function that simulates physics on-the-fly based on learned parameters. Moreover, there has been a very interesting recent line of work that looks at making key physics processes differentiable, such as the calculation of matrix elements for scattering amplitudes [@madjax] and parton showering  [@jaxshower]. This is certainly an area to keep an eye on over the coming years.
+
 - Upper limits (i've done working prototypes)
 - Scaling (iris-hep)
 - Addressing batching concerns (validity of objective relates to batch size)
