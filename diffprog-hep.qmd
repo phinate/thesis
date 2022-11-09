@@ -570,6 +570,7 @@ $$
 
 Since $\mathcal{I}(\theta)$ is defined in terms of second-order derivatives of the log-likelihood -- something that we've already made differentiable from a code perspective -- we can then calculate the Fisher information using automatic differentiation. Moreover, since function transformations like the gradient operator are composable in automatic differentiation frameworks, this will itself be differentiable! This gives us access to many other inference-aware quantities that we can use as both diagnostics and as loss functions, including diagonal elements of the covariance matrix, which correspond to the individual uncertainties on each likelihood parameter. This approach was first explored by INFERNO [@inferno], from whom we take much inspiration from in this section.
 
+Now, the fisher information involves a matrix filled with second derivatives of the likelihood, and so requires data and parameters to be evaluated as a number. One thing we can do in the HistFactory setting is use Asimov data, which would mean we'll be able to know the best-fit parameter values already, and we can attempt to achieve the Cramér–Rao bound in @eq-cramer-rao by evaluating at $\mu=\mu'$, $x=x_A(\mu')$. As to the choice of $\mu'$, I'm not sure that it matters too much, as we're always going to be at the best fit parameter value for $\mu$ (the likelihood shape itself isn't affected by this, for instance), but I haven't studied this in detail.
 
 ## Putting it all together!
 
@@ -581,9 +582,13 @@ The results of training this setup to optimize $\phi$ with respect to the discov
 
 ![Left: The resulting point from optimizing $\phi$ with gradient descent. Right: The histogram model at the solution of the optimization.](images/opt){#fig-simple-opt}
 
-One interesting thing to note: we're calculating the discovery $p$-value using the asymptotic formulae outlined in @sec-asymptotics. Minimising this $p$-value corresponds to pushing the observed value of the test statistic as far to the right as possible (i.e. maximizing its value), which will trap smaller and smaller proportions of the distribution of the test statistic. Recall that @eq-wald states that we know an interesting fact about this test statistic: it's approximately equal to $\left((\mu_0 - \hat{\mu}(x))/\sigma_{\hat{\mu}}\right)^2$. Since we're using Asimov data with $\mu'=\hat{\mu}=1$, and probing a null of $\mu_0=0$, the test statistic is actually an (inverse) estimate of the variance of $\hat{\mu}$, which is being minimized during optimization! This has a lot of similarities with INFERNO, since both methods are effectively minimizing the same quantity, but estimated a different way.
+### A quick aside on INFERNO vs `neos`
 
-Equipped with this systematic-aware loss function, we can now apply it to something a little more complicated.
+One interesting thing to note: we're calculating the expected discovery $p$-value using the asymptotic formulae outlined in @sec-asymptotics. Minimising this $p$-value corresponds to pushing the observed value of the $q_0$ test statistic as far to the right as possible (i.e. maximizing its value), which will trap smaller and smaller proportions of the distribution $p(q_0 | \mu_0)$ (smaller $p$-values). Recall that @eq-wald states that we know an interesting fact about this test statistic: it's approximately equal to $\left((\mu_0 - \hat{\mu}(x))/\sigma_{\hat{\mu}}\right)^2$. Since we're using Asimov data with $\mu'=\hat{\mu}=1$, and probing a null of $\mu_0=0$, the test statistic is actually an (inverse) estimate of the variance of $\hat{\mu}$, which is being minimized during optimization! This has a lot of similarities with INFERNO, since both methods are effectively minimizing the same quantity, but estimated a different way; INFERNO uses the Fisher information estimate, and `neos` uses asymptotic formulae.
+
+If we were to apply this same logic to calculating a $p$-value (or a $\mathrm{CL}_s$ value) for upper limit setting, then we'd insead be using $q_\mu$, and would typically examine Asimov data with $\mu'=\hat{\mu}=0$ (no signal) while looking at a null of $\mu_0=1$. We would then still end up with the same relation of inverse proportionality to $\sigma_{\hat{\mu}}^2$. Of course, the test statistics $q_0$ and $q_\mu$ differ conceptually in their definition, so there are likely going to be differences in practice if we used one or the other for optimization (but we would definitely expect a reduced uncertainty on $\hat{\mu}$ in either case). We'll see these differences in practice later on.
+
+Equipped with these systematic-aware (or more aptly, *inference*-aware) loss functions, we can now apply them to something a little more complicated.
 
 ## `neos`: End-to-End Optimized Summary Statistics for High-Energy Physics {#sec-neos}
 
@@ -698,29 +703,59 @@ The pipeline is exactly the same as in @sec-neos, but with slightly different hy
 - More epochs (~100) with the same batch size of 2000 to view the learning process over a longer period of time (it looks like some curves in @fig-neos-results would keep reducing with more training)
 - Average over nine random seeds (previously seven -- just a time constraint on both accounts)
 
-As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable.
+As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable, to see if that influences the efficacy of the methods.
 
+One thing I also thought to try is, for a fixed number of bins, exploring what happens when the bin edges are made to be *part of the optimization itself*. Our free parameters are then $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used to replace values that were larger than their neighboring edge with something just below it instead. As opposed to bin edges, we could have equivalently let the bin widths vary instead, and decide the last width as $1-\sum_{i=0}^{\text{number of bins - 1}} \text{bin widths}_i$. In practice, this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range. In hindsight, though, I think things would be fine without this restriction, especially since the best network is selected based on the the version of the loss with no approximations (i.e. a pipeline that uses a regular histogram with the optimized binning).
 
-### Results: fixed binning
+### Results: 5-bin observable
 
-We'll start by looking at the overall metrics when optimizing a 5-bin observable. These are shown in @fig-newneos-5bin-fixed. To recap the differences to @fig-neos-results:
+We'll start by looking at the overall metrics when optimizing a 5-bin observable. These are shown in @fig-newneos-5bin-fixed, where the circular points show the epoch where we would stop training and select that set of models across all the random seeds. To recap the differences to @fig-neos-results: we're using a slightly different neural network, training for longer, and tracking all the different metrics for each training strategy. Now, the first identifiable difference I'll highlight is that training to minimize $\sigma_{\mu}$ is *much* better than it was in the `neos` paper! It also follows the $\mathrm{CL}_s$ curve really tightly for most of the metrics, which is much more in-line with expectations: remember that minimizing $\mathrm{CL}_s$ will also minimize some version of $\sigma_{\mu}$ too! So why were they so different in the `neos` paper? Well, the reason I seemed to stumble upon is that the wider and more shallow network of size (1024, 1024, 1) produces results with much higher variance for some reason when trained to optimize $\sigma_{\mu}$. This is reflected in a statistic I didn't show in the initial `neos` studies -- the networks trained with different random seeds for the network parameters had very high variance! Why this occured for $\sigma_{\mu}$ in particular is unclear to me, but the results with the narrower, deeper network used here are far more stable, which will be seen again when we dive into some of the resulting models.
 
-The first identifiable difference when looking at the relative performances
+Commenting on other features: the new player in the game is the discovery $p$-value $p_0$, which performs pretty well in the three inference aware metrics. It's curious to note that choosing $\mathrm{CL}_s$ or $p_0$ as a training strategy limits the performance in the other to a degree, though this is alleviated when training using their combination $\mathrm{CL}_s + p_0$ (as would be expected). There is a saying though -- when one uses a metric as a training objective, it ceases to function well as a measure of performance. In some ways this is only partially true here, as these metrics are calculated using a regular histogram instead of a bKDE, so they differ in a mild conceptual way. But despite that, all of $\mathrm{CL}_s$, $p_0$, and adding them together seem to perform identically with the value of $\sigma_{\mu}$ they end up with.
 
+As to why the the Fisher information estimate of $\sigma_{\mu}$ minimizes $\mathrm{CL}_s$ much more than $\p_0$, it's not immediately clear to me. Here, we evaluate the Fisher information using Asimov data with $\mu'=\gamma'=1$, i.e. the nominal signal + background hypothesis; earlier I said it shouldn't matter too much what this choice is, but it could play a factor that $\mathrm{CL}_s$ also uses this Asimov data configuration. It could also stem from the fact that $q_0 \neq q_\mu$, but that's pure speculation at this point. The one definite takeaway is that all these metrics care about minimizing $\sigma_{\mu}$ in some fashion, even if their mutual relationships are more complicated.
 
 ### Results: variable binning
 
-One thing I also thought to try is, for a fixed number of bins, exploring what happens when the bin edges are made to be *part of the optimization itself*. Our free parameters are then $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used to replace values that were larger than their neighboring edge with something just below it instead. As opposed to bin edges, we could have equivalently let the bin widths vary instead, and decide the last width as $1-\sum_{i=0}^{\text{number of bins - 1}} \text{bin widths}_i$. In practice, this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range. In hindsight, though, I think things would be fine without this restriction, especially since the best network is selected based on the the version of the loss with no approximations (i.e. a pipeline that uses a regular histogram with the optimized binning).
+
 
 
 
 ## What's next?
 
-A whole world of things could be targets for being made differentiable. As a simple extension to what's already been shown here, one could imagine making upper limits differentiable in the same way as the profile likelihood; there's no conceptual restriction, but since there's an optimization procedure to determine the upper limit (find the value of the parameter that gives a certain $p$-value)
+The first question that arises when reading this work for most -- which mirrors accurately the same question I get when giving talks about this -- is *how does it scale?*
 
+Great question. I wish I knew. I've not personally managed to apply this to a real use-case where this method could thrive;
+
+A whole world of things could be targets for being made differentiable. As a simple extension to what's already been shown here, one could imagine making upper limits differentiable in the same way as the profile likelihood; there's no conceptual restriction, but since there's an optimization procedure to determine the upper limit (find the value of the parameter that gives a certain $p$-value), we can reuse the idea of implicit gradients that exist for functions with fixed points. It's possible that I've gotten around to implementing that in [`relaxed`](github.com/gradhep/relaxed) [@relaxed] by the time you read this, which is a differentiable toolbox of sorts that implements all of the advances that you've seen in this chapter.
+
+While we're on the topic, one particularly cool thing about `relaxed` is that it mimics the APIs of commonly used software tools in HEP; hypothesis tests are usually done with [`pyhf`](github.com/scikit-hep/pyhf) using the one-liner
+
+```{python}
+#| echo: true
+#| eval: false
+pyhf.infer.hypotest(
+    mu_0,  # null hypothesis for mu
+    data,
+    model,
+    test_stat,  # = q_mu or q_0
+)
+```
+
+And indeed, the same call works for `relaxed`, with the bonus being you can differentiate the result:
+
+```{python}
+#| echo: true
+#| eval: false
+relaxed.infer.hypotest(
+    mu_0,  # null hypothesis for mu
+    data,
+    model,
+    test_stat,  # = q_mu or q_0
+    lr = 1e-3  # learning rate for fits (done with grad descent)
+)
+```
+
+To see more of what this looks like in practice, I encourage you to check out the [repository (e.g. the tests)](github.com/gradhep/relaxed), a [set of examples that I wrote](github.com/phinate/differentiable-analysis-examples) [@examples], and my [PyHEP 2022 video tutorial](https://youtu.be/cOv7W-moO6k).
 
 Beyond quantities that stem from statistical inference, differentiable simulation is another promising area that could allow simulator-in-the-loop optimization. An example could be tuning your simulator parameters to model data by gradient descent, or perhaps having a pipeline with a loss function that simulates physics on-the-fly based on learned parameters. Moreover, there has been a very interesting recent line of work that looks at making key physics processes differentiable, such as the calculation of matrix elements for scattering amplitudes [@madjax] and parton showering  [@jaxshower]. This is certainly an area to keep an eye on over the coming years.
-
-- Upper limits (i've done working prototypes)
-- Scaling (iris-hep)
-- Addressing batching concerns (validity of objective relates to batch size)

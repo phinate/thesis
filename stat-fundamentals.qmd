@@ -275,7 +275,7 @@ We'll focus on the fact that you can extract *parameter uncertainty estimates* f
 
 $$
 \Sigma_{\hat{\theta}^2} \geqslant [\mathcal{I}(\theta)]^{-1}~,
-$$
+$${#eq-cramer-rao}
 
 where $\Sigma_{\hat{\theta}}^2$ is the covariance matrix for the fitted parameters $\hat{\theta}$. In the asymptotic limit, the maximum likelihood estimator will attain this lower bound, and satisfies
 
