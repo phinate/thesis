@@ -1,5 +1,4 @@
 ---
-title: "Probability and Statistics, in theory"
 execute:
   echo: false
 format:
@@ -11,7 +10,7 @@ format:
 jupyter: python3
 ---
 
-
+# Probability and Statistics, in theory
 ## Probability, distributions, and likelihood
 
 It must be said that I have no desire to subject you, the reader, to the same philosophical torment that I have undergone in my pursuit of clarity of this topic, which I could not even claim to have reached. Moreover, given that this is an *experimental* physics thesis, it is exceedingly likely that you are a pragmatist, and wish to move swiftly on to the sections that may be useful to your life. Nonetheless, I’d like you to allow me the courtesy of proposing that there may in fact be something truly useful in revisiting these foundations, if only to reaffirm their non-utility.

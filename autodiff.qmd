@@ -1,7 +1,6 @@
 ---
 execute:
   echo: false
-title: "Automatic differentiation"
 format:
   html:
     code-fold: true
@@ -12,6 +11,7 @@ jupyter: python3
 ---
 
 
+# Automatic differentiation
 
 
 One may think that the pace of scientific discovery is determined by the speed at which new ideas are formed. That was likely true in the early days; if I posited that a rock, when thrown, will roughly trace a parabolic arc, we likely don't need to take leaps in experimental physics to test this hypothesis to some ballpark degree of accuracy -- maybe we could even get away with just a ruler and the naked eye. In contrast to this, science as done in the present requires a little additional technology in order to probe the questions that we're interested in (unless we get really, really good rulers).
@@ -20,7 +20,7 @@ I say this to emphasize that the advancements made in deep learning over the pas
 
 This section will take a tour through the basics of gradient computation, and then we'll compare the different types of automatic differentiation mechanisms (do we build a graph of our program before executing the code, or do we trace it at runtime?), and then show some example code for each.
 
-## Getting dressed, but the clothes are gradients
+## Building blocks of automatic differentiation
 
 The core idea of autodiff is the breaking down of a potentially complicated calculation into a set of computational **primitives**: basic operations with known derivatives. Think of things like $+$, $\times$, $-$, $\div$, $\sin$, $\log$, and so on. We know how to take the derivative across each of these operations analytically, so we can say to a computer "Every time you see a $\sin$, replace it with a $\cos$ in the gradient calculation". Then, thanks to the chain rule, we can build up the gradient of the whole program by multiplying these gradient results together.
 
@@ -51,12 +51,12 @@ $$
 
 One can note the sizes of each of the intermediate matricies in the format (# rows, # columns):
 
-\begin{align}
-size(\partial y / \partial \mathbf{c}) &= (1,len(c)) \\
-size(\partial \mathbf{c} / \partial \mathbf{b} ) &= (len(c), len(b)) \\
-size(\partial \mathbf{b} / \partial \mathbf{a} ) &= (len(b), len(a)) \\
-size(\partial \mathbf{a} / \partial \mathbf{x} ) &= (len(a), n) \\
-\end{align}
+\begin{align*}
+\mathrm{size}(\partial y / \partial \mathbf{c}) &= (1,len(c)) \\
+\mathrm{size}(\partial \mathbf{c} / \partial \mathbf{b} ) &= (len(c), len(b)) \\
+\mathrm{size}(\partial \mathbf{b} / \partial \mathbf{a} ) &= (len(b), len(a)) \\
+\mathrm{size}(\partial \mathbf{a} / \partial \mathbf{x} ) &= (len(a), n)
+\end{align*}
 
 
 The size of the final Jacobian matrix is then  $(1, n)$, as shown earlier (i.e. one row vector). We'll come back to why these sizes are important -- for instance, these matricies could be very hard to store if $n$ is large.
