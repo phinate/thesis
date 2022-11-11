@@ -705,40 +705,53 @@ The pipeline is exactly the same as in @sec-neos, but with slightly different hy
 
 As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable, to see if that influences the efficacy of the methods.
 
-One thing I also thought to try is, for a fixed number of bins, exploring what happens when the bin edges are made to be *part of the optimization itself*. Our free parameters are then $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used to replace values that were larger than their neighboring edge with something just below it instead. As opposed to bin edges, we could have equivalently let the bin widths vary instead, and decide the last width as $1-\sum_{i=0}^{\text{number of bins - 1}} \text{bin widths}_i$. In practice, this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range. In hindsight, though, I think things would be fine without this restriction, especially since the best network is selected based on the the version of the loss with no approximations (i.e. a pipeline that uses a regular histogram with the optimized binning).
+
 
 ### 5-bin observable
 
 #### Metrics {-}
 
-![Plots of the different metrics calculated on the test set for different training strategies using a 5-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).](images/test_metricsfewbins){#fig-newneos-5bin-fixed}
+![Plots of the different metrics calculated on the test set for different training strategies using a 5-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).](images/test_metricsfewnobins){#fig-newneos-5bin-fixed}
 
-We'll start by looking at the overall metrics when optimizing a 5-bin observable. These are shown in @fig-newneos-5bin-fixed, where the circular points show the epoch where we would stop training and select that set of models across all the random seeds (being loose with the distiction between validation and test sets in this toy problem setting). To recap the differences to @fig-neos-results: we're using a slightly different neural network, training for longer, and tracking all the different metrics for each training strategy. Now, the first identifiable difference I'll highlight is that training to minimize $\sigma_{\mu}$ is *much* better than it was in the `neos` paper! It also follows the $\mathrm{CL}_s$ curve really tightly for most of the metrics, which is much more in-line with expectations: remember that minimizing $\mathrm{CL}_s$ will also minimize some version of $\sigma_{\mu}$ too! So why were they so different in the `neos` paper? Well, the reason I seemed to stumble upon is that the wider and more shallow network of size (1024, 1024, 1) produces results with much higher variance for some reason when trained to optimize $\sigma_{\mu}$. This is reflected in a statistic I didn't show in the initial `neos` studies -- the networks trained with different random seeds for the network parameters had very high variance! Why this occured for $\sigma_{\mu}$ in particular is unclear to me, but the results with the narrower, deeper network used here are far more stable, which will be seen again when we dive into some of the resulting models.
+We'll start by looking at the overall metrics when optimizing a 5-bin observable. These are shown in @fig-newneos-5bin-fixed, where the circular points show the epoch where we would stop training and select that set of models across all the random seeds (being loose with the distiction between validation and test sets in this toy problem setting). To recap the differences to @fig-neos-results: we're using a slightly different neural network, training for longer, and tracking all the different metrics for each training strategy.
 
-Commenting on other features: the new player in the game is the discovery $p$-value $p_0$, which performs pretty well in the three inference aware metrics. It's curious to note that choosing $\mathrm{CL}_s$ or $p_0$ as a training strategy limits the performance in the other to a degree, though this is alleviated when training using their combination $\mathrm{CL}_s + p_0$ (as would be expected). There is a saying though -- when one uses a metric as a training objective, it ceases to function well as a measure of performance. In some ways this is only partially true here, as these metrics are calculated using a regular histogram instead of a bKDE, so they differ in a mild conceptual way. But despite that, all of $\mathrm{CL}_s$, $p_0$, and adding them together seem to perform identically with the value of $\sigma_{\mu}$ they end up with.
+We can see that training to minimze binary cross-entropy quickly overfits, since it's not too difficult to separate the nominal signal and background samples from each other in data space (teal vs orange points). However, note the difference in discovery $p$-value -- apparently we miss out on a $p$-value that's better by *six orders of magnitude* if we choose BCE over something like $p_0$ as an objective! It's also interesting to note that there's a very weak correlation between the models that are more inference-aware and their respective binary cross-entropies.
 
-As to why the the Fisher information estimate of $\sigma_{\mu}$ minimizes $\mathrm{CL}_s$ much more than $p_0$, it's not immediately clear to me. Here, we evaluate the Fisher information using Asimov data with $\mu'=\gamma'=1$, i.e. the nominal signal + background hypothesis; earlier I said it shouldn't matter too much what this choice is, but it could play a factor that $\mathrm{CL}_s$ also uses this Asimov data configuration. It could also stem from the fact that $q_0 \neq q_\mu$, but that's pure speculation at this point. The one definite takeaway is that all these metrics care about minimizing $\sigma_{\mu}$ in some fashion, even if their mutual relationships are more complicated.
+Another identifiable difference I'll highlight is that training to minimize $\sigma_{\mu}$ is *much* better than it was in the `neos` paper! It also follows the $\mathrm{CL}_s$ curve really tightly for most of the metrics, which is much more in-line with expectations: remember that minimizing $\mathrm{CL}_s$ will also minimize some version of $\sigma_{\mu}$ too! So why were they so different in the `neos` paper? Well, the reason I seemed to stumble upon is that the wider and more shallow network of size (1024, 1024, 1) produces results with much higher variance for some reason when trained to optimize $\sigma_{\mu}$. This is reflected in a statistic I didn't show in the initial `neos` studies -- the networks trained with different random seeds for the network parameters had very high variance! Why this occured for $\sigma_{\mu}$ in particular is unclear to me, but the results with the narrower, deeper network used here are far more stable, which will be seen again when we dive into some of the resulting models.
+
+Commenting on other features: the new player in the game is the discovery $p$-value $p_0$, which performs pretty well in the three inference aware metrics. It's curious to note that choosing $\mathrm{CL}_s$ or $p_0$ as a training strategy limits the performance in the other to a degree, though this is alleviated when training using their combination $\mathrm{CL}_s + p_0$ (as would be expected). There is a saying though -- when one uses a metric as a training objective, it ceases to function well as a measure of performance, so we should take this all with a grain of salt and some lemon zest. In some ways this saying is only partially true here, as these metrics are calculated using a regular histogram instead of a bKDE, so they differ in a mild conceptual way. But despite that, all of $\mathrm{CL}_s$, $p_0$, and adding them together seem to perform identically with the value of $\sigma_{\mu}$ they end up with.
+
+There's a couple of good performances that are worth highlighting -- optimizing with respect to $\sigma_{\mu}$ seems to match or beat using $\mathrm{CL}_s$ as the training goal within its own metric for one! It could be that it's an easier metric to minimize in practice, and so it reaches its optimal value much faster. Though, neither $\mathrm{CL}_s$ nor $\sigma_{\mu}$ seem to be super great at optimizing for $p_0$ (but they handily beat binary cross-entropy). Using $\mathrm{CL}_s + p_0$ also ends up with a slightly better $p_0$ by a small amount than using $p_0$ as the objective, while not compromising on any of the other metrics.
+
+As to why the the Fisher information estimate of $\sigma_{\mu}$ minimizes $\mathrm{CL}_s$ much more than $p_0$, there are a number of potential causes. Here, we evaluate the Fisher information using Asimov data with $\mu'=\gamma'=1$, i.e. the nominal signal + background hypothesis; earlier I said it shouldn't matter too much what this choice is, but it could play a factor that $\mathrm{CL}_s$ also uses this Asimov data configuration. It could also stem from the fact that $q_0 \neq q_\mu$, but that's pure speculation at this point -- this should be studied further in future. The one definite takeaway is that all these metrics care about minimizing $\sigma_{\mu}$ in some fashion, even if their mutual relationships are more complicated.
+
+
+
 
 #### Histograms {-}
+As a supplement to the metrics we just examined, it's interesting to see the types of observable that the network learns for each metric. For this, I've plotted the resulting histograms for each training strategy that were learned by the best-performing models over each random seed. These histograms are further augmented by plots of the value of the neural network observable across data space, where the contours used are exactly the same as the bin intervals; you can do a one-to-one comparison by looking at the points enclosed in one contour, and find the bin that corresponds to that interval, where you'll see those points accumulated (after scale factors are applied).
+![Histograms from optimizing with respect to binary cross-entropy between signal and nominal background.](images/new-hist-models-bce-5nobin){#fig-hists-5bin-bce}
 
 ![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-5bin){#fig-hists-5bin-discovery}
 
-![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-5bin){#fig-hists-5bin-CLs}
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-5nobin){#fig-hists-5nobin-CLs}
 
-![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-5bin){#fig-hists-5bin-comb}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-5nobin){#fig-hists-5bin-comb}
 
-![](images/new-hist-models-poi_uncert-5bin){#fig-hists-5bin-poi-uncert}
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-hist-models-poi_uncert-5nobin){#fig-hists-5bin-poi-uncert}
 
 
 #### Neural network contours in data space {-}
 
-![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-grid-models-discovery-5bin){#fig-grid-5bin-discovery}
+![Contours of the neural network output from optimizing with respect to binary cross-entropy between signal and nominal background. The test set points are overlayed.](images/new-grid-models-bce-5nobin){#fig-grid-5bin-bce}
 
-![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-grid-models-CLs-5bin){#fig-grid-5bin-CLs}
+![Contours of the neural network output from optimizing with respect to the discovery $p$-value $p_0$. The test set points are overlayed.](images/new-grid-models-discovery-5nobin){#fig-grid-5bin-discovery}
 
-![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-grid-models-COMB-5bin){#fig-grid-5bin-comb}
+![Contours of the neural network output from optimizing with respect to the $\mathrm{CL}_s$. The test set points are overlayed.](images/new-grid-models-CLs-5nobin){#fig-grid-5bin-CLs}
 
-![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-grid-models-poi_uncert-5bin){#fig-grid-5bin-poi-uncert}
+![Contours of the neural network output from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$. The test set points are overlayed.](images/new-grid-models-COMB-5nobin){#fig-grid-5bin-comb}
+
+![Contours of the neural network output from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$. The test set points are overlayed.](images/new-grid-models-poi_uncert-5nobin){#fig-grid-5bin-poi-uncert}
 
 ### 20-bin observable
 
@@ -746,28 +759,42 @@ Now we can see what happens when we provide a lot more bins to play with!
 
 #### Metrics {-}
 
-![Plots of the different metrics calculated on the test set for different training strategies using a 20-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).](images/test_metricsfewbins){#fig-newneos-5bin-fixed}
+![Plots of the different metrics calculated on the test set for different training strategies using a 20-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).](images/test_metricsmanynobins){#fig-newneos-20bin-fixed}
+
+The story doesn't change too much with more bins, with all the training strategies maintaining their mutual relationships as discussed earlier. The only marked difference is that $p_0 + \mathrm{CL}_s$ outperforms $p_0$ alone much more clearly here, which is pretty interesting to think about.
+
+I'll now show the histograms and neural network contours -- there are some pretty funky ones here. You'll see that the types of histogram model learned by the neural network fluctuates much more with this additional granularity provided by the new bins, especially for the hypothesis test-based metrics (seed 2 and 3 are particularly strange for $p_0$).
 
 #### Histograms {-}
 
-![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-20bin){#fig-hists-20bin-discovery}
+![Histograms from optimizing with respect to binary cross-entropy between signal and nominal background.](images/new-hist-models-bce-20nobin){#fig-hists-20bin-bce}
 
-![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-20bin){#fig-hists-20bin-CLs}
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-20nobin){#fig-hists-20bin-discovery}
 
-![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-20bin){#fig-hists-20in-comb}
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-20bin){#fig-hists-20nobin-CLs}
 
-![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-hist-models-poi_uncert-bin){#fig-hists-20bin-poi-uncert}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-20nobin){#fig-hists-20in-comb}
+
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-hist-models-poi_uncert-20nobin){#fig-hists-20bin-poi-uncert}
 
 
 #### Neural network contours in data space {-}
 
-![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-grid-models-discovery-20bin){#fig-grid-20bin-discovery}
+![Contours of the neural network output from optimizing with respect to binary cross-entropy between signal and nominal background. The test set points are overlayed.](images/new-grid-models-bce-20nobin){#fig-grid-20bin-bce}
 
-![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-grid-models-CLs-20bin){#fig-grid-20bin-CLs}
+![Contours of the neural network output from optimizing with respect to the discovery $p$-value $p_0$. The test set points are overlayed.](images/new-grid-models-discovery-20nobin){#fig-grid-20bin-discovery}
 
-![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-grid-models-COMB-20bin){#fig-grid-20bin-comb}
+![Contours of the neural network output from optimizing with respect to the $\mathrm{CL}_s$. The test set points are overlayed.](images/new-grid-models-CLs-20nobin){#fig-grid-20bin-CLs}
 
-![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-grid-models-poi_uncert-20bin){#fig-grid-20bin-poi-uncert}
+![Contours of the neural network output from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$. The test set points are overlayed.](images/new-grid-models-COMB-20nobin){#fig-grid-20bin-comb}
+
+![Contours of the neural network output from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$. The test set points are overlayed.](images/new-grid-models-poi_uncert-20nobin){#fig-grid-20bin-poi-uncert}
+
+### Optimizing binning and neural network simultaneously
+
+One thing I also thought to try is, for a fixed number of bins, exploring what happens when the bin edges are made to be *part of the optimization itself*. Our free parameters are then $\varphi = \left\{\varphi_{\mathrm{nn}}, \text{bin edges}\right\}$. To prevent the bin edges from being non-ascending, a `jax.numpy.where` statement was used to replace values that were larger than their neighboring edge with something just below it instead. As opposed to bin edges, we could have equivalently let the bin widths vary instead, and decide the last width as $1-\sum_{i=0}^{\text{number of bins - 1}} \text{bin widths}_i$. In practice, this was found to be less stable when tried (often the sum of widths would exceed 1, and the last width becomes negative in that case). The endpoints $[0,1]$ were taken as fixed to ensure there isn't optimization that accounts for the bKDE spilling out outside that range. In hindsight, though, I think things would be fine without this restriction, especially since the best network is selected based on the the version of the loss with no approximations (i.e. a pipeline that uses a regular histogram with the optimized binning).
+
+Results from this experiment are fairly similar to the fixed-bin case, and are shown in @sec-bins-app. The most notable finding is that $\sigma_{\hat{\mu}}$ seemed to be the metric that made use of adapting the binning the most.
 
 ## What's next?
 

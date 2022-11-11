@@ -21,7 +21,8 @@ book:
       - flow-interp.qmd
       - sh.qmd
     - references.qmd
-
+  appendices:
+    - neos-extra.qmd
 
 
 bibliography: references.bib
