@@ -721,24 +721,24 @@ As to why the the Fisher information estimate of $\sigma_{\mu}$ minimizes $\math
 
 #### Histograms {-}
 
-![](images/new-hist-models-discovery-5bin){#fig-hists-5bin-discovery}
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-5bin){#fig-hists-5bin-discovery}
 
-![](images/new-hist-models-CLs-5bin){#fig-hists-5bin-CLs}
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-5bin){#fig-hists-5bin-CLs}
 
-![](images/new-hist-models-COMB-5bin){#fig-hists-5bin-comb}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-5bin){#fig-hists-5bin-comb}
 
 ![](images/new-hist-models-poi_uncert-5bin){#fig-hists-5bin-poi-uncert}
 
 
 #### Neural network contours in data space {-}
 
-![](images/new-grid-models-discovery-5bin){#fig-grid-5bin-discovery}
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-grid-models-discovery-5bin){#fig-grid-5bin-discovery}
 
-![](images/new-grid-models-CLs-5bin){#fig-grid-5bin-CLs}
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-grid-models-CLs-5bin){#fig-grid-5bin-CLs}
 
-![](images/new-grid-models-COMB-5bin){#fig-grid-5bin-comb}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-grid-models-COMB-5bin){#fig-grid-5bin-comb}
 
-![](images/new-grid-models-poi_uncert-5bin){#fig-grid-5bin-poi-uncert}
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-grid-models-poi_uncert-5bin){#fig-grid-5bin-poi-uncert}
 
 ### 20-bin observable
 
@@ -750,24 +750,24 @@ Now we can see what happens when we provide a lot more bins to play with!
 
 #### Histograms {-}
 
-![](images/new-hist-models-discovery-20bin){#fig-hists-20bin-discovery}
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-20bin){#fig-hists-20bin-discovery}
 
-![](images/new-hist-models-CLs-20bin){#fig-hists-20bin-CLs}
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-20bin){#fig-hists-20bin-CLs}
 
-![](images/new-hist-models-COMB-bin){#fig-hists-20in-comb}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-20bin){#fig-hists-20in-comb}
 
-![](images/new-hist-models-poi_uncert-bin){#fig-hists-20bin-poi-uncert}
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-hist-models-poi_uncert-bin){#fig-hists-20bin-poi-uncert}
 
 
 #### Neural network contours in data space {-}
 
-![](images/new-grid-models-discovery-20bin){#fig-grid-20bin-discovery}
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-grid-models-discovery-20bin){#fig-grid-20bin-discovery}
 
-![](images/new-grid-models-CLs-20bin){#fig-grid-20bin-CLs}
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-grid-models-CLs-20bin){#fig-grid-20bin-CLs}
 
-![](images/new-grid-models-COMB-20bin){#fig-grid-20bin-comb}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-grid-models-COMB-20bin){#fig-grid-20bin-comb}
 
-![](images/new-grid-models-poi_uncert-20bin){#fig-grid-20bin-poi-uncert}
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-grid-models-poi_uncert-20bin){#fig-grid-20bin-poi-uncert}
 
 ## What's next?
 
