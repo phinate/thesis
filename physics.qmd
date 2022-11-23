@@ -163,3 +163,6 @@ After simulating the physics processes themselves, we're not quite ready to jump
 Once we've done all that, we're free to then attempt to **reconstruct** the events just like we would for a regular detector (essentially building up particle four-momenta from track information), which allows us to make sure we don't do any better in getting the physics information than we would be able to in actuality. We can then use this information as the input for our physics analysis, and begin to optimize. The only difference is that there's a bias between the simulation and real data we may struggle to account for, but we trade off by having a label on each event that tells us which physics process it came from (i.e. signal or background). We can see this whole process depicted in @fig-simulator.
 
 ![A summary of the different workflow steps that are taken when simulating particle physics processes, including mirroring detector effects.](images/simulation){#fig-simulator}
+
+
+## Beyond the standard model

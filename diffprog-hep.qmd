@@ -499,9 +499,116 @@ In the case of an observable that has well-defined gradients with respect to $\p
 
 ### Binned density estimation (histograms) {#sec-bkde}
 
-Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. Similarly to the cut example with the sigmoid, we're assigning a number (there the weight, and here a count in a bin) in a discrete way to the data -- to make this differentiable, we need to come up with a smooth version of this.
+Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. Similarly to the cut example with the sigmoid, we're assigning a number (there the weight, and here a count in a bin) in a discrete way to the data -- to make this differentiable, we need to come up with a smooth version of this that allows gradients to be calculated across the result.
 
-The solution that we developed to this involves a **kernel density estimate** (KDE). We discussed this in @sec-kde, but just to recap: a KDE is essentially the average of a set of normal distributions centered at each data point, with their width controlled by a global parameter called the **bandwidth**. There's a neat way to take this and cast it into a bin-like form (i.e. defined over intervals): We can calculate the "count" in an interval by taking the area under the KDE between the interval endpoints. We can do this using the cumulative density function (cdf), as $P(a \leqslant X \leqslant b) = P(X \leqslant b) - P(X \leqslant a)$. Since the KDE is the mean over some normal distributions, its cdf is also just the mean of the cdfs for each normal distribution. Moreover, to turn this into a histogram-like object, we can multiply the result by the total number of events, which just changes the mean into a sum. We put this all together in @fig-bkde-code, where a pseudocoded implementation of a **binned KDE** (bKDE) can be found.
+To say a little more to that effect, we'll look at the types of gradients that we may be interested in with more detail. Say we have a data distribution that depends on some latent parameter $\mu$, e.g. data that's drawn from $\mathrm{Normal}(\mu, 1)$. We can then make a histogram of the resulting data. What happens to that histogram When we shift the value of $\mu$? Well, shifting the mean will just translate the histogram along the $x$-axis; an example of this is shown below for a couple values of $\mu$.
+
+```{python}
+import jax
+import jax.numpy as jnp
+from jax.random import normal, PRNGKey
+rng = PRNGKey(7)
+
+from matplotlib.colors import to_rgb
+import matplotlib.pyplot as plt
+subplot_settings = dict(figsize=[7,3],dpi=150,facecolor='w', tight_layout=True)
+
+from functools import partial
+
+lo, hi = -2, 2
+grid_points = 500
+mu_grid = jnp.linspace(lo, hi, grid_points)
+
+num_samples = 100
+points = jnp.tile(
+    normal(rng, shape = (num_samples,)),
+    reps = (grid_points,1)
+    ) + mu_grid.reshape(-1,1)
+
+bins = jnp.linspace(lo-3,hi+3,6)
+make_hists = jax.vmap(partial(jnp.histogram, bins = bins))
+hists, _ = make_hists(points)
+centers = bins[:-1] + jnp.diff(bins) / 2.0
+width = (bins[-1] - bins[0])/(len(bins) - 1)
+
+fig, axs = plt.subplots(1,3, **subplot_settings)
+
+# first mu value
+axs[0].bar(
+    centers,
+    hists[0],
+    width = width,
+    label=f'$\mu$={mu_grid[0]}'
+)
+axs[0].legend()
+# axs[0].axis('off')
+axs[0].set_xlabel('x')
+
+# middle mu value
+axs[1].bar(
+    centers, hists[len(hists)//2],
+    width = width,
+    label=f'$\mu$={mu_grid[len(hists)//2]:.2f}',
+    color = 'C1'
+)
+axs[1].legend()
+# axs[1].axis('off')
+axs[1].set_xlabel('x')
+
+# last mu value
+axs[2].bar(
+    centers,
+    hists[-1],
+    width = width,
+    label=f'$\mu$={mu_grid[-1]}',
+    color = 'C2'
+)
+axs[2].legend()
+# axs[2].axis('off');
+axs[2].set_xlabel('x');
+```
+
+Let us now shift our focus to a single bin: we'll choose the bin centered on 0, and monitor its height as we vary $\mu$:
+
+
+```{python}
+import jax.scipy as jsc
+
+
+def kde_hist(events, bins, bandwidth=None, density=False):
+
+    edge_hi = bins[1:]  # ending bin edges ||<-
+    edge_lo = bins[:-1]  # starting bin edges ->||
+
+    # get cumulative counts (area under kde) for each set of bin edges
+    cdf_up = jsc.stats.norm.cdf(edge_hi.reshape(-1, 1), loc=events, scale=bandwidth)
+    cdf_dn = jsc.stats.norm.cdf(edge_lo.reshape(-1, 1), loc=events, scale=bandwidth)
+    # sum kde contributions in each bin
+    counts = (cdf_up - cdf_dn).sum(axis=1)
+
+    if density:  # normalize by bin width and counts for total area = 1
+        db = jnp.array(jnp.diff(bins), float)  # bin spacing
+        return counts / db / counts.sum(axis=0)
+
+    return counts
+
+# make hists as before
+bins = jnp.linspace(lo-3,hi+3,6)
+make_kde_hists = jax.vmap(partial(kde_hist, bins = bins, bandwidth = .5))
+kde_hists = make_kde_hists(points)
+
+middle = len(bins)//2 - 1
+mu_width = mu_grid[1]-mu_grid[0]
+fig, ax = plt.subplots(**subplot_settings)
+ax.bar(mu_grid, hists[:,middle],  width=mu_width, edgecolor= 'black',linewidth = 0.05,alpha=0.7)
+ax.set_title("Height of central histogram bin as a function of $\mu$")
+ax.set_ylabel("bin height")
+ax.set_xlabel('$\mu$');
+```
+
+We can see that the bin height jumps around in discrete intervals as we translate the underlying data, which would produce ill-defined gradient estimates if we used something numerical like finite differences. To exploit the magic of automatic differentiation here, we want to make it such that this envelope becomes smooth; varying $\mu$ by a very small amount should also vary the bin height by a small amount instead of leaving it static or jumping discontinuously.
+
+The solution that we developed to address this involves a **kernel density estimate** (KDE). We discussed this in @sec-kde, but just to recap: a KDE is essentially the average of a set of normal distributions centered at each data point, with their width controlled by a global parameter called the **bandwidth**. There's a neat way to take this and cast it into a bin-like form (i.e. defined over intervals): We can calculate the "count" in an interval by taking the area under the KDE between the interval endpoints. We can do this using the cumulative density function (cdf), as $P(a \leqslant X \leqslant b) = P(X \leqslant b) - P(X \leqslant a)$. Since the KDE is the mean over some normal distributions, its cdf is also just the mean of the cdfs for each normal distribution. Moreover, to turn this into a histogram-like object, we can multiply the result by the total number of events, which just changes the mean into a sum. We put this all together in @fig-bkde-code, where a pseudocoded implementation of a **binned KDE** (bKDE) can be found.
 
 ```{python}
 #| label: fig-bkde-code
@@ -517,13 +624,19 @@ def bKDE(data: Array, bins: Array, bandwidth: float) -> Array:
     return (cdf_hi - cdf_lo).sum(axis=1) # sum cdfs over each kernel
 ```
 
-We know what happens to a KDE when we change the bandwidth, but how does that impact the bKDE? We can quantify this relative to the bin width by examining the shape of the bKDE relative to a "hard" histogram, which is shown in @fig-bkde-bandwidth. For low bandwidths, we recover something almost resembling a regular histogram. In fact, in the limit of zero bandwidth, we will *exactly* get a histogram! The reason is that zero bandwidth would turn each normal distribution into an infinite spike at each data point, which, when integrated over to get the counts, would have a contribution of 1 if the event lies in the bin, and 0 otherwise.
+
+Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which we can see in @fig-bin-height-bKDE, showing that the variation of the bin height with $\mu$ is much more well-behaved.
+
+
+#### Choosing the bandwidth {-}
+
+I'll show a few studies here that illustrate what happens to the accuracy of the bKDE histogram from the perspective of both the distribution and the resulting gradients.
+
+We know what happens to a KDE when we change the bandwidth: small bandwidth gives a function with high variance, and a large bandwidth oversmooths the distribution. How do these effects impact the bKDE? We can quantify this *relative to the bin width* by examining the shape of the bKDE relative to a "hard" histogram, which is shown in @fig-bkde-bandwidth. For low bandwidths, we recover something almost resembling a regular histogram. In fact, in the limit of zero bandwidth, we will *exactly* get a histogram! The reason is that zero bandwidth would turn each normal distribution into an infinite spike at each data point, which, when integrated over to get the counts, would have a contribution of 1 if the event lies in the bin, and 0 otherwise^[For non-uniform bin widths, an extension of the bKDE to non-uniform bandwidths could be interesting -- one could keep the bin width/bandwidth ratio fixed for each bin, and if the event falls in a given bin, the resulting bandwidth from using that ratio is applied to that event. This would make the analogy between bin width and bandwidth more general in some ways, albeit at the cost of someone's coding time.]
 
 ![Illustration of the bias/smoothness tradeoff when tuning the bandwidth of a bKDE, defined over 200 samples from a bi-modal Gaussian mixture. All distributions are normalized to unit area. The individual kernels that make up the KDE are scaled down for visibility.](images/relaxed_hist){#fig-bkde-bandwidth}
 
-#### Bandwidth vs number of data points {-}
-
-
+This idea of a bias/variance tradeoff with the bandwidth is the gist of it, but there's an additional factor that will influence the value of the bandwidth chosen: the number of data samples available.
 
 ### Differentiable likelihood construction
 
