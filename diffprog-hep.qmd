@@ -570,11 +570,11 @@ axs[2].legend()
 axs[2].set_xlabel('x');
 ```
 
-Let us now shift our focus to a single bin: we'll choose the bin centered on 0, and monitor its height as we vary $\mu$, shown in
+Let us now shift our focus to a single bin: we'll choose the bin centered on 0, and monitor its height as we vary $\mu$, shown in @fig-bin-height-mu.
 
 
 ```{python}
-#| label: @fig-bin-height-mu
+#| label: fig-bin-height-mu
 #| fig-cap: "Demonstrating the shift in the central histogram bin as $\mu$ is varied from -2 to 2."
 middle = len(bins)//2 - 1
 mu_width = mu_grid[1]-mu_grid[0]
@@ -607,7 +607,7 @@ def bKDE(data: Array, bins: Array, bandwidth: float) -> Array:
 Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which we can see in @fig-bin-height-bKDE, showing that the variation of the bin height with $\mu$ is much more well-behaved.
 
 ```{python}
-#| label: @fig-bin-height-bKDE
+#| label: fig-bin-height-bKDE
 #| fig-cap: "Demonstrating the shift in the central histogram bin as $\mu$ is varied from -2 to 2 for both a regular histogram and a bKDE."
 import jax.scipy as jsc
 
@@ -675,7 +675,9 @@ We know what happens to a KDE when we change the bandwidth: small bandwidth give
 
 ![Illustration of the bias/smoothness tradeoff when tuning the bandwidth of a bKDE, defined over 200 samples from a bi-modal Gaussian mixture. All distributions are normalized to unit area. The individual kernels that make up the KDE are scaled down for visibility.](images/relaxed_hist){#fig-bkde-bandwidth}
 
-This idea of a bias/variance tradeoff with the bandwidth is the gist of it, but there's an additional factor that will influence the value of the bandwidth chosen: the number of data samples available.
+This idea of a bias/variance tradeoff with the bandwidth is the gist of it, but there's an additional factor that will influence the value of the bandwidth chosen: the number of data samples available. We may expect that as we add more samples to a KDE, there will be a lot more kernels centered on the new points, so we'd want to reduce the bandwidth in order to faithfully represent the envelope of the distribution. We then can inspect the degree to which this also continues to hold for the bKDE; it may be that good defaults for KDEs differ slightly compared to those for bKDEs.
+
+First, let's examine the distribution accuracy as a function of bandwidth and number of data samples. We can define this by looking at the "true" histogram, which can be calculated using the cumulative distribution of $\mathrm{Normal}(\mu, 1)$ in a way analagous to the bKDE (i.e. the integral under the curve over the intervals defined by the bins). We can then plot the true height of the central bin as it varies with $\mu$
 
 ### Differentiable likelihood construction
 
