@@ -671,13 +671,350 @@ plt.xlabel('$\mu$');
 
 I'll show a few studies here that illustrate what happens to the accuracy of the bKDE histogram from the perspective of both the distribution and the resulting gradients.
 
-We know what happens to a KDE when we change the bandwidth: small bandwidth gives a function with high variance, and a large bandwidth oversmooths the distribution. How do these effects impact the bKDE? We can quantify this *relative to the bin width* by examining the shape of the bKDE relative to a "hard" histogram, which is shown in @fig-bkde-bandwidth. For low bandwidths, we recover something almost resembling a regular histogram. In fact, in the limit of zero bandwidth, we will *exactly* get a histogram! The reason is that zero bandwidth would turn each normal distribution into an infinite spike at each data point, which, when integrated over to get the counts, would have a contribution of 1 if the event lies in the bin, and 0 otherwise^[For non-uniform bin widths, an extension of the bKDE to non-uniform bandwidths could be interesting -- one could keep the bin width/bandwidth ratio fixed for each bin, and if the event falls in a given bin, the resulting bandwidth from using that ratio is applied to that event. This would make the analogy between bin width and bandwidth more general in some ways, albeit at the cost of someone's coding time.]
+We know what happens to a KDE when we change the bandwidth: small bandwidth gives a function with high variance, and a large bandwidth oversmooths the distribution. How do these effects impact the bKDE? We can quantify this *relative to the bin width* by examining the shape of the bKDE relative to a "hard" histogram, which is shown in @fig-bkde-bandwidth. For low bandwidths, we recover something almost resembling a regular histogram. In fact, in the limit of zero bandwidth, we will *exactly* get a histogram! The reason is that zero bandwidth would turn each normal distribution into an infinite spike at each data point, which, when integrated over to get the counts, would have a contribution of 1 if the event lies in the bin, and 0 otherwise^[For non-uniform bin widths, an extension of the bKDE to non-uniform bandwidths could be interesting -- one could keep the bin width/bandwidth ratio fixed for each bin, and if the event falls in a given bin, the resulting bandwidth from using that ratio is applied to that event. This would make the analogy between bin width and bandwidth more general in some ways, albeit at the cost of someone's coding time.].
 
 ![Illustration of the bias/smoothness tradeoff when tuning the bandwidth of a bKDE, defined over 200 samples from a bi-modal Gaussian mixture. All distributions are normalized to unit area. The individual kernels that make up the KDE are scaled down for visibility.](images/relaxed_hist){#fig-bkde-bandwidth}
 
 This idea of a bias/variance tradeoff with the bandwidth is the gist of it, but there's an additional factor that will influence the value of the bandwidth chosen: the number of data samples available. We may expect that as we add more samples to a KDE, there will be a lot more kernels centered on the new points, so we'd want to reduce the bandwidth in order to faithfully represent the envelope of the distribution. We then can inspect the degree to which this also continues to hold for the bKDE; it may be that good defaults for KDEs differ slightly compared to those for bKDEs.
 
-First, let's examine the distribution accuracy as a function of bandwidth and number of data samples. We can define this by looking at the "true" histogram, which can be calculated using the cumulative distribution of $\mathrm{Normal}(\mu, 1)$ in a way analagous to the bKDE (i.e. the integral under the curve over the intervals defined by the bins). We can then plot the true height of the central bin as it varies with $\mu$
+First, let's examine the distribution accuracy as a function of bandwidth and number of data samples. We can define this by looking at the "true" histogram, which can be calculated using the cumulative distribution of $\mathrm{Normal}(\mu, 1)$ in a way analagous to the bKDE (i.e. the integral under the curve over the intervals defined by the bins), which we then normalize to the number of data samples available. We can then plot the true height of the central bin as it varies with $\mu$, and compare it to that obtained from the histogram and bKDE estimates across a number of different settings for the sample size and bandwidth. These plots are shown in @fig-bin-height-all, which looks at bandwidths of 0.05, 0.5, and 0.8 in tandem with sample sizes of 20, 100, and 5000. As expected, we see that the low bandwidth case has the histogram and bKDE predictions for the bin mostly agreeing, while they diverge for larger bandwidths. The best-case scenario appears to be when we have a large number of samples and a low bandwidth, which is when we'd expect all three estimates to converge. If we choose a bandwidth too large though, we're going to introduce a bias as we oversmooth the data features.
+
+```{python}
+#| label: fig-bin-height-all
+#| fig-cap: "Demonstrating the shift in the central histogram bin as a function of bandwidth and the number of samples for a histogram and bKDE, which are compared to the true bin height."
+def true_hist(bins, mu):
+
+    edge_hi = bins[1:]  # ending bin edges ||<-
+    edge_lo = bins[:-1]  # starting bin edges ->||
+
+    # get cumulative counts (area under curve) for each set of bin edges
+    cdf_up = jsc.stats.norm.cdf(edge_hi.reshape(-1, 1), loc=mu)
+    cdf_dn = jsc.stats.norm.cdf(edge_lo.reshape(-1, 1), loc=mu)
+
+    counts = (cdf_up - cdf_dn).T
+
+    return counts
+
+truth = true_hist(bins,mu_grid)*100
+# make hists as before (but normalize)
+bins = jnp.linspace(lo-3,hi+3,6)
+make_kde_hists = jax.vmap(partial(kde_hist, bins = bins, bandwidth = .5, density=False))
+kde_hists = make_kde_hists(points)
+make_hists = jax.vmap(partial(jnp.histogram, bins = bins, density = False))
+hists, _ = make_hists(points)
+def make_points(num_samples, grid_points=300, lo=-2, hi=+2):
+    mu_grid = jnp.linspace(lo, hi, grid_points)
+
+    rngs = [PRNGKey(i) for i in range(9)]
+
+    points = jnp.asarray(
+        [
+            jnp.tile(
+                normal(rng, shape = (num_samples,)),
+                reps = (grid_points,1)
+            ) + mu_grid.reshape(-1,1) for rng in rngs
+        ]
+    )
+
+    return points, mu_grid
+
+
+def make_kdes(points, bandwidth, bins):
+    make_kde_hists = jax.vmap(
+        partial(kde_hist, bins = bins, bandwidth = bandwidth)
+    )
+    return make_kde_hists(points)
+
+def make_mu_scan(bandwidth, num_samples, grid_points=500, lo=-2, hi=+2):
+
+    points, mu_grid = make_points(num_samples, grid_points, lo, hi)
+
+    bins = jnp.linspace(lo-3,hi+3,6)
+
+    truth = true_hist(bins,mu_grid)*num_samples
+
+    get_kde_hists = jax.vmap(partial(make_kdes, bins=bins, bandwidth=bandwidth))
+
+    kde_hists = get_kde_hists(points)
+    make_hists = jax.vmap(jax.vmap(partial(jnp.histogram, bins = bins)))
+    hists, _ = make_hists(points)
+    study_bin = len(bins)//2 - 1
+
+    h = jnp.array([truth[:,study_bin],
+                   hists[:,:,study_bin].mean(axis=0),
+                   kde_hists[:,:,study_bin].mean(axis=0)])
+    stds = jnp.array([hists[:,:,study_bin].std(axis=0),
+                      kde_hists[:,:,study_bin].std(axis=0)])
+    return h, stds
+    bws = jnp.array([0.05,0.5,0.8])
+lo_samp = jax.vmap(partial(make_mu_scan, num_samples = 20))
+mid_samp = jax.vmap(partial(make_mu_scan, num_samples = 100))
+hi_samp = jax.vmap(partial(make_mu_scan, num_samples = 5000))
+
+lo_hists, lo_stds = lo_samp(bws)
+mid_hists, mid_stds = mid_samp(bws)
+hi_hists, hi_stds = hi_samp(bws)
+# colors = fade('C0','C9',num_points=7)
+
+fig, axarr = plt.subplots(3,len(bws), sharex=True, sharey='row', figsize=[7,4], dpi=150)
+
+up, mid, down = axarr
+for i,res in enumerate(zip(lo_hists, lo_stds)):
+    hists, stds = res
+    up[i].plot(mu_grid,hists[0],alpha=.4, color='C3',label="actual", linestyle=':')
+    up[i].fill_between(mu_grid, hists[1]+stds[0], hists[1]-stds[0], alpha=.2,color='C1',label='histogram variance')
+    up[i].plot(mu_grid,hists[1],alpha=.4, color='C1',label="histogram")
+    up[i].fill_between(mu_grid, hists[2]+stds[1], hists[2]-stds[1], alpha=.2,color='C0')
+    up[i].plot(mu_grid,hists[2],alpha=.6,color='C0',label="bKDE")
+    up[i].set_title(f'bw = {bws[i]:.2f}', color='C0')
+
+for i,res in enumerate(zip(mid_hists, mid_stds)):
+    hists, stds = res
+    mid[i].plot(mu_grid,hists[0],alpha=.4, color='C3',label="true bin height", linestyle=':')
+    mid[i].fill_between(mu_grid, hists[1]+stds[0], hists[1]-stds[0], alpha=.2,color='C1',label='histogram $\pm$ std')
+    mid[i].plot(mu_grid,hists[1],alpha=.4,color='C1',label="histogram")
+    mid[i].fill_between(mu_grid, hists[2]+stds[1], hists[2]-stds[1], alpha=.2,color='C0',label='bKDE $\pm$ std')
+    mid[i].plot(mu_grid,hists[2],alpha=.6,color='C0',label="bKDE")
+
+for i,res in enumerate(zip(hi_hists, hi_stds)):
+    hists, stds = res
+    down[i].plot(mu_grid,hists[0],alpha=.4, color='C3',label="actual", linestyle=':')
+    down[i].fill_between(mu_grid, hists[1]+stds[0], hists[1]-stds[0], alpha=.2,color='C1')
+    down[i].plot(mu_grid,hists[1],alpha=.4, color='C1',label="histogram")
+    down[i].fill_between(mu_grid, hists[2]+stds[1], hists[2]-stds[1], alpha=.2,color='C0')
+    down[i].plot(mu_grid,hists[2],alpha=.6,color='C0',label="bKDE")
+#down[0].set_ylabel('n=1e6', rotation=0, size='large')
+down[1].set_xlabel("$\mu$",size='large')
+down[0].set_ylabel("yield",size='large',labelpad=11)
+mid[0].set_ylabel("yield",size='large',labelpad=11)
+up[0].set_ylabel("yield",size='large',labelpad=11)
+# mid[0].set_ylabel("frequency",size='large',labelpad=11)
+mid[-1].legend(bbox_to_anchor=(1.1, 1.05), frameon=False)
+
+rows = [f"{s} samples" for s in [20, 100, 5000]]
+for ax, row in zip(axarr[:,0], rows):
+    ax.annotate(row, xy=(0, 0.5), xytext=(-ax.yaxis.labelpad , 0),
+                xycoords=ax.yaxis.label, textcoords='offset points',
+                size='large', ha='right', va='center', color='C2')
+# plt.suptitle("Height of central histogram bin as a function of $\mu$")
+
+fig.tight_layout()
+# tight_layout doesn't take these labels into account. We'll need
+# to make some room. These numbers are are manually tweaked.
+# You could automatically calculate them, but it's a pain.
+fig.subplots_adjust(left=0.15, top=0.95)
+plt.subplots_adjust(hspace=0.2);
+```
+
+So far things seem all to follow intuition somewhat, but we've only checked half the picture; the whole reason we're using the bKDE construct in the first place is so we can access *gradients* of the histogram yields. To study these, we can derive the "true" gradients from the definition of the bin height: as before, a bin defined by $(a,b)$ for a given $\mu$ value is just
+
+$$\operatorname{height}_{\mathsf{true}}(\mu; a,b) = \Phi(b;\mu) - \Phi(a;\mu) ~,$$
+
+where $\Phi(x; \mu)$ is the normal cumulative distribution parametrized by $\sigma=1, \mu=\mu$. We can then just take the gradient of this expression with respect $\mu$ by hand. First we write the explicit definition of the cdf:
+
+$$\Phi(x; \mu)(x;\mu) = \frac{1}{2}\left[1+\operatorname{erf}\left(\frac{x-\mu}{\sigma \sqrt{2}}\right)\right]~,$$
+
+where the convenient short hand of the error function $\operatorname{erf}$ is given by
+
+$$
+\operatorname{erf}(z) \equiv \frac{2}{\sqrt{\pi}} \int_0^z e^{-t^2} d t~.
+$$
+
+Then, the derivative is as follows:
+
+$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{normcdf}(x;\mu) = \frac{1}{2}\left[1-\left(\frac{2}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\right)\right]~,$$
+
+since $\frac{d}{d z} \operatorname{erf}(z)=\frac{2}{\sqrt{\pi}} e^{-z^{2}}$.
+
+As mentioned, we have $\sigma=1$ in this particular example, making this expression simpler:
+
+$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{normcdf}(x;\mu) = \frac{1}{2}\left[1-\left(\frac{2}{\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2}}\right)\right]~.$$
+
+Putting this all together gives us
+
+$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{freq}_{\mathsf{true}}(\mu; a,b) = -\frac{1}{\sqrt{2\pi}}\left[\left(e^{-\frac{(b-\mu)^2}{2}}\right) - \left( e^{-\frac{(a-\mu)^2}{2}}\right)\right]~,$$
+
+which we can use as a way to quantify the accuracy of the gradients obtained from using a bKDE compared to those of the amount of the true distribution in the interval $(a,b)$.
+
+```{python}
+def true_grad(mu,bins):
+
+    b = bins[1:]  # ending bin edges ||<-
+    a = bins[:-1]  # starting bin edges ->||
+
+    return -(1/((2*jnp.pi)**0.5))*(jnp.exp(-((b-mu)**2)/2) - jnp.exp(-((a-mu)**2)/2))
+
+def gen_points(mu, jrng, nsamples):
+    points = normal(jrng, shape = (nsamples,))+mu
+    return points
+
+def bin_height(mu, jrng, bw, nsamples, bins):
+
+    points = gen_points(mu, jrng, nsamples)
+    return kde_hist(points, bins, bandwidth=bw)[2]
+
+def kde_grads(bw, nsamples, lo=-2, hi=+2, grid_size=300):
+    bins = jnp.linspace(lo-3,hi+3,6)
+
+    mu_grid = jnp.linspace(lo,hi,grid_size)
+
+    rngs = [PRNGKey(i) for i in range(9)]
+
+    grad_fun = jax.grad(bin_height)
+
+    grads = []
+
+    for i,jrng in enumerate(rngs):
+        get_grads = jax.vmap(partial(
+            grad_fun, jrng=jrng, bw=bw, nsamples=nsamples, bins=bins
+        ))
+        grads.append(get_grads(mu_grid))
+
+    return jnp.asarray(grads)
+
+
+def get_hist(mu, jrng, nsamples, bins):
+    points = gen_points(mu, jrng, nsamples)
+
+    hist, _ = jnp.histogram(points, bins)
+
+    return hist[2]
+
+def hist_grad_numerical(bin_heights, mu_width):
+
+    # in mu plane
+    lo = bin_heights[:-1]
+    hi = bin_heights[1:]
+
+    bin_width = (bins[1]-bins[0])
+    grad_left = -(lo-hi)/mu_width
+    # grad_right = -grad_left
+    return grad_left
+
+def hist_grads(nsamples, lo=-2, hi=+2, grid_size=300):
+    bins = jnp.linspace(lo-3,hi+3,6)
+
+    mu_grid = jnp.linspace(lo,hi,grid_size)
+
+    rngs = [PRNGKey(i) for i in range(9)]
+
+    grad_fn = partial(hist_grad_numerical, mu_width=mu_grid[1]-mu_grid[0])
+    grads = []
+    for jrng in rngs:
+        get_heights = jax.vmap(partial(
+            get_hist, jrng=jrng, nsamples=nsamples, bins=bins
+        ))
+        grads.append(grad_fn(get_heights(mu_grid)))
+
+    return jnp.asarray(grads)
+
+
+
+def both_grads(bw, nsamples, lo=-2, hi=+2, grid_size=300):
+    bins = jnp.linspace(lo-3,hi+3,6)
+
+    mu_grid = jnp.linspace(lo,hi,grid_size)
+
+    hist_grad_fun = partial(hist_grad_numerical, mu_width=mu_grid[1]-mu_grid[0])
+    grad_fun = jax.grad(bin_height)
+
+    hist_grads = []
+    kde_grads = []
+
+    rngs = [PRNGKey(i) for i in range(3)]
+
+    for jrng in rngs:
+
+        get_heights = jax.vmap(partial(
+            get_hist, jrng=jrng, nsamples=nsamples, bins=bins
+        ))
+        hist_grads.append(hist_grad_fun(get_heights(mu_grid)))
+
+        get_grads = jax.vmap(partial(
+            grad_fun, jrng=jrng, bw=bw, nsamples=nsamples, bins=bins
+        ))
+        kde_grads.append(get_grads(mu_grid))
+
+    hs = jnp.array(hist_grads)
+    ks = jnp.array(kde_grads)
+
+    h = jnp.array([hs.mean(axis=0),hs.std(axis=0)])
+    k = jnp.array([ks.mean(axis=0),ks.std(axis=0)])
+
+    return h,k
+
+bws = jnp.array([0.05,0.5,0.8])
+samps = [20,100,5000]
+grid_size = 60
+lo_samp = jax.vmap(partial(both_grads, nsamples = samps[0],grid_size=grid_size))
+mid_samp = jax.vmap(partial(both_grads, nsamples = samps[1],grid_size=grid_size))
+hi_samp = jax.vmap(partial(both_grads, nsamples = samps[2],grid_size=grid_size))
+
+lo_hist, lo_kde = lo_samp(bws)
+mid_hist, mid_kde = mid_samp(bws)
+hi_hist, hi_kde = hi_samp(bws)
+
+mu_grid = jnp.linspace(-2,2,grid_size)
+
+true = [true_grad_many(mu_grid)[:,2]*s for s in samps]
+
+fig, axarr = plt.subplots(3,len(bws), sharex=True, sharey='row', figsize=[7,4], dpi=150)
+
+up, mid, down = axarr
+for i,res in enumerate(zip(lo_hist, lo_kde)):
+    hist_grads, hist_stds = res[0]
+    kde_grads, kde_stds = res[1]
+    up[i].plot(mu_grid,true[0],alpha=.4, color='C3',label="actual", linestyle=':')
+    y = jnp.array(up[i].get_ylim())
+
+    up[i].plot(mu_grid[:-1], hist_grads,alpha=.7, color='C1',label="histogram",linewidth=0.6)
+    up[i].fill_between(mu_grid, kde_grads+kde_stds, kde_grads-kde_stds, alpha=.2,color='C0',label='kde histogram $\pm$ std')
+    up[i].plot(mu_grid,kde_grads,alpha=.6,color='C0',label="kde histogram")
+    up[i].set_title(f'bw={bws[i]:.2f}', color='C0')
+    up[i].set_ylim(y*1.3)
+
+for i,res in enumerate(zip(mid_hist, mid_kde)):
+    hist_grads, hist_stds = res[0]
+    kde_grads, kde_stds = res[1]
+    mid[i].plot(mu_grid,true[1],alpha=.4, color='C3',label="true gradient", linestyle=':')
+    y = jnp.array(mid[i].get_ylim())
+
+    mid[i].plot(mu_grid[:-1], hist_grads,alpha=.7, color='C1',label="histogram",linewidth=0.6)
+    mid[i].fill_between(mu_grid, kde_grads+kde_stds, kde_grads-kde_stds, alpha=.2,color='C0',label='bKDE $\pm$ std')
+    mid[i].plot(mu_grid,kde_grads,alpha=.6,color='C0',label="bKDE")
+    mid[i].set_ylim(y*1.3)
+
+for i,res in enumerate(zip(hi_hist, hi_kde)):
+    hist_grads, hist_stds = res[0]
+    kde_grads, kde_stds = res[1]
+    down[i].plot(mu_grid,true[2],alpha=.4, color='C3',label="actual", linestyle=':')
+    y = jnp.array(down[i].get_ylim())
+
+    down[i].plot(mu_grid[:-1], hist_grads,alpha=.7, color='C1',label="histogram")
+    down[i].fill_between(mu_grid, kde_grads+kde_stds, kde_grads-kde_stds, alpha=.2,color='C0')
+    down[i].plot(mu_grid,kde_grads,alpha=.6,color='C0',label="kde histogram")
+    down[i].set_ylim(y*1.3)
+
+down[1].set_xlabel("$\mu$",size='large')
+down[0].set_ylabel("$\partial\,$yield / $\partial\mu$",size='large',labelpad=11)
+mid[0].set_ylabel("$\partial\,$yield / $\partial\mu$",size='large',labelpad=11)
+up[0].set_ylabel("$\partial\,$yield / $\partial\mu$",size='large',labelpad=11)
+mid[-1].legend(bbox_to_anchor=(1.1, 1.05), frameon=False)
+
+rows = [f"{s} samples" for s in [20, 100, 5000]]
+for ax, row in zip(axarr[:,0], rows):
+    ax.annotate(row, xy=(0, 0.5), xytext=(-ax.yaxis.labelpad , 0),
+                xycoords=ax.yaxis.label, textcoords='offset points',
+                size='large', ha='right', va='center', color='C2')
+# plt.suptitle("Height of central histogram bin as a function of $\mu$")
+
+fig.tight_layout()
+# tight_layout doesn't take these labels into account. We'll need
+# to make some room. These numbers are are manually tweaked.
+# You could automatically calculate them, but it's a pain.
+fig.subplots_adjust(left=0.15, top=0.95)
+plt.subplots_adjust(hspace=0.2)
+```
 
 ### Differentiable likelihood construction
 
