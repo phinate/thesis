@@ -501,9 +501,11 @@ In the case of an observable that has well-defined gradients with respect to $\p
 
 Histograms are discontinuous by nature. They are defined for 1-D data as a set of two quantities: intervals (or *bins*) over the domain of that data, and counts of the number of data points that fall into each bin. For small changes in the underlying data distribution, bin counts will either remain static, or jump in integer intervals as data migrate between bins, both of which result in ill-defined gradients. Similarly to the cut example with the sigmoid, we're assigning a number (there the weight, and here a count in a bin) in a discrete way to the data -- to make this differentiable, we need to come up with a smooth version of this that allows gradients to be calculated across the result.
 
-To say a little more to that effect, we'll look at the types of gradients that we may be interested in with more detail. Say we have a data distribution that depends on some latent parameter $\mu$, e.g. data that's drawn from $\mathrm{Normal}(\mu, 1)$. We can then make a histogram of the resulting data. What happens to that histogram When we shift the value of $\mu$? Well, shifting the mean will just translate the histogram along the $x$-axis; an example of this is shown below for a couple values of $\mu$.
+To say a little more to that effect, we'll look at the types of gradients that we may be interested in. Say we have a data distribution that depends on some latent parameter $\mu$, e.g. data that's drawn from $\mathrm{Normal}(\mu, 1)$. We can then make a histogram of the resulting data. What happens to that histogram When we shift the value of $\mu$? Well, shifting the mean will just translate the histogram along the $x$-axis; an example of this is shown in @fig-hist-mus for a couple values of $\mu$ (with the random seed kept constant).
 
 ```{python}
+#| label: fig-hist-mus
+#| fig-cap: "Translating a histogram from left to right by varying the center of the distribution the data is drawn from."
 import jax
 import jax.numpy as jnp
 from jax.random import normal, PRNGKey
@@ -568,10 +570,45 @@ axs[2].legend()
 axs[2].set_xlabel('x');
 ```
 
-Let us now shift our focus to a single bin: we'll choose the bin centered on 0, and monitor its height as we vary $\mu$:
+Let us now shift our focus to a single bin: we'll choose the bin centered on 0, and monitor its height as we vary $\mu$, shown in
 
 
 ```{python}
+#| label: @fig-bin-height-mu
+#| fig-cap: "Demonstrating the shift in the central histogram bin as $\mu$ is varied from -2 to 2."
+middle = len(bins)//2 - 1
+mu_width = mu_grid[1]-mu_grid[0]
+fig, ax = plt.subplots(**subplot_settings)
+ax.bar(mu_grid, hists[:,middle],  width=mu_width, edgecolor= 'black',linewidth = 0.05,alpha=0.7, color='C1')
+ax.set_title("Height of central histogram bin as a function of $\mu$")
+ax.set_ylabel("bin height")
+ax.set_xlabel('$\mu$');
+```
+
+We can see that the bin height jumps around in discrete intervals as we translate the underlying data, which would produce ill-defined gradient estimates if we used something numerical like finite differences. To exploit the magic of automatic differentiation here, we want to make some other function such that this envelope becomes smooth; varying $\mu$ by a very small amount should also vary the bin height by a small amount instead of leaving it static or jumping discontinuously.
+
+The solution that we developed to address this involves a **kernel density estimate** (KDE). We discussed this in @sec-kde, but just to recap: a KDE is essentially the average of a set of normal distributions centered at each data point, with their width controlled by a global parameter called the **bandwidth**. There's a neat way to take this and cast it into a bin-like form (i.e. defined over intervals): We can calculate the "count" in an interval by taking the area under the KDE between the interval endpoints. We can do this using the cumulative density function (cdf), as $P(a \leqslant X \leqslant b) = P(X \leqslant b) - P(X \leqslant a)$. Since the KDE is the mean over some normal distributions, its cdf is also just the mean of the cdfs for each normal distribution. Moreover, to turn this into a histogram-like object, we can multiply the result by the total number of events, which just changes the mean into a sum. We put this all together in @fig-bkde-code, where a pseudocoded implementation of a **binned KDE** (bKDE) can be found.
+
+```{python}
+#| label: fig-bkde-code
+#| fig-cap: none
+#| echo: true
+#| eval: false
+def bKDE(data: Array, bins: Array, bandwidth: float) -> Array:
+    edge_hi = bins[1:]  # ending bin edges ||<-
+    edge_lo = bins[:-1]  # starting bin edges ->||
+    # get cumulative counts (area under kde) for each set of bin edges
+    cdf_hi = norm.cdf(edge_hi.reshape(-1, 1), loc=data, scale=bandwidth)
+    cdf_lo = norm.cdf(edge_lo.reshape(-1, 1), loc=data, scale=bandwidth)
+    return (cdf_hi - cdf_lo).sum(axis=1) # sum cdfs over each kernel
+```
+
+
+Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which we can see in @fig-bin-height-bKDE, showing that the variation of the bin height with $\mu$ is much more well-behaved.
+
+```{python}
+#| label: @fig-bin-height-bKDE
+#| fig-cap: "Demonstrating the shift in the central histogram bin as $\mu$ is varied from -2 to 2 for both a regular histogram and a bKDE."
 import jax.scipy as jsc
 
 
@@ -591,42 +628,44 @@ def kde_hist(events, bins, bandwidth=None, density=False):
         return counts / db / counts.sum(axis=0)
 
     return counts
-
 # make hists as before
 bins = jnp.linspace(lo-3,hi+3,6)
 make_kde_hists = jax.vmap(partial(kde_hist, bins = bins, bandwidth = .5))
 kde_hists = make_kde_hists(points)
-
 middle = len(bins)//2 - 1
 mu_width = mu_grid[1]-mu_grid[0]
-fig, ax = plt.subplots(**subplot_settings)
-ax.bar(mu_grid, hists[:,middle],  width=mu_width, edgecolor= 'black',linewidth = 0.05,alpha=0.7)
-ax.set_title("Height of central histogram bin as a function of $\mu$")
-ax.set_ylabel("bin height")
-ax.set_xlabel('$\mu$');
+
+fig, axs = plt.subplots(2,1, sharex=True, **subplot_settings)
+
+axs[0].bar(
+    mu_grid,
+    hists[:,middle],
+#     fill=False,
+    color = 'C1',
+    width = mu_width,
+    alpha = .7,
+    label = 'histogram',
+    edgecolor= 'black',
+    linewidth = 0.05
+)
+axs[0].legend(frameon=False)
+axs[0].set_ylabel("bin height")
+axs[0].set_title("Height of central histogram bin as a function of $\mu$")
+
+axs[1].bar(
+    mu_grid,
+    kde_hists[:,middle],
+    color = 'C0',
+    width = mu_width,
+    alpha = .7,
+    label = 'bKDE',
+    edgecolor= 'black',
+    linewidth = 0.05
+)
+axs[1].set_ylabel("bin height")
+axs[1].legend(frameon=False)
+plt.xlabel('$\mu$');
 ```
-
-We can see that the bin height jumps around in discrete intervals as we translate the underlying data, which would produce ill-defined gradient estimates if we used something numerical like finite differences. To exploit the magic of automatic differentiation here, we want to make it such that this envelope becomes smooth; varying $\mu$ by a very small amount should also vary the bin height by a small amount instead of leaving it static or jumping discontinuously.
-
-The solution that we developed to address this involves a **kernel density estimate** (KDE). We discussed this in @sec-kde, but just to recap: a KDE is essentially the average of a set of normal distributions centered at each data point, with their width controlled by a global parameter called the **bandwidth**. There's a neat way to take this and cast it into a bin-like form (i.e. defined over intervals): We can calculate the "count" in an interval by taking the area under the KDE between the interval endpoints. We can do this using the cumulative density function (cdf), as $P(a \leqslant X \leqslant b) = P(X \leqslant b) - P(X \leqslant a)$. Since the KDE is the mean over some normal distributions, its cdf is also just the mean of the cdfs for each normal distribution. Moreover, to turn this into a histogram-like object, we can multiply the result by the total number of events, which just changes the mean into a sum. We put this all together in @fig-bkde-code, where a pseudocoded implementation of a **binned KDE** (bKDE) can be found.
-
-```{python}
-#| label: fig-bkde-code
-#| fig-cap: "Implementation of a bKDE using Pythonic pseudocode."
-#| echo: true
-#| eval: false
-def bKDE(data: Array, bins: Array, bandwidth: float) -> Array:
-    edge_hi = bins[1:]  # ending bin edges ||<-
-    edge_lo = bins[:-1]  # starting bin edges ->||
-    # get cumulative counts (area under kde) for each set of bin edges
-    cdf_hi = norm.cdf(edge_hi.reshape(-1, 1), loc=data, scale=bandwidth)
-    cdf_lo = norm.cdf(edge_lo.reshape(-1, 1), loc=data, scale=bandwidth)
-    return (cdf_hi - cdf_lo).sum(axis=1) # sum cdfs over each kernel
-```
-
-
-Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which we can see in @fig-bin-height-bKDE, showing that the variation of the bin height with $\mu$ is much more well-behaved.
-
 
 #### Choosing the bandwidth {-}
 
@@ -640,7 +679,7 @@ This idea of a bias/variance tradeoff with the bandwidth is the gist of it, but 
 
 ### Differentiable likelihood construction
 
-Now, I must confess, I have told you somewhat of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
+Now, I must confess, I have told you somewhat of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it, or [browse the `pyhf` issues on the topic](https://github.com/scikit-hep/pyhf/issues?q=is%3Aissue+author%3Aphinate+)), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
 
 ### Differentiable test statistics (profile likelihood ratio)
 
