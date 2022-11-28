@@ -575,7 +575,7 @@ Let us now shift our focus to a single bin: we'll choose the bin centered on 0, 
 
 ```{python}
 #| label: fig-bin-height-mu
-#| fig-cap: "Demonstrating the shift in the central histogram bin as $\mu$ is varied from -2 to 2."
+#| fig-cap: "Demonstrating the shift in the central histogram bin as $\\mu$ is varied from -2 to 2."
 middle = len(bins)//2 - 1
 mu_width = mu_grid[1]-mu_grid[0]
 fig, ax = plt.subplots(**subplot_settings)
@@ -608,7 +608,7 @@ Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which w
 
 ```{python}
 #| label: fig-bin-height-bKDE
-#| fig-cap: "Demonstrating the shift in the central histogram bin as $\mu$ is varied from -2 to 2 for both a regular histogram and a bKDE."
+#| fig-cap: "Demonstrating the shift in the central histogram bin as $\\mu$ is varied from -2 to 2 for both a regular histogram and a bKDE."
 import jax.scipy as jsc
 
 
@@ -746,7 +746,7 @@ def make_mu_scan(bandwidth, num_samples, grid_points=500, lo=-2, hi=+2):
     stds = jnp.array([hists[:,:,study_bin].std(axis=0),
                       kde_hists[:,:,study_bin].std(axis=0)])
     return h, stds
-    bws = jnp.array([0.05,0.5,0.8])
+bws = jnp.array([0.05,0.5,0.8])
 lo_samp = jax.vmap(partial(make_mu_scan, num_samples = 20))
 mid_samp = jax.vmap(partial(make_mu_scan, num_samples = 100))
 hi_samp = jax.vmap(partial(make_mu_scan, num_samples = 5000))
@@ -808,35 +808,39 @@ plt.subplots_adjust(hspace=0.2);
 
 So far things seem all to follow intuition somewhat, but we've only checked half the picture; the whole reason we're using the bKDE construct in the first place is so we can access *gradients* of the histogram yields. To study these, we can derive the "true" gradients from the definition of the bin height: as before, a bin defined by $(a,b)$ for a given $\mu$ value is just
 
-$$\operatorname{height}_{\mathsf{true}}(\mu; a,b) = \Phi(b;\mu) - \Phi(a;\mu) ~,$$
+$$\operatorname{yield}_{\mathsf{true}}(\mu; a,b) = \Phi(b;\mu, \sigma) - \Phi(a;\mu, \sigma) ~,$$
 
-where $\Phi(x; \mu)$ is the normal cumulative distribution parametrized by $\sigma=1, \mu=\mu$. We can then just take the gradient of this expression with respect $\mu$ by hand. First we write the explicit definition of the cdf:
+where $\Phi(x; \mu, \sigma)$ is the normal cumulative distribution parametrized by $\sigma, \mu=$. We can then just take the gradient of this expression with respect $\mu$ by hand. First we write the explicit definition of the cdf:
 
-$$\Phi(x; \mu)(x;\mu) = \frac{1}{2}\left[1+\operatorname{erf}\left(\frac{x-\mu}{\sigma \sqrt{2}}\right)\right]~,$$
+$$\Phi(x; \mu, \sigma) = \frac{1}{2}\left[1+\operatorname{erf}\left(\frac{x-\mu}{\sigma \sqrt{2}}\right)\right]~,$$
 
 where the convenient short hand of the error function $\operatorname{erf}$ is given by
 
 $$
-\operatorname{erf}(z) \equiv \frac{2}{\sqrt{\pi}} \int_0^z e^{-t^2} d t~.
+\operatorname{erf}(x) \equiv \frac{2}{\sqrt{\pi}} \int_0^x e^{-t^2} d x~.
 $$
 
 Then, the derivative is as follows:
 
-$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{normcdf}(x;\mu) = \frac{1}{2}\left[1-\left(\frac{2}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\right)\right]~,$$
+$$\frac{\partial}{\partial\mu}\Phi(x;\mu, \sigma) = \frac{1}{2}\left[1-\left(\frac{2}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\right)\right]~,$$
 
-since $\frac{d}{d z} \operatorname{erf}(z)=\frac{2}{\sqrt{\pi}} e^{-z^{2}}$.
+since $\frac{d}{dx} \operatorname{erf}(x)=\frac{2}{\sqrt{\pi}} e^{-x^{2}}$.
 
 As mentioned, we have $\sigma=1$ in this particular example, making this expression simpler:
 
-$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{normcdf}(x;\mu) = \frac{1}{2}\left[1-\left(\frac{2}{\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2}}\right)\right]~.$$
+$$ \frac{\partial}{\partial\mu}\Phi(x;\mu, \sigma=1) = \frac{1}{2}\left[1-\left(\frac{2}{\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2}}\right)\right]~.$$
 
 Putting this all together gives us
 
-$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{freq}_{\mathsf{true}}(\mu; a,b) = -\frac{1}{\sqrt{2\pi}}\left[\left(e^{-\frac{(b-\mu)^2}{2}}\right) - \left( e^{-\frac{(a-\mu)^2}{2}}\right)\right]~,$$
+$$\Rightarrow \frac{\partial}{\partial\mu}\operatorname{yield}_{\mathsf{true}}(\mu; a,b) = -\frac{1}{\sqrt{2\pi}}\left[\left(e^{-\frac{(b-\mu)^2}{2}}\right) - \left( e^{-\frac{(a-\mu)^2}{2}}\right)\right]~,$$
 
 which we can use as a way to quantify the accuracy of the gradients obtained from using a bKDE compared to those of the amount of the true distribution in the interval $(a,b)$.
 
+The comparative plots between the true gradient, the histogram gradient, and the bKDE gradient are shown in @fig-bin-grad-all, where the histogram gradient is calculated using the finite differences method, and the bKDE gradient with automatic differentiation. A similar trend can be seen to @fig-bin-height-all, where the estimate from the bKDE improves with more samples, and becomes much less noisy. This is in contrast to the histogram, which struggles with gradients unless the sample size is large (here 5000), and produces very high variance estimates in general. The bKDE, however, is able to avoid this high variance while keeping a reasonably low bias depending on how many samples are present; the central plot, for instance, shows a case where the bKDE of bandwidth 0.5 far outperforms estimating the true gradient with just 100 samples compared to the erratic estimates using the regular histogram.
+
 ```{python}
+#| label: fig-bin-grad-all
+#| fig-cap: "Variation of the gradient of the central histogram bin as a function of bandwidth and the number of samples for a histogram and bKDE, which are compared to the true gradient of the yield."
 def true_grad(mu,bins):
 
     b = bins[1:]  # ending bin edges ||<-
@@ -955,7 +959,7 @@ mid_hist, mid_kde = mid_samp(bws)
 hi_hist, hi_kde = hi_samp(bws)
 
 mu_grid = jnp.linspace(-2,2,grid_size)
-
+true_grad_many = jax.vmap(partial(true_grad, bins = bins))
 true = [true_grad_many(mu_grid)[:,2]*s for s in samps]
 
 fig, axarr = plt.subplots(3,len(bws), sharex=True, sharey='row', figsize=[7,4], dpi=150)
@@ -970,7 +974,7 @@ for i,res in enumerate(zip(lo_hist, lo_kde)):
     up[i].plot(mu_grid[:-1], hist_grads,alpha=.7, color='C1',label="histogram",linewidth=0.6)
     up[i].fill_between(mu_grid, kde_grads+kde_stds, kde_grads-kde_stds, alpha=.2,color='C0',label='kde histogram $\pm$ std')
     up[i].plot(mu_grid,kde_grads,alpha=.6,color='C0',label="kde histogram")
-    up[i].set_title(f'bw={bws[i]:.2f}', color='C0')
+    up[i].set_title(f'bw = {bws[i]:.2f}', color='C0')
     up[i].set_ylim(y*1.3)
 
 for i,res in enumerate(zip(mid_hist, mid_kde)):
@@ -1016,9 +1020,14 @@ fig.subplots_adjust(left=0.15, top=0.95)
 plt.subplots_adjust(hspace=0.2)
 ```
 
+It seems then that there is some kind of middle ground to be had with respect to the bandwidth one can choose for a bKDE depending on the number of samples present, where the trends of distribution and gradient accuracy roughly align. Optimality seems to be in the high-sample and low-bandwidth case. To look at this at scale, we can summarize each of these plots into a single number, e.g. the mean relative error, and see how this number varies across a large grid of different configurations for the number of samples and the bandwidth. This plot can be found in
+
+~
+
+
 ### Differentiable likelihood construction
 
-Now, I must confess, I have told you somewhat of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it, or [browse the `pyhf` issues on the topic](https://github.com/scikit-hep/pyhf/issues?q=is%3Aissue+author%3Aphinate+)), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
+Now, I must confess, I have told you a bit of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it, or [browse the `pyhf` issues on the topic](https://github.com/scikit-hep/pyhf/issues?q=is%3Aissue+author%3Aphinate+)), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
 
 ### Differentiable test statistics (profile likelihood ratio)
 
