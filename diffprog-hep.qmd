@@ -161,8 +161,8 @@ pipe_no_uncertainty = partial(pipeline, uncertainty=False)
 pvals_no_uncertainty = jax.vmap(pipe_no_uncertainty)(phis)
 fig, ax = plt.subplots(**subplot_settings)
 axs = [ax]
-axs[0].plot(phis, pvals, label="with uncertainty", color="C2")
-axs[0].plot(phis, pvals_no_uncertainty, label="no uncertainty", color="C4")
+axs[0].plot(phis, pvals, label="with uncertainty", color="C0")
+axs[0].plot(phis, pvals_no_uncertainty, label="no uncertainty", color="C2")
 axs[0].set_ylabel("$p$-value")
 # plot vertical dotted line at minimum of p-values + s/b
 best_phi = phis[jnp.argmin(pvals)]
@@ -1024,6 +1024,9 @@ It seems then that there is some kind of middle ground to be had with respect to
 
 ![Absolute relative error in the bKDE gradient compared to the true distribution, calculated for a wide variety of bandwidths and sample sizes. Orange points indicate the lowest error across the rows of constant sample size to hint at the trend of a good bandwidth choice.](images/grad_errors){#fig-grad-errors}
 
+#### Other differentiable binned density estimates {-}
+
+In the INFERNO paper [@inferno], from which much inspiration was taken in general, they use a softmax function as a way to mimic binned output from the neural network. This was tried in practice
 
 ### Differentiable likelihood construction
 
@@ -1083,6 +1086,8 @@ The results of training this setup to optimize $\phi$ with respect to the discov
 ![Left: The resulting point from optimizing $\phi$ with gradient descent. Right: The histogram model at the solution of the optimization.](images/opt){#fig-simple-opt}
 
 ### A quick aside on INFERNO vs `neos`
+
+My advocacy hereafter is to refrain from using `neos` or INFERNO methodology naming, since these methods differ only on small implementation details, the main one being the *choice of loss function*.
 
 One interesting thing to note: we're calculating the expected discovery $p$-value using the asymptotic formulae outlined in @sec-asymptotics. Minimising this $p$-value corresponds to pushing the observed value of the $q_0$ test statistic as far to the right as possible (i.e. maximizing its value), which will trap smaller and smaller proportions of the distribution $p(q_0 | \mu_0)$ (smaller $p$-values). Recall that @eq-wald states that we know an interesting fact about this test statistic: it's approximately equal to $\left((\mu_0 - \hat{\mu}(x))/\sigma_{\hat{\mu}}\right)^2$. Since we're using Asimov data with $\mu'=\hat{\mu}=1$, and probing a null of $\mu_0=0$, the test statistic is actually an (inverse) estimate of the variance of $\hat{\mu}$, which is being minimized during optimization! This has a lot of similarities with INFERNO, since both methods are effectively minimizing the same quantity, but estimated a different way; INFERNO uses the Fisher information estimate, and `neos` uses asymptotic formulae.
 
@@ -1165,7 +1170,10 @@ The work done in making $\mathrm{CL}_s$ differentiable opened up a variety of ne
 - Deviations from the nominal values of the nuisance parameters from control measurements ("pulls")
 - ...and *any algebraic combination of the above!*
 
-Indeed, since all of these quantities can be calculated in a differentiable way, we can create a hybrid loss function using any of these components, such as $a_1 \mathrm{CL}_s + a_2\sigma_{\mu}^2 + a_3\log{p_0} + \dots$ etc. We can even view this through the lens of regularization, where we have one clear loss target, then introduce other components weighted with small linear coefficients to steer away from potentially undesirable pathologies. Amongst those metrics already mentioned, one further example of a quantity that could serve this purpose is the empirical notion of the "**Gaussianity**" of a likelihood, which my colleague/supervisor Lukas Heinrich coined as the mean-squared difference across a grid of points between the learned HistFactory likelihood and a Normal distribution defined using the covariance implied by the (inverse) Fisher information matrix (remember the Cramér–Rao bound from @sec-fisher). This would essentially control the validity of the assumptions made when using the Fisher information to calculate uncertainties, as well as potentially reducing the chances of arriving at poorly-behaved likelihood shapes that happen to satisfy a low value of any particular metric.
+Indeed, since all of these quantities can be calculated in a differentiable way, we can create a hybrid loss function using any of these components, such as $a_1 \mathrm{CL}_s + a_2\sigma_{\mu}^2 + a_3\log{p_0} + \dots$ etc. We can even view this through the lens of regularization, where we have one clear loss target, then introduce other components weighted with small linear coefficients to steer away from potentially undesirable pathologies.
+
+
+Amongst those metrics already mentioned, one further example of a quantity that could serve this purpose is the empirical notion of the "**Gaussianity**" of a likelihood, which my colleague/supervisor Lukas Heinrich coined as the mean-squared difference across a grid of points between the learned HistFactory likelihood and a Normal distribution defined using the covariance implied by the (inverse) Fisher information matrix (remember the Cramér–Rao bound from @sec-fisher). This would essentially control the validity of the assumptions made when using the Fisher information to calculate uncertainties, as well as potentially reducing the chances of arriving at poorly-behaved likelihood shapes that happen to satisfy a low value of any particular metric.
 
 But despite all of this, I find myself a little bit torn as to the real answer to the question posed in the section title: which loss function is *really* the best for physics analysis? This inquiry brings us one layer deeper philisophically, as it touches on a more delicate question: how do we actually gauge how good a physics result is? We'd maybe say something that aligns with our physics goals, e.g. the discovery significance, but the way we assess analyses is a little more nuanced than this in reality. One can see this by thinking about reviewing an analysis paper -- we're not just interested in the significance alone, but also things like the pull plots, the validity of the modelling assumptions, whether things are correlated in the right place, and probably many other things that I'm not thinking of. Moreover, these nuances would be even *more* important if the significance was high!
 
@@ -1204,8 +1212,9 @@ The pipeline is exactly the same as in @sec-neos, but with slightly different hy
 - 5-layer neural network of size (128, 128, 128, 128, 1)^[Initially, this was chosen to be less wide to maybe slow down the learning process a touch, though the extra layers mitigates that to some degree. It turned out that this made the training much more stable for some reason (less variability in the metrics), so I kept it.]
 - More epochs (~100) with the same batch size of 2000 to view the learning process over a longer period of time (it looks like some curves in @fig-neos-results would keep reducing with more training)
 - Average over nine random seeds (previously seven -- just a time constraint on both accounts)
+- Bandwidth of 0.09 for the bKDE, found through trial and error by making it as small as possible while still producing stable training runs
 
-As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable, to see if that influences the efficacy of the methods.
+As an additional layer of complexity, we'll look at how the different training strategies perform when using a lower and higher number of bins for the neural network observable, to see if that influences the efficacy of the methods. The bandwidth should then in theory be shrunk in proportion to match the smaller bin widths, though
 
 
 
