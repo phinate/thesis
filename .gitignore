@@ -159,3 +159,22 @@ src/*/_version.py
 
 /.quarto/
 _book/
+
+
+# misc in my dir
+0-kde-hist-gradient-studies.ipynb
+Archive.zip
+Data-Analysis-in-High-Energy-Physics-as-a-Differentiable-Program.aux
+Data-Analysis-in-High-Energy-Physics-as-a-Differentiable-Program.fdb_latexmk
+Data-Analysis-in-High-Energy-Physics-as-a-Differentiable-Program.fls
+Data-Analysis-in-High-Energy-Physics-as-a-Differentiable-Program.synctex.gz
+Data-Analysis-in-High-Energy-Physics-as-a-Differentiable-Program.tex
+Data-Analysis-in-High-Energy-Physics-as-a-Differentiable-Program.toc
+differentiable-analysis-examples/
+diffprog-hep_files/
+many-peaks.ipynb
+neos-extra.qmd
+neos.tex
+neos.tikz
+test.json
+thesis-style.mplstyle
