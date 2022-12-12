@@ -1026,12 +1026,14 @@ It seems then that there is some kind of middle ground to be had with respect to
 
 #### Other differentiable binned density estimates {-}
 
-In the INFERNO paper [@inferno], from which much inspiration was taken in general, they use a softmax function as a way to mimic binned output from the neural network, which would have an output dimensionality equal to the number of bins you want in your histogram. For a dataset $\mathbf{x}$ and a fixed neural network $\mathbf{y}$ with output nodes $y_i$, the yield bin $i$ of the histogram by summing the softmax contributions from each data point
+In the INFERNO paper [@inferno], from which much inspiration was taken in general, they use a softmax function as a way to mimic binned output from the neural network, which would have an output dimensionality equal to the number of bins you want in your histogram. We can then think about each data point having a weight of 1, and having the softmax smoothly distribute that weight across the different bins. For a dataset $\mathbf{x}$ and a fixed neural network $\mathbf{y}$ with output nodes $y_i$, the yield bin $i$ of the histogram by summing the softmax contributions from each data point in that bin:
 
 \begin{align}
 \text{softmax histogram}_{\text{bin } i}(\mathbf{x}) &= \sum_{\text{data }k} \text{softmax}(x_k, y_i) \\
-&= \sum_{\text{data }k} \frac{e^{y_{\text{bin } i}(x_k) / \tau}}{\sum_{j=0}^{\text{# bins}} e^{y_{\text{bin } j}(x_k) / \tau}}
+&= \sum_{\text{data }k} \frac{e^{y_{\text{bin } i}(x_k) / \tau}}{\sum_{j=0}^{\text{# bins}} e^{y_{\text{bin } j}(x_k) / \tau}}~,
 \end{align}
+
+where $\tau$ is a factor to tune how hard the slope of the softmax is, i.e. it has some analogy to the bandwidth about tuning the level of approximation. The drawback, however, is that the softmax used in tandem with a neural network does not come with an inherent notion of *ordering*; it's going to be somewhat arbitrary in which bin the
 
 ### Differentiable likelihood construction
 
