@@ -1,5 +1,7 @@
 ---
 title: "Machine learning"
+execute:
+  echo: false
 format:
   html:
     code-fold: true
@@ -50,8 +52,8 @@ So: what *is* a neural network in the first place?
 
 At its simplest, a neural network is a sequence of location-scale transforms of the input data, with non-linear "activation" functions applied in-between to allow for non-linear modelling capabilities. This type of neural network is referred to as a **multi-layer perceptron** (MLP) or a **feed-forward network** (both namings given since I use them interchangeably in later sections). Each layer of an MLP represents a round of these computations. At its most complex, there's a lot of funky ways to transform the data, including self-attention, convolutions, graph structure, and all sorts of other stuff. These types of specialized "architectures" are beyond the scope of what we'll look at here, but are incredibly important for introducing inductive bias that helps to more efficiently identify useful information within the data.
 
-<!-- ```{python}
-#| fig-cap: "Commonly used activation functions, taken from the python library `jax` within the submodule `jax.nn`."
+```{python}
+#| fig-cap: "Commonly used activation functions, taken from the Python library JAX."
 #| label: fig-activations
 
 import jax.numpy as jnp
@@ -96,8 +98,8 @@ fig.add_subplot(111, frameon=False)
 plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
 plt.ylabel("activation")
 plt.xlabel("input")
-plt.suptitle("Common activation functions", y=1.05, fontsize='large')
-``` -->
+plt.suptitle("Common activation functions", y=1.05, fontsize='large');
+```
 
 The ingredients to a MLP are the **weights** $w$, the **biases** $b$, and the **activation functions** $\sigma$. The weights represent the scale transform, and the bias the location transform. On the other hand, the activation function plays the role of "bending" the output such that we can model non-linear effects, i.e. anything with realistic complexity. Examples of common activation functions can be found in @fig-activations, where there are all sorts of flavors to choose from, each with their own quirks (ReLU and its variants have been the gold standard for some time).
 
