@@ -50,7 +50,58 @@ So: what *is* a neural network in the first place?
 
 At its simplest, a neural network is a sequence of location-scale transforms of the input data, with non-linear "activation" functions applied in-between to allow for non-linear modelling capabilities. This type of neural network is referred to as a **multi-layer perceptron** (MLP) or a **feed-forward network** (both namings given since I use them interchangeably in later sections). Each layer of an MLP represents a round of these computations. At its most complex, there's a lot of funky ways to transform the data, including self-attention, convolutions, graph structure, and all sorts of other stuff. These types of specialized "architectures" are beyond the scope of what we'll look at here, but are incredibly important for introducing inductive bias that helps to more efficiently identify useful information within the data.
 
-The ingredients to a MLP are the **weights** $w$, the **biases** $b$, and the **activation functions** $\sigma$. The weights represent the scale transform, and the bias the location transform. You'll typically see all this represented in a ball-and-stick diagram, e.g. @fig-ballandstick. Each series of balls represents one set of computations with the weights, biases, and activation functions that are within that layer. The outputs from this are called activations (just to reference the application of the activation function). We call this round a **layer**.
+```{python}
+#| fig-cap: "Commonly used activation functions, taken from the python library `jax` within the submodule `jax.nn`."
+#| label: fig-activations
+
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import jax.scipy as jsc
+from jax.nn import celu
+from jax.nn import elu
+from jax.nn import gelu
+from jax.nn import glu
+from jax.nn import leaky_relu
+from jax.nn import log_sigmoid
+from jax.nn import log_softmax
+from jax.nn import relu
+from jax.nn import relu6
+from jax.nn import selu
+from jax.nn import sigmoid
+from jax.nn import silu
+from jax.nn import soft_sign
+from jax.nn import softmax
+from jax.nn import softplus
+from jax.nn import swish
+import jax.numpy as jnp
+from jax.numpy import tanh
+subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True, sharex=True)
+import colourmap
+
+colors = [f'C{i}' for i in range(10)] + ['gold',  'turquoise']
+
+def plot(dct):
+    ax, f, i = list(dct.values())
+    grid = jnp.linspace(-5, +5, 100)
+    ax.plot(grid, f(grid), c=colors[i])
+    ax.set_title(f.__name__ if f.__name__ != "silu" else "swish (silu)")
+
+
+from plothelp import autogrid
+
+fig = autogrid([celu, elu, gelu, leaky_relu, relu,  selu, sigmoid, soft_sign, softmax, softplus, silu, tanh], plot, subplot_kwargs=subplot_settings, flip_size=True)
+# add a big axis, hide frame
+fig.add_subplot(111, frameon=False)
+# hide tick and tick label of the big axis
+plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+plt.xlabel("activation")
+plt.ylabel("input")
+plt.suptitle("Common activation functions", y=1.05, fontsize='large')
+```
+
+The ingredients to a MLP are the **weights** $w$, the **biases** $b$, and the **activation functions** $\sigma$. The weights represent the scale transform, and the bias the location transform. On the other hand, the activation function plays the role of "bending" the output such that we can model non-linear effects, i.e. anything with realistic complexity. Examples of common activation functions can be found in @fig-activations, where there are all sorts of flavors to choose from, each with their own quirks (ReLU and its variants have been the gold standard for some time).
+
+You'll typically see all this represented in a ball-and-stick diagram, e.g. @fig-ballandstick. Each series of balls represents one set of computations with the weights, biases, and activation functions that are within that layer. The outputs from this are called activations (just to reference the application of the activation function). The thing we call a **layer** is then each set of parallel computations of this nature, which are then aggregated into the set of inputs to the next layer (if it exists, else it's just the network output). Don't get too hung up on this definition of the word "layer" though, it sort of breaks down when looking at modern architectures with very detailed computation steps.
 
 ![The "ball-and-stick" representation of a MLP.](images/mlp){#fig-ballandstick}
 
@@ -108,13 +159,13 @@ Since a neural network is a sequence of applications of @eq-layer, it's differen
 
 One extra thing to mention is the different type of architectures that go beyond this simple MLP framing. We can think about these architectures as a kind of inductive bias on the space of possible functions that could be learned, e.g. through some kind of specific manipulations that take advantage of the format of the input data (sequences, images, sets etc.). To highlight a few:
 
-- **Convolutional neural networks** @cnn are one of the first types of domain-specific architecture, and manipulate an image through convolutional filters that measure local image features through things like pooling.
+- **Convolutional neural networks** [@cnn] are one of the first types of domain-specific architecture, and manipulate an image through convolutional filters that measure local image features through things like pooling.
 
-- **Transformers** @transformers perform fantastically well for sequential data (e.g. natural language), but have even shown generalization to other domains like images @vit. They use a mechanism called *self-attention* to extract information from sequential inputs, and are probably the most important architecture that exists at the time of writing in terms of their ability to generalize and scale.
+- **Transformers** [@transformers] perform fantastically well for sequential data (e.g. natural language), but have even shown generalization to other domains like images [@vit]. They use a mechanism called *self-attention* to extract information from sequential inputs, and are probably the most important architecture that exists at the time of writing in terms of their ability to generalize and scale.
 
-- **Deep sets** @deepsets is a method that incorporates the bias of the input data being an unordered collection. They have found use in e.g. particle physics @deepsetsjets, where objects like jets and their properties exist in unequal amounts across events, but without any specific ordering (though we've typically ordered them by $p_T$ and then treated them as a sequence in the past).
+- **Deep sets** [@deepsets] is a method that incorporates the bias of the input data being an unordered collection. They have found use in e.g. particle physics [@deepsetsjets], where objects like jets and their properties exist in unequal amounts across events, but without any specific ordering (though we've typically ordered them by $p_T$ and then treated them as a sequence in the past).
 
-- **Geometric deep learning** @geodl generalizes a lot of the above, and casts things in the language of equivariances and graphs, spawning the idea of e.g. graph neural networks @gnn.
+- **Geometric deep learning** [@geodl] generalizes a lot of the above, and casts things in the language of equivariances and graphs, spawning the idea of e.g. graph neural networks [@gnn].
 
 There are countless other architectures, but we will focus on a particular neural network method (not necessarily an architecture) in the next section, as it makes up one of my applications, so we'll spend a bit of extra time to sufficiently ground that work.
 
