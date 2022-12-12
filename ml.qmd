@@ -233,7 +233,7 @@ This comes out to effectively minimizing the negative log-likelihood of the flow
 
 ### Masked Autoregressive Flows {#sec-maf}
 
-A specific type of flow that we'll encounter in the wild later is the **masked autoregressive flow** @maf. The approach that this flow takes to density modelling is as follows:
+A specific type of flow that we'll encounter in the wild later is the **masked autoregressive flow** [@maf]. The approach that this flow takes to density modelling is as follows:
 
 When modelling a distribution across multiple random variables, one can break down their joint density into a product of conditional distributions through the probability chain rule as in @eq-prob-chain-rule, and models these conditional distributions explicitly:
 
@@ -249,7 +249,7 @@ Here, we’ve arbitrarily labelled our random variables $x_i$ with indicies $i$ 
 
 One can model this relationship using a neural network in a *single forward pass.* By constructing a feed-forward network with equal input and output dimensionality, and assigning the same ordering to the input and output, we can simply drop (or **mask**) those connections for each output $i$ with all input variables that have index $j<i$. This way, there is no possible computational path between each output and the variables that come before that output in the ordering, meaning that the value of that output will be able to capture the nature of the relevant conditional $p(x_i | \mathbf{x}_{j<i})$. These aspects together form a **masked, autoregressive** network.
 
-This idea was first used in @made, which used it to output the density directly in one forward pass by having the outputs correspond to the individual conditional distributions. However, to use this network in a flow, which transforms one distribution to another, we can instead use the outputs of the neural network to parametrize the transform $T$. The result is known as a **masked autoregressive flow** (MAF), and was introduced in @maf.
+This idea was first used in [@made], which used it to output the density directly in one forward pass by having the outputs correspond to the individual conditional distributions. However, to use this network in a flow, which transforms one distribution to another, we can instead use the outputs of the neural network to parametrize the transform $T$. The result is known as a **masked autoregressive flow** (MAF), and was introduced in [@maf].
 
 The MAF as I used it involved a fairly simple implementation of $T$ -- a location scale transform:
 
