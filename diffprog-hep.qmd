@@ -1026,7 +1026,12 @@ It seems then that there is some kind of middle ground to be had with respect to
 
 #### Other differentiable binned density estimates {-}
 
-In the INFERNO paper [@inferno], from which much inspiration was taken in general, they use a softmax function as a way to mimic binned output from the neural network. This was tried in practice
+In the INFERNO paper [@inferno], from which much inspiration was taken in general, they use a softmax function as a way to mimic binned output from the neural network, which would have an output dimensionality equal to the number of bins you want in your histogram. For a dataset $\mathbf{x}$ and a fixed neural network $\mathbf{y}$ with output nodes $y_i$, the yield bin $i$ of the histogram by summing the softmax contributions from each data point
+
+\begin{align}
+\text{softmax histogram}_{\text{bin } i}(\mathbf{x}) &= \sum_{\text{data }k} \text{softmax}(x_k, y_i) \\
+&= \sum_{\text{data }k} \frac{e^{y_{\text{bin } i}(x_k) / \tau}}{\sum_{j=0}^{\text{# bins}} e^{y_{\text{bin } j}(x_k) / \tau}}
+\end{align}
 
 ### Differentiable likelihood construction
 
