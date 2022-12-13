@@ -58,22 +58,10 @@ Despite this separation, when event weights are produced, the $\gamma\gamma jj$ 
 
 The different specific event generator tools used for all of the simulation were PYTHIA [@pythia], SHERPA [@sherpa], EvtGen [@evtgen], and NNPDF [@nnpdf]. We can segment their use for the two cases for signal and background.
 
-For signal processes, samples are generated at leading order (i.e. only the simplest processes for that interaction) with Pythia 8 doing the underlying quantum field theory calculations. EvtGen was used to simulate the fragmentation of the $b$-quark jets into hadrons. NNPDF 2.3 controlled the set of parton distribution functions used, which dictate the interior structure of the protons that are colliding, and therefore play an important role in the calculations for different scattering probabilities when the constituents of those protons collide. It's worth mentioning that the new scalar particles $X$ and $S$ are generated using what's called the *narrow-width approximation*, which simplifies calculations greatly by assuming the particles are very short-lived as resonances, and have narrow invariant mass spectra as a result.
+For signal processes, samples are generated for each mass point in @fig-mass-grid at leading order (i.e. only the simplest processes for that interaction) with Pythia 8 doing the underlying quantum field theory calculations. EvtGen was used to simulate the fragmentation of the $b$-quark jets into hadrons. NNPDF 2.3 controlled the set of parton distribution functions used, which dictate the interior structure of the protons that are colliding, and therefore play an important role in the calculations for different scattering probabilities when the constituents of those protons collide. It's worth mentioning that the new scalar particles $X$ and $S$ are generated using what's called the *narrow-width approximation*, which simplifies calculations greatly by assuming the particles are very short-lived before decaying, and results in more narrow invariant mass spectra as a result.
 
-and
-160 the A14 N. The 𝑋and 𝑆scalars are generated with the Narrow-Width
-161 Approximation.
-11th December 2022 – 17:54 5
- ATLAS DRAFT
-  162 3.3 Background MC
-163 Table 2 summarizes the samples used as the nominal Standard Model backgrounds prediction. All the
-164 single Higgs samples are considered in the di-photon final state. All the production modes are considered
-165 and the rarer single-top associated production is separated between the 𝑠- and 𝑡- channel contribution
-166 (𝑡𝐻𝑏𝑗)andthe𝑊-associatedone(𝑡𝐻𝑊). Thedi-Higgssamplesareconsideredinthe𝑏𝑏 ̄𝛾𝛾finalstateand
-167 corresponds to the two to main channels: gluon-gluon fusion (𝑔𝑔𝐻𝐻) and vector-boson fusion (VBF).
-168 InthecaseofVBF,thecontributioncomingform𝑉𝐻𝐻processwasremovedfromthe𝑝𝑝→𝐻𝐻𝑗𝑗
-169 generation. These samples are shared with the hh → 𝑏𝑏 ̄𝛾𝛾 analysis [18] due to the same probed final
-170 states.
+In the case of background -- that is, every Standard Model process that could possibly generate a final state of two $b$ quarks and two photons -- things get a lot more complicated, since there are many more processes we need to consider. The different contributions are summarized in a table for those that want more detail. We'll just note that the process that contributes the most by far is
+
 
 
 ## Preprocessing and selection
