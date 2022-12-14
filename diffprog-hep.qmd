@@ -181,20 +181,24 @@ plt.tight_layout()
 
 If we optimize this analysis then, we want to arrive at the value of $\phi$ at the dotted green line (around ~4.3 or so), which gives us the benefit of rejecting the background hypothesis more strongly when the signal exists in the data. This is made possible if we use the $p$-value as our objective -- it clearly accounts for the uncertainty!
 
-<!-- ### How do we optimize in an uncertainty-aware way?
-
-Attempts:
-- Asimov sig with assumptions on bkg uncert: [@asimovuncert]
-- Learning to pivot: [@pivot]
-- Directly incorporate NPs: [@uncert] -->
-
  The reason for this makes sense: in these physics likelihoods, we're  careful to include all the details of the systematic uncertainties that we're able to quantify by constructing nuisance parameters that vary the shape and normalization of the model. From here, to calculate the $p$-value, we then construct the **profile likelihood ratio** as a test statistic, which accounts for these systematic uncertainties by fitting the value of the nuisance parameters depending on the hypothesis you test (see @sec-hyptests for more).
 
 All this makes the $p$-value seem like a good candidate for an objective function! So why haven't we used this already?
 
 As emphasized in @sec-gradient-descent, if we want to perform optimization using gradient-based methods,^[We don't have to use gradient based methods! They're just very well implemented and studied, as well as enabling things like this paradigm.] then we need the objective that we optimize to be *differentiable*. This is not immediately the case for the $p$-value -- we would have to be able to differentiate through all stages of the full calculation, including model building, profiling, and even histograms, which are not generally known for their smoothness. But say we were able to decompose this complicated pipeline into bite-size chunks, each of which we can find a way to take gradients of. What becomes possible then? This begins our view of **physics analysis as a differentiable program**.
 
-In the following sections, we'll take a collider physics analysis apart step-by-step, then see how we can employ tricks and substitutes to recover gradients for each piece. After that, we'll explore the ways that we can use the result to perform gradient-based optimization of different parts of the analysis with respect to physics goals. We'll then do it all at once by*optimizing a toy physics analysis from end-to-end*, exploring the common example of a summary statistic based on a neural network, accounting for uncertainties all the while.
+In the following sections, we'll take a collider physics analysis apart step-by-step, then see how we can employ tricks and substitutes to recover gradients for each piece. After that, we'll explore the ways that we can use the result to perform gradient-based optimization of different parts of the analysis with respect to physics goals. We'll then do it all at once by *optimizing a toy physics analysis from end-to-end*, exploring the common example of a summary statistic based on a neural network, accounting for uncertainties all the while.
+
+<!-- ## Related work
+
+The only real analog to what's done in this section is INFERNO [@inferno], a similar method for inference aware optimization. In terms of  -->
+
+<!-- ### How do we optimize in an uncertainty-aware way?
+
+Attempts:
+- Asimov sig with assumptions on bkg uncert: [@asimovuncert]
+- Learning to pivot: [@pivot]
+- Directly incorporate NPs: [@uncert] -->
 
 ## Making HEP Analysis Differentiable
 
@@ -1030,14 +1034,16 @@ In the INFERNO paper [@inferno], from which much inspiration was taken in genera
 
 \begin{align}
 \text{softmax histogram}_{\text{bin } i}(\mathbf{x}) &= \sum_{\text{data }k} \text{softmax}(x_k, y_i) \\
-&= \sum_{\text{data }k} \frac{e^{y_{\text{bin } i}(x_k) / \tau}}{\sum_{j=0}^{\text{N}} e^{y_{\text{bin } j}(x_k) / \tau}}~,
+&= \sum_{\text{data }k} \frac{e^{y_{i}(x_k) / \tau}}{\sum_{j=0}^{\text{N}} e^{y_{j}(x_k) / \tau}}~,
 \end{align}
 
-where $\tau$ is a factor to tune how hard the slope of the softmax is, i.e. it has some analogy to the bandwidth about tuning the level of approximation. A drawback, however, is that the softmax used in tandem with a neural network does not come with an inherent notion of *ordering*; it's going to be somewhat arbitrary in which bins events occupy, and the resulting plots are a little hard to interpret compared to regular histograms. Also, even the "hard" softmax is difficult to map to some other "true" histogram in which the bins follow Poisson-distributed counts; I'm not 100% sure on whether the softmax counts
+where $\tau$ is a factor to tune how hard the slope of the softmax is, i.e. it has some analogy to the bandwidth about tuning the level of approximation. A drawback, however, is that the softmax used in tandem with a neural network does not come with an inherent notion of *ordering*; it's going to be somewhat arbitrary in which bins events occupy, and the resulting plots are a little hard to interpret compared to regular histograms. Also, even the "hard" softmax with $\tau \rightarrow \infty$ is difficult to map to some other "true" histogram in which the bins follow Poisson-distributed counts.
+
+As for other things, one could always do something like overlap sigmoid functions, or even make a KDE with a new histogram-like kernel. We'll cap our imagination here though, and move onwards to the likelihood that this histogram is part of.
 
 ### Differentiable likelihood construction
 
-Now, I must confess, I have told you a bit of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` (@pyhf, @pyhf2) is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it, or [browse the `pyhf` issues on the topic](https://github.com/scikit-hep/pyhf/issues?q=is%3Aissue+author%3Aphinate+)), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
+Now, I must confess, I have told you a bit of a white lie to set up the motivation here. The likelihood function as described in @eq-hifabase is indeed a-priori differentiable with respect to the histograms that make up the expectations. The problem is actually a *technical* one -- we need to make this happen in code. As per our conversations on automatic differentiation, we know how to do this: we code up our program using a framework for automatic differentiation that has defined primitives and gradient rules. `pyhf` [@pyhf, @pyhf2] is the software package that brings this to life: the whole HistFactory prescription, all coded using a choice of autodiff backends, e.g. JAX, TensorFlow, and PyTorch. There's honestly not too much else to say here; any further discussion would involve extremely niche and technical topics within the `pyhf` codebase, and all the error messages I saw over the years I worked on trying to hack things together. I'll spare you that discussion (feel free to ask about it, or [browse the `pyhf` issues on the topic](https://github.com/scikit-hep/pyhf/issues?q=is%3Aissue+author%3Aphinate+)), and we'll move on to something a little more thesis-suited (though, what is a PhD if not niche and technical...).
 
 ### Differentiable test statistics (profile likelihood ratio)
 

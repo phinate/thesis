@@ -27,7 +27,18 @@ Also, a quick note on shorthand for this section -- you'll see me write notation
 
 The new particle discovered in 2012 [@higgs] is widely regarded to represent the Higgs boson as predicted by the Standard Model, which is predicted to have a rest mass of $125 \, \text{GeV}$. While this is confirmatory of the existence of some flavor of the Standard Model, we know this isn't the end of the story. Many physics theories beyond the Standard Model predict some kind of Higgs sector, where additional scalar bosons could exist and interact with the Higgs in some way, but have yet to be discovered. To this effect, it is useful to probe data taken from proton-proton collisions to see if particles produce states that correspond to e.g. resonances that look like these new scalars.
 
-In particular, this work looks at the process $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where $X$ is a heavy scalar with a mass large enough to produce a Higgs with Standard Model mass (i.e. $m_H = 125 \text{ GeV}$) and a scalar $S$ with mass $m_S$ such that $m_X > m_S + m_H$, which makes the decay $X\rightarrow SH$ satisfy energy conservation. This particular process is predicted by a number of different theories, including but not limited to:
+In particular, this work looks at the process $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where $X$ is a heavy scalar with a mass large enough to produce a Higgs with Standard Model mass (i.e. $m_H = 125 \text{ GeV}$) and a scalar $S$ with mass $m_S$ such that $m_X > m_S + m_H$, which makes the decay $X\rightarrow SH$ satisfy energy conservation. I found an example for something that looks like a candidate event for this process as-seen by the ATLAS detector, shown in @fig-evt.
+
+::: {#fig-evt layout-ncol=2}
+
+![Cross-sectional view.](images/evtdisplay1.png)
+
+![3-D view for depth.](images/evtdisplay2.png)
+
+An example of a event's wake in the ATLAS detector, which looks very similar to that we would see from $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$, where there are two blue lines that the photons leave as a signature, and two cones from the $b$-jets. Attribution: [@evt].
+:::
+
+This particular process is predicted by a number of different theories, including but not limited to:
 
 - Next-to-Minimal two-Higgs Doublet Model [@N2HDM]
 - Next-to-Minimal Supersymmetric Standard Model [@NMSSM]
