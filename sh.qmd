@@ -46,28 +46,27 @@ Data for the signal process of $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma
 
 ![A grid of the different points for which data originating from the signal process was simulated.](images/sh/mass-grid){#fig-mass-grid}
 
-This simulation was done where the $X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma$ process was simulated to leading order, i.e. only using the least complicated Feynman diagrams that can make this process happen.
 
-The background can be organized into particular processes, all coming from the Standard Model. The main contributions that were simulated:
-
-- Interactions involving the strong force (known as QCD -- quantum chromodynamics) that result in two photons and two jets (shorthand of $\gamma\gamma jj$)
-- Associated production of a Higgs boson and two top quarks ($tt(bb)H(\gamma \gamma)$)
-- Fusion of two gluons to a Higgs, where a gluon in the process fragments to a $bb$ pair of jets ($ggH$)
-- Associated production of a $Z$ boson that and a Higgs, where the $Z$ decays hadronically ($Z(qq)H(\gamma \gamma)$)
-
-Despite this separation, when event weights are produced, the $\gamma\gamma jj$ background completely dominates all the others (> 99% of the contribution to the total event weights).
 
 The different specific event generator tools used for all of the simulation were PYTHIA [@pythia], SHERPA [@sherpa], EvtGen [@evtgen], and NNPDF [@nnpdf]. We can segment their use for the two cases for signal and background.
 
-For signal processes, samples are generated for each mass point in @fig-mass-grid at leading order (i.e. only the simplest processes for that interaction) with Pythia 8 doing the underlying quantum field theory calculations. EvtGen was used to simulate the fragmentation of the $b$-quark jets into hadrons. NNPDF 2.3 controlled the set of parton distribution functions used, which dictate the interior structure of the protons that are colliding, and therefore play an important role in the calculations for different scattering probabilities when the constituents of those protons collide. It's worth mentioning that the new scalar particles $X$ and $S$ are generated using what's called the *narrow-width approximation*, which simplifies calculations greatly by assuming the particles are very short-lived before decaying, and results in more narrow invariant mass spectra as a result.
+For signal processes, samples were generated for each mass point in @fig-mass-grid at leading order (i.e. only the simplest processes for that interaction) with Pythia 8 doing the underlying quantum field theory calculations. EvtGen was used to simulate the fragmentation of the $b$-quark jets into hadrons. NNPDF 2.3 controlled the set of parton distribution functions used, which dictate the interior structure of the protons that are colliding, and therefore play an important role in the calculations for different scattering probabilities when the constituents of those protons collide. Additionally, there are effects It's worth mentioning that the new scalar particles $X$ and $S$ were generated using what's called the *narrow-width approximation*, which simplifies calculations greatly by assuming the particles are very short-lived before decaying, and results in more narrow invariant mass spectra as a result.
 
-In the case of background -- that is, every Standard Model process that could possibly generate a final state of two $b$ quarks and two photons -- things get a lot more complicated, since there are many more processes we need to consider. The different contributions are summarized in @tbl-bkg for those that want more detail, but it's beyond our scope to cover this in detail, since the following methods treat the background sample as a concatenation of all these processes, which is a simplification.
+In the case of background -- that is, every Standard Model process that could possibly generate a final state of two $b$ quarks and two photons -- things get a lot more complicated, since there are many more processes we need to consider. To add more granularity to this, the main contributions that were simulated include:
+
+- Interactions involving the strong force (known as QCD, or quantum chromodynamics) that result in two photons and two jets (shorthand $\gamma\gamma jj$)
+- Associated production of a Higgs boson and two top quarks ($tt(bb)H(\gamma \gamma)$)
+- Fusion of two gluons to a Higgs, where a gluon in the process fragments to a $bb$ pair of jets ($ggH$)
+- Associated production of a $Z$ boson and a Higgs, where the $Z$ decays hadronically to quarks ($Z(qq)H(\gamma \gamma)$)
+- Different types of di-Higgs events, where two Higgs bosons are produced
+
+Despite this separation, when event weights are produced, the $\gamma\gamma jj$ background completely dominates all the others (> 99% of the contribution to the total event weights). The different simulation contributions are summarized in @tbl-bkg for those that want more detail, but it's worth noting that the methods I worked on treat the background sample as one unit, equal to the concatenation of all events from these processes, which is an intentional simplification.
 
 
-| **Process Type** | **Generator**       | **PDF (ME)** | **PDF+Tune (PS)** | **Production Mode**                                    |
+| **Process Type** | **Physics simulators**       | **Parton distributions (Probabilities)** | **Parton distributions (Showering)** | **Production Mode**                                    |
 |------------------|---------------------|--------------|-------------------|--------------------------------------------------------|
 | Single Higgs     | NNLOPS + PYTHIA8    | PDFLHC       | AZNLOCTEQ6        | $ggH$                                                  |
-| Single Higgs     | POWHEG + PYTHIA8    | PDFLHC       | AZNLOCTEQ6        | VBF                                                    |
+| Single Higgs     | POWHEG + PYTHIA8    | PDFLHC       | AZNLOCTEQ6        | Vector-boson fusion                                                 |
 | Single Higgs     | POWHEG + PYTHIA8    | PDFLHC       | AZNLOCTEQ6        | $W^{+}H$                                               |
 | Single Higgs     | POWHEG + PYTHIA8    | PDFLHC       | AZNLOCTEQ6        | $W^{-}H$                                               |
 | Single Higgs     | POWHEG + PYTHIA8    | PDFLHC       | AZNLOCTEQ6        | $qq \rightarrow ZH$                                    |
@@ -78,25 +77,36 @@ In the case of background -- that is, every Standard Model process that could po
 | Single Higgs     | MGMCatNLO + PYTHIA8 | NNPDF        | A14NNPDF23        | $tHW$                                                  |
 | di-Higgs         | POWHEG + PYTHIA8    | PDFLHC       | A14NNPDF23        | $ggHH$                                                 |
 | di-Higgs         | MGMCatNLO + PYTHIA8 | NNPDF        | A14NNPDF23        | VBF $HH$ without $VHH$                                 |
-| QCD              | SHERPA2 (ME@NLO+PS) |              |                   | $\gamma\gamma$+0,1(NLO),2,3(LO), $m_{\gamma\gamma} \in 90-175\, \text{GeV}$ |
-| QCD              | MGMCatNLO + PYTHIA8 |              |                   | $t\bar{t}\gamma\gamma$ (noallhad)                      |
-| QCD              | MGMCatNLO + PYTHIA8 |              |                   | $t\bar{t}\gamma\gamma$ (allhad)                        |
+| QCD              | SHERPA2  |   SHERPA2    |     SHERPA2          | $\gamma\gamma$+jets (0-4), $m_{\gamma\gamma} \in 90-175\, \text{GeV}$ |
+| QCD              | MGMCatNLO + PYTHIA8 |      MGMCatNLO        |      MGMCatNLO             | $t\bar{t}\gamma\gamma$                      |
 
 
-: My Caption {#tbl-bkg}
+: Different simulation tools used for the individual background processes. {#tbl-bkg}
 
 ## Preprocessing and selection
 
-There are many different analyses selections being trialed at the time of writing; the results shown below are all performed with a simple "loose" criteria imposed on the data, which requires:
+Before analyzing the data we simulated above, which gives us access to kinematic quantities of the objects in the detector, there is typically a pre-filtering stage -- called a **preselection** -- where we slim down this dataset to only things that we're interested in based on a set of criteria. To talk about that, we'll have to first speak a little about jets, which need a bit more work due to their very messy signature from all the showering into hadrons.
+
+### Tagging $b$-jets
+
+Just as a reminder, quarks are never seen alone -- they're always in some composite state with other quarks, which we call hadrons. When a quark is produced in a decay, it will really be bound somehow to a different quark, which we can picture as a rope. When the rope breaks from them going too far away, we can think of each end of the rope turning into a new quark to keep the state stable. We call this **hadronization**, and it's this process happening over and over again that forms a spray of particles that has a conic shape, which we call a jet.
+
+Now, how might we distinguish a jet that comes from two different quark types? There aren't any particularly clear differences from first principles that I know of, but since quarks differ in concrete ways (mass being the main one), we'd expect the jets to have subtly differing dynamics. That's why we need more complicated algorithmic systems to tell these jets apart based on their properties, which are colloquially called *taggers* since they tag a jet with a label of the quark type. Taggers are usually something like a neural network, which can take in many different inputs about the structure of the jet, and give us a single number that represents the likelihood of that jet being of a certain type. Since the Higgs boson most commonly decays to two $b$-jets, we have very specialized $b$-taggers in particle physics. We're very interested in making use of these $b$-taggers to help us identify which jets in our events came from $b$-quarks, which could sign our scalar $S$.
+
+The way this appears to the analyzer is that each jet object in our data will have a score that the $b$-tagger has given the jet based on its properties. (working point)
+
+### Selection for this work
+
+There are many different analyses selections being trialed at the time of writing; the results that follow are all performed with a simple "loose" criteria imposed on the data, which requires:
 
 - at least two selected photons
 - no leptons
-- at least 2 central jets (central = originating from the primary vertex)
+- at least 2 central jets (central = originating from the main collision center, or *primary vertex*)
 - less than 6 central jets
 - at least one jet above the 70% working point threshold for $b$-tagging
 - less than 3 $b$-tagged jets at the 77% working point
 
-We also accept any data with exactly 2 $b$-jets at the 77% working point threshold, as this will likely allow us to reconstruct the invariant mass $m_{bb}$ well.
+We also accept any data with exactly 2 $b$-jets at the 77% working point threshold, as this will likely allow us to reconstruct the invariant mass $m_{bb}$ well -- something very important if we want to precisely determine if our events peak at the mass of our new scalar $S$.
 
 ## Fit strategies {#sec-fit-strategies}
 
