@@ -141,7 +141,7 @@ $${#eq-invariant-mass-system}
 
 which will involve terms in the energies and three-momenta of the different particles as per @eq-invariant-mass. This quantity will be particularly important when we come to the search for a new particle in the latter stages of the thesis, because it allows us to detect **resonances**, which are intermediate particles that can produce a different final state. As an example, the Higgs boson can decay to four leptons as per @fig-higgs-ratios, so can then be found in the invariant mass of this four-lepton system, $m_{4l}$. We can see this in @fig-higgs-m4l, where there's a peak at the Higgs mass of $m_H \approx 125$ $\text{GeV}$, since the invariant mass of the initial state (a Higgs boson with $E^2 - |\mathbf{p}|^2 = m_H^2$) is equal to that of the final state (four leptons) by energy/momentum conservation.
 
-![An example plot taken from a recent Higgs boson mass measurement using four leptons. Attribution: [@m4l]](images/higgsm4l){#fig-higgs-m4l}
+![An example plot of the four-lepton invariant mass, taken from a recent Higgs boson mass measurement in this final state. Attribution: [@m4l]](images/higgsm4l){#fig-higgs-m4l}
 
 ### Quantifying collisions
 
