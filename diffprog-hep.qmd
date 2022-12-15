@@ -607,7 +607,6 @@ def bKDE(data: Array, bins: Array, bandwidth: float) -> Array:
 ```
 
 
-Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which we can see in @fig-bin-height-bKDE, showing that the variation of the bin height with $\mu$ is much more well-behaved.
 
 ```{python}
 #| label: fig-bin-height-bKDE
@@ -665,6 +664,9 @@ axs[1].set_ylabel("bin height")
 axs[1].legend(frameon=False)
 plt.xlabel('$\mu$');
 ```
+
+Using this, we can remake the plot from @fig-bin-height-mu for the bKDE, which we can see in @fig-bin-height-bKDE, showing that the variation of the bin height with $\mu$ is much more well-behaved.
+
 
 #### Choosing the bandwidth {-}
 
