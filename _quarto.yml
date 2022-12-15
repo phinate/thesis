@@ -4,7 +4,7 @@ project:
 book:
   title: "Data Analysis in High-Energy Physics as a Differentiable Program"
   author: "Nathan Simpson"
-  date: "21/11/2022"
+  date: "02/03/2023"
   chapters:
     - index.qmd
     - part: "Fundamentals"

@@ -1,5 +1,4 @@
 ---
-title: "Probability and Statistics, in practice"
 execute:
   echo: false
 format:
@@ -11,8 +10,11 @@ format:
 jupyter: python3
 ---
 
+# Probability and Statistics, in practice
 
 This section focuses on how fundamental statistical ideas are translated into meaningful physics insights. We'll look at common practice, and summarize the main components needed to set the scene for applications that involve building new ideas with these techniques.
+
+My primary resources for this section were the seminal asymptotics paper [@asymptotics] and Kyle Cranmer's stats notes [@kylenotes].
 
 ## Estimating distributions from data
 
@@ -62,7 +64,7 @@ There was also more in that thread on ease parallel computation, the fact that h
 
 If you wanted a smooth distribution instead of a discrete one, the *kernel density estimate* (KDE) has you covered.
 
-It's a pretty simple but powerful idea: for each data point, define some *kernel function* that uses the point as a centre (e.g. normal distribution). Then, the distribution of the data at a point $x$ is equal to the *average of the kernel functions evaluated at $x$.
+It's a pretty simple but powerful idea: for each data point, define some *kernel function* that uses the point as a centre (e.g. normal distribution). Then, the distribution of the data at a point $x$ is equal to the average of the kernel functions evaluated at $x$.
 
 There are many different choices of kernel function, each with their own tradeoffs, but the most common one in practice is indeed the standard normal distribution $\mathrm{Normal}(0, 1)$. If we specify the mean as the data, then there's one missing ingredient -- the *width* of these distributions. That number is called the **bandwidth**, and controls the width of every kernel at once. Interestingly, the choice of bandwidth affects the resulting shape in general much more than the choice of kernel -- see @fig-kde for some examples of the bandwidth's influence on the distribution.
 
@@ -378,7 +380,7 @@ Another way to estimate $\sigma^2_{\hat{\mu}}$ is using the Fisher information m
 
 ## The $\text{CL}_s$ quantity
 
-When setting upper limits, instead of calculating $p$-values as in @eq-upper-lim-p-value, the ATLAS experiment mainly uses a modification of $p_\mu$ that divides by the *power of the test* $1-\beta$. Originally proposed in @cls, in which it was termed $\mathrm{CL}_s$, the quantity is defined as the ratio
+When setting upper limits, instead of calculating $p$-values as in @eq-upper-lim-p-value, the ATLAS experiment mainly uses a modification of $p_\mu$ that divides by the *power of the test* $1-\beta$. Originally proposed in [@cls], in which it was termed $\mathrm{CL}_s$, the quantity is defined as the ratio
 
 $$
 \mathrm{CL}_s = \frac{p_{\mu}}{1-p_{\mu=0}}~,

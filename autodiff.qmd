@@ -240,7 +240,7 @@ I wouldn't be surprised if one of the first things you thought before reading th
 
 $$ \frac{\partial f}{\partial x} \approx \frac{f(x+\Delta x) - f(x)}{\Delta x}.$$
 
-We can see how well this performs on an example problem in [@fig-finite-1] for different step sizes, and in [@fig-finite-2] for different numbers of evaluations. A smaller $\Delta x$ will result in higher accuracy for that point, but if we're interested in the actual gradient function, this will then incur many evaluations of the function itself (twice for each gradient estimate) as we build up the envelope of the gradient, or use it frequently in a program (e.g. gradient descent). Moreover, if we want higher-order derivatives, then the error induced in the estimate of $\partial f / \partial x$ from the step size $\Delta x$ not being identically 0 will compound upon finite difference estimation of $\partial^2 f/ \partial x^2$ and so on.
+We can see how well this performs on an example problem in @fig-finite-1 for different step sizes, and in @fig-finite-2 for different numbers of evaluations. A smaller $\Delta x$ will result in higher accuracy for that point, but if we're interested in the actual gradient function, this will then incur many evaluations of the function itself (twice for each gradient estimate) as we build up the envelope of the gradient, or use it frequently in a program (e.g. gradient descent). Moreover, if we want higher-order derivatives, then the error induced in the estimate of $\partial f / \partial x$ from the step size $\Delta x$ not being identically 0 will compound upon finite difference estimation of $\partial^2 f/ \partial x^2$ and so on.
 ```{python}
 #| label: fig-finite-1
 #| fig-cap: "Finite difference gradient calculations for the function `y=sin(x)`, varying the distance between the evaluated points."
@@ -288,4 +288,6 @@ ax.legend(loc="upper right");
 
 ### Symbolic differentiation
 
-Symbolic differentiation endeavours to calculate gradients through algebraic symbols, just like doing it on pen and paper. This approach will definitely appeal at first sight to those that have done any kind of calculus -- if we want to differentiate a function that implements $y = x^2$, then we will instantly think of $2x$, not of Jacobian-vector products or the like.
+Symbolic differentiation endeavors to calculate gradients through algebraic symbols, just like doing it on pen and paper. This approach will definitely appeal at first sight to those that have done any kind of calculus -- if we want to differentiate a function that implements $y = x^2$, then we will instantly think of $2x$, not of Jacobian-vector products or the like. In this sense, the gradients of the functions produced are analytical. However, even for a simple program, these expressions can swell easily to become horrifically complex compared to the resulting programs from autodiff.
+
+We'll omit any further discussion for now for the sake of brevity, but for a much more thorough comparison between this and other methods compared to automatic differentiation, I'll direct your attention to the nicely-written notebook here that I looked at for inspiration while writing this whole section: [@lukasautodiff].

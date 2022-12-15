@@ -37,11 +37,15 @@ $$ {#eq-grad-descent}
 
 @eq-grad-descent is the equation for gradient descent, and is probably the most important equation in the whole thesis, since it enables all of the downstream applications I'll talk about later. It's also the mechanism that enables most artificial intelligence systems to learn.
 
-To reframe this equation one more time through the lens of optimization: given an **objective function** $L$ with parameters $\varphi$ that defines a goal relative to data $d$ (so $L=L(\varphi, x)$), we can use *gradient descent* to update the parameters $\varphi$ such that we minimize the objective evaluated at $d$:
+To reframe this equation one more time through the lens of optimization: given an **objective function** or **loss function** $L$ with parameters $\varphi$ that defines a goal relative to data $d$ (so $L=L(\varphi, x)$), we can use *gradient descent* to update the parameters $\varphi$ such that we minimize the objective evaluated at $d$:
 
 $$
 \varphi_{i+1} = \varphi_i - \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i}~.
 $$ {#eq-grad-descent}
+
+See a pictorial demonstration of this rule in @fig-ball-rolling.
+
+![Gradient descent is more easily digestible when considering it as rolling a ball down a hill, but you need to play the role of gravity.](images/gdesc3){#fig-ball-rolling}
 
 We're now specifying the data $d$ because we want to give meaning to the vertical position in the hill: it's some quantity that's assessing the quality of our workflow with respect to some data from the real world $d$, given that we're using parameters $\varphi_i$. In practice this may be a small subset of the dataset that we draw at random, since we can't computationally do this update on the whole data set due to memory restrictions on the device we run this on.
 
@@ -193,7 +197,7 @@ $$
 v_{i} = \gamma v_{i-1} + \alpha \frac{\partial L(\varphi_i, d)}{\partial \varphi_i};~~~ \varphi_{i+1} = \varphi_i - v_i~.
 $$
 
-To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $\gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $\gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes. This is termed gradient descent with **momentum**, and was proposed in [@momentum].
+To give some intuition as to what's happening here, we note that there's still a standard gradient update rule in there, but we're also "speeding up" the update by an amount $\gamma v_{i-1}$, meaning if we did a large update previously, then we'll go even further this time. The analogy here is really still a ball rolling down a hill, but we're compounding speed just like gravity would make us do in real life. Moreover, if the previous update had a different sign for the gradient (travelling in the opposite direction), we'll actually be *slowed* by $\gamma v_{i-1}$, which will prevent these types of oscillating situations bouncing between two steep slopes. This is termed gradient descent with **momentum**; I don't know if this was where it was originally proposed, but many seem to cite [@momentum], despite it opening with "A momentum term is usually used in...".
 
 ### Adagrad
 
@@ -245,7 +249,7 @@ A curious thing to note in @eq-adadelta is the lack of $\alpha$ -- we've removed
 
 ### Adam
 
-We've reached **Adam**: by far the most common default choice of optimizer for deep learning, and the one frequently used within this thesis. Adam draws upon ideas from all of the above methods; it keeps track of both a decaying average of gradients *and* squared gradients. We can write their forms explicitly:
+We've reached **Adam** [@adam]: by far the most common default choice of optimizer for deep learning, and the one frequently used within this thesis. Adam draws upon ideas from all of the above methods; it keeps track of both a decaying average of gradients *and* squared gradients. We can write their forms explicitly:
 
 $$
 \begin{aligned}
@@ -269,8 +273,3 @@ $$
 $$
 
 As you can see, gradient descent can get pretty complicated! The reason I went through this explicitly was to show that gradient descent has been extremely well-studied during the rise of deep learning, and we often need to go beyond simple update rules in order to effectively learn the properties we want from our parameters in practice. In fact, the main work you'll see in the first application later on initially wouldn't learn at all until we switched to using Adam!
-
-
-### Early stopping
-
-### k-fold validation

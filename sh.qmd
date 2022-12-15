@@ -304,3 +304,8 @@ Satisfied that the shape is good, we move swiftly on to view some of the example
 ![Plots of the distribution of $s_{\text{flow}}$ for a variety of test set signal points, where an even number of points are provided of either signal or background.](images/sh/conditioned_sflow_all){#fig-sflow-shapes}
 
 <!-- We may also be curious what happens when we condition on the wrong point, i.e. when the data comes from a different $m_X$ and $m_S$; such a case can be seen in -->
+## Future and outlook
+
+There are many ideas here -- I'm unsure how many will make it into the final analysis product, but the interpolation has gotten more mature since I wrote this section, though it still suffers from some of the drawbacks listed. In particular though, it now trains on *all* the mass points, and will be assessed with some newly generated events from previously non-existent mass points that definitely fall in the interpolation range.
+
+Those that are ATLAS-inclined are invited to look at the internal note we just published, which includes much more detail on the overall analysis: ANA-HDBS-2021-17-INT1.

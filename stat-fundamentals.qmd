@@ -11,9 +11,13 @@ jupyter: python3
 ---
 
 # Probability and Statistics, in theory
-## Probability, distributions, and likelihood
+
 
 It must be said that I have no desire to subject you, the reader, to the same philosophical torment that I have undergone in my pursuit of clarity of this topic, which I could not even claim to have reached. Moreover, given that this is an *experimental* physics thesis, it is exceedingly likely that you are a pragmatist, and wish to move swiftly on to the sections that may be useful to your life. Nonetheless, I’d like you to allow me the courtesy of proposing that there may in fact be something truly useful in revisiting these foundations, if only to reaffirm their non-utility.
+
+For this section, my most heavily used and recommended resource is [@bob], which I heard Bob himself refer to as his "life's work". Do give it a read -- so many useful gems by someone who took a lot of time to build bridges between science and statistics!
+
+## Probability, distributions, and likelihood
 
 Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of *nested sampling* @ns to infer the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof (if you're planning to be indisposed for a time, you may find @bayesrant of interest as reading material, but do make sure to dilute it with things like @freq and @mayo). This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just
 
@@ -55,7 +59,7 @@ $$
 \Rightarrow = \prod_{i=1}^N P(X_i | X_{j > i})~,
 $${#eq-prob-chain-rule}
 
-where $X_{j > i} $ represents the set of all $X_j$ for which $j >i$. This is known as the **probability chain rule**.
+where $X_{j > i}$ represents the set of all $X_j$ for which $j >i$. This is known as the **probability chain rule**.
 
 <!-- A pictorial demonstration of this and other probability quantities can be found in @fig-probs. -->
 
@@ -169,11 +173,11 @@ We define the **normal distribution** -- commonly known as a "Gaussian" in HEP -
 
 $$ p(x | \mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi} } e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2} .$$
 
-The parameters $\mu$ and $\sigma$ characterize the location and the width of the normal distribution respectively. In shorthand, we'll denote this as $\mathrm{Normal}(\mu, \sigma)$.
+The parameters $\mu$ and $\sigma$ characterize the location and the width of the normal distribution respectively. In shorthand, we'll denote this as $\mathrm{Normal}(\mu, \sigma)$, or maybe also including the input $x$ via $\mathrm{Normal}(x|\mu, \sigma)$.
 
 The normal distribution is exceedingly useful as a modelling tool due to the *central limit theorem*, which states that the distribution of the sum (and consequently the mean) of i.i.d. random variables calculated on a sample tends to a normal distribution as the size of your sample goes to infinity. This type of distribution is known as a **sampling distribution** as it involves a quantity that is computed on a per-sample basis.
 
-The specific normal distribution you end up with from the cental limit theorem is $\mathrm{Normal}(\bar{\mu}, \bar{\sigma}/\sqrt{n}$, where $\bar{\mu}$ and $\bar{\sigma}$ are the sample mean and standard deviation respectively. Part of the power of the central limit theorem is that it works regardless of the shape of the original distribution! So it's pretty impressive that we can get a good idea of how the distribution of the data mean looks, even with a finite sample size.
+The specific normal distribution you end up with from the cental limit theorem is $\mathrm{Normal}(\bar{\mu}, \bar{\sigma}/\sqrt{n})$, where $\bar{\mu}$ and $\bar{\sigma}$ are the sample mean and standard deviation respectively. Part of the power of the central limit theorem is that it works regardless of the shape of the original distribution! So it's pretty impressive that we can get a good idea of how the distribution of the data mean looks, even with a finite sample size.
 
 #### Poisson {#sec-poisson}
 
@@ -605,7 +609,7 @@ $$ \{\mu: t(x_0, \mu) < t_c \} = \mathrm{confidence~interval~at~C.L.~of~}1-\alph
 
 ### Bayesian procedures {#sec-bayes}
 
-I won't talk much about the Bayesian methodology here since I didn't explicitly use it in my PhD, but it's worth mentioning for contrast. Moreover, if you're a student within HEP reading this, I don't want to make it seem like there's only one way of doing things -- there are analyses that use these methods, and I think they should be explored more! See something like @sivia for a comprehensive introduction.
+I won't talk much about the Bayesian methodology here since I didn't explicitly use it in my PhD, but it's worth mentioning for contrast. Moreover, if you're a student within HEP reading this, I don't want to make it seem like there's only one way of doing things -- there are analyses that use these methods, and I think they should be explored more! See something like [@sivia] for a comprehensive introduction.
 
 As I've mentioned a few times, the Bayesian interpretation of probability admits distributions for facts; one can ask "how likely is supersymmetry?" or "what's the distribution for my signal strength?" These questions are often answered via use of Bayes theorem, which states that for probability distribution $p(\cdot)$, data ${x}$, and model parameters ${\mu} = \{ \mu_1, \mu_2, \dots, \mu_n\}$,
 $$
@@ -632,4 +636,4 @@ Armed with this equation, Bayesian procedures include:
     - Can then perform point estimation via *maximum a posteriori* (the mode of the posterior)
 - **Credible intervals**: in contrast to confidence intervals where the endpoints are random variables, $\mu$ itself is now the random variable, and the interval is constructed such that it contains the true value $\mu_T$ with some allocated probability.
 - **Hypothesis testing**: Bayesian hypothesis tests do exist, and involve the model evidence; I won't talk about them here.
-- **Evidence estimation**, e.g. nested sampling @ns, which also comes with a posterior estimate as a by-product.
+- **Evidence estimation**, e.g. nested sampling [@ns], which also comes with a posterior estimate as a by-product.

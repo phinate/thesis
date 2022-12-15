@@ -44,11 +44,11 @@ All of the properties of a flow satisfy most of the bullets above for our criter
 
 ### Implementing conditional density estimation
 
-A few different types of models allow for conditional density estimation, e.g. RealNVPs @realnvp, MADE @made, and masked autoregressive flows (MAFs) @maf -- we focus on the latter as the choice for this task. Details on the precise implementation of a MAF can be found in @sec-maf.
+A few different types of models allow for conditional density estimation, e.g. RealNVPs [@realnvp], MADE [@made], and masked autoregressive flows (MAFs) [@maf] -- we focus on the latter as the choice for this task. Details on the precise implementation of a MAF can be found in @sec-maf.
 
 ### Estimating predictive uncertainty
 
-If we're using the likelihood (or a histogram of the samples) to make a prediction using the flow, we don't have a natural way to produce a corresponding uncertainty on that prediction. One way to get around this fact is to take inspiration from the notion of **model ensembles** (see a review in @ensembles), which combine multiple predictive models into one by averaging their predictions at a given point, then providing an uncertainty through the sample standard deviation across those predictions. The intuition behind this is that one would expect models to have the most mutual variance in the region where there is no training data, as that lies outside of the context that the models learned. There's no particular way in which one needs to form the different elements of an ensemble for it to have some reasonable utility, but one common strategy in the land of neural networks is to train a few models with different weight initializations, and use those as the models to make up the ensemble. This approach is what we do here: both with the likelihood functions, and with the histogram yields produced from samples of those flows.
+If we're using the likelihood (or a histogram of the samples) to make a prediction using the flow, we don't have a natural way to produce a corresponding uncertainty on that prediction. One way to get around this fact is to take inspiration from the notion of **model ensembles** (see a review in [@ensembles]), which combine multiple predictive models into one by averaging their predictions at a given point, then providing an uncertainty through the sample standard deviation across those predictions. The intuition behind this is that one would expect models to have the most mutual variance in the region where there is no training data, as that lies outside of the context that the models learned. There's no particular way in which one needs to form the different elements of an ensemble for it to have some reasonable utility, but one common strategy in the land of neural networks is to train a few models with different weight initializations, and use those as the models to make up the ensemble. This approach is what we do here: both with the likelihood functions, and with the histogram yields produced from samples of those flows.
 
 
 ## Example 1: Following the mean
@@ -71,7 +71,7 @@ The distributions chosen are shown in @fig-normalgrid, where 49 different means 
 - Adam optimizer with a learning rate of 1e-3
 - 3000 iterations total (common reasonable plateau point for all examples)
 
-During training, the inputs and context are each scaled to standard normal distributions through fitting a `StandardScaler` from Scikit-Learn @scikit-learn to the train data. Any samples produced from the flow are then transformed back using this same scaler. Training was done using the `nflows` software package @nflows, which builds on PyTorch @torch.
+During training, the inputs and context are each scaled to standard normal distributions through fitting a `StandardScaler` from Scikit-Learn [@scikit-learn] to the train data. Any samples produced from the flow are then transformed back using this same scaler. Training was done using the `nflows` software package [@nflows], which builds on PyTorch [@torch].
 
 It's worth noting that since we trained three MAFs, when I refer to the "flow" in later sections, I'm referring to the ensemble of all three models, where their predictions (either likelihoods or histograms) are averaged together, and their predictive uncertainty is the corresponding standard deviations.
 
@@ -134,7 +134,7 @@ $$
 \end{array}\right]~.
 $$ {#eq-complex-cov}
 
-This rather weird formula, found using inspiration from a blog post on a geometric interpretation of the covariance in a Gaussian @covariance, applies a rotation and a scaling in proportion to the mean. By generating the same grid of points as in @fig-normalgrid, we end up with the result in @fig-complex-normalgrid. I've affectionately termed it a Gaussian firework, since it makes a wonderful explosive pattern when plotted symmetrically about the origin, which I additionally show some examples of in @fig-firework.
+This rather weird formula, found using inspiration from a blog post on a geometric interpretation of the covariance in a Gaussian [@covariance], applies a rotation and a scaling in proportion to the mean. By generating the same grid of points as in @fig-normalgrid, we end up with the result in @fig-complex-normalgrid. I've affectionately termed it a Gaussian firework, since it makes a wonderful explosive pattern when plotted symmetrically about the origin, which I additionally show some examples of in @fig-firework.
 
 ![A grid of 49 different normal distributions, each with a mean corresponding to a cross on the image, and with covariance as defined by @eq-complex-cov. The contour representing 0 is omitted for visualization purposes.](images/flows/complex/non-simple_data_dists){#fig-complex-normalgrid}
 

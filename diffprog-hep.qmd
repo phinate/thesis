@@ -583,7 +583,7 @@ Let us now shift our focus to a single bin: we'll choose the bin centered on 0, 
 middle = len(bins)//2 - 1
 mu_width = mu_grid[1]-mu_grid[0]
 fig, ax = plt.subplots(**subplot_settings)
-ax.bar(mu_grid, hists[:,middle],  width=mu_width, edgecolor= 'black',linewidth = 0.05,alpha=0.7, color='C1')
+ax.bar(mu_grid, hists[:,middle],  width=mu_width,alpha=0.7, color='C1')
 ax.set_title("Height of central histogram bin as a function of $\mu$")
 ax.set_ylabel("bin height")
 ax.set_xlabel('$\mu$');
@@ -649,8 +649,6 @@ axs[0].bar(
     width = mu_width,
     alpha = .7,
     label = 'histogram',
-    edgecolor= 'black',
-    linewidth = 0.05
 )
 axs[0].legend(frameon=False)
 axs[0].set_ylabel("bin height")
@@ -663,8 +661,6 @@ axs[1].bar(
     width = mu_width,
     alpha = .7,
     label = 'bKDE',
-    edgecolor= 'black',
-    linewidth = 0.05
 )
 axs[1].set_ylabel("bin height")
 axs[1].legend(frameon=False)
