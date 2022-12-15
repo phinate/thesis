@@ -9,14 +9,17 @@ format:
 jupyter: python3
 ---
 
-# Physics Analysis as a Differentiable Program
+# Data Analysis in High-Energy Physics as a Differentiable Program
+
+This is the title track of this thesis, and rightly so; it dominated metrics in both my time spent and headspace given for any of the topics I've written about. I feel incredibly privileged to have worked on something like this, which is fairly self-contained, and draws upon themes from both machine learning and statistical inference in order to make headway in addressing a long-standing issue: *systematic-aware optimization*. What's even cooler is that it goes further than this, opening up a whole variety of possibilities to optimize with the whole statistical inference procedure in the loop, and rethink the ways in which we can improve our workflows. I hope you enjoy it!
 
 ## Motivation
-Given the success of the Standard Model (SM), analysis of data from the LHC usually occurs for two reasons:
-- Precisely measuring SM processes to look for small deviations with SM predictions
-- Searching for new physics signatures as predicted by models beyond the SM
+Given the success of the Standard Model, analysis of data from the LHC usually occurs for two reasons:
 
-When analyzing data in this way, we'll have lots of free parameters to tune. These can be as simple as a threshold value that you limit the p_T to, or as complicated as the weights and biases that determine a neural network for identifying $b$-jets. We can of course choose any values for these quantities to do our analysis, but the resulting physics that follows may suffer as a result. As such, we're likely to try some kind of optimization to improve the answers to our physics questions. How do we do this in practice?
+- Precisely measuring Standard Model processes to look for small deviations from their predicted values
+- Searching for new physics signatures as predicted by models beyond the Standard Model
+
+When analyzing data in this way, we'll have lots of free parameters to tune. These can be as simple as a threshold value that you limit the $p_T$ to, or as complicated as the weights and biases that determine a neural network for identifying $b$-jets. We can of course choose any values for these quantities to do our analysis, but the resulting physics that follows may suffer as a result. As such, we're likely to try some kind of optimization to improve the answers to our physics questions. How do we do this in practice?
 
 In either case above, there is a notion of <span style="color:#13becf">signal</span> (what you’re looking for) and <span style="color:#ff7f0e">background</span> (everything else).
 Generally, we then try to choose a parameter configuration that can separate (or discriminate) the signal from the background, allowing us to extract just the data we think is relevant to the physics process we're looking at. As an example, machine learning models are often trained using the **binary cross-entropy** loss as an objective, which corresponds to optimizing the ability of the model to identify whether an event originated from signal or background processes. A closely related goal is the **Asimov significance** in the case of signal and background event counts $s$ and $b$ with *no uncertainty* on either quantity. The formula for this stems from assuming a Poisson likelihood function as in @sec-hifa, and is equal to
@@ -37,13 +40,9 @@ Now, this is all very sensible of course (we want to discover our signal), but t
 
 > (...) sensitivity to high-level physics questions **must account for systematic uncertainties**, which involve a nonlinear trade-off between the typical machine learning performance metrics and the systematic uncertainty estimates.
 
-This is the crux of the issue: we're not accounting for uncertainty. Our data analysis process comes with many sources of systematic error, which we endeavour to model in the likelihood function as nuisance parameters.
-- e.g. simulation comes with many physics parameters that we have to choose, e.g. jes
-- systs between simulators
-- quantification of data/MC agreement (closure?)
-...etc
+This is the crux of the issue: we're not accounting for uncertainty. Our data analysis process comes with many sources of systematic error, which we endeavour to model in the likelihood function as nuisance parameters. However, optimizing with respect to any of the above quantities isn't going to be aware of that process. We need something better.
 
-But this is all talk... let's prove it!
+Okay, I hear you: blah blah this is all just talk... let's prove this scenario needs addressing with an example!
 
 
 ### A simplified analysis example, both with and without uncertainty {#sec-simple-anal}
@@ -52,7 +51,7 @@ Let's define an analysis with a predicted number of signal and background events
 
 $$s = 15 + \phi $$
 $$b = 45 - 2 \phi $$
-$$\sigma_b = 0.5 + 0.1*\phi^2 $$
+$$\sigma_b = 0.5 + 0.1\phi^2 $$
 
 Note that $s \propto \phi$ and $\propto -2\phi$, so increasing $\phi$ corresponds to increasing the signal/backround ratio. However, our uncertainty scales like $\phi^2$, so we're also going to compromise in our certainty of the background count as we do that. This kind of tradeoff between $s/b$ ratio and uncertainty is important for the discovery of a new signal, so it may be that can't get away with optimizing $s/b$ alone, as the $p$-value may be worse!
 
@@ -113,7 +112,7 @@ autogrid(
 Using this very simple histogram, we can form a statistical model as if we're using @sec-hifa principles, which would look something like
 
 $$
-p(x | \mu) = \mathrm{Poisson}(x | \mu x^{\mathrm{sig}}  + \gamma x^{\mathrm{bkg}})\mathrm{Normal}(y | \gamma, 1)~,
+p(x | \mu) = \mathrm{Poisson}(x | \mu x^{\mathrm{sig}}  + \gamma x^{\mathrm{bkg}})\,\mathrm{Normal}(y | \gamma, 1)~,
 $$ {#eq-simplemodel}
 
 where $\gamma$ is a continuous description of $\sigma_b$ that we get from interpolating between the yields, just like in the HistFactory approach, which has the constraint term $\mathrm{Normal}(y | \gamma, 1)$ attached to penalize fitting a value of $\gamma$ that differs largely from the information provided by $\sigma_b$.
@@ -185,7 +184,7 @@ If we optimize this analysis then, we want to arrive at the value of $\phi$ at t
 
 All this makes the $p$-value seem like a good candidate for an objective function! So why haven't we used this already?
 
-As emphasized in @sec-gradient-descent, if we want to perform optimization using gradient-based methods,^[We don't have to use gradient based methods! They're just very well implemented and studied, as well as enabling things like this paradigm.] then we need the objective that we optimize to be *differentiable*. This is not immediately the case for the $p$-value -- we would have to be able to differentiate through all stages of the full calculation, including model building, profiling, and even histograms, which are not generally known for their smoothness. But say we were able to decompose this complicated pipeline into bite-size chunks, each of which we can find a way to take gradients of. What becomes possible then? This begins our view of **physics analysis as a differentiable program**.
+As emphasized in @sec-gradient-descent, if we want to perform optimization using gradient-based methods,^[We don't have to use gradient based methods! They're just very well implemented and studied, as well as enabling things like this paradigm.] then we need the objective that we optimize to be *differentiable*. This is not immediately the case for the $p$-value -- we would have to be able to differentiate through all stages of the full calculation, including model building, profiling, and even histograms, which are not generally known for their smoothness. But say we were able to decompose this complicated pipeline into bite-size chunks, each of which we can find a way to take gradients of. What becomes possible then? This begins our view of **data analysis in high-energy physics as a differentiable program**.
 
 In the following sections, we'll take a collider physics analysis apart step-by-step, then see how we can employ tricks and substitutes to recover gradients for each piece. After that, we'll explore the ways that we can use the result to perform gradient-based optimization of different parts of the analysis with respect to physics goals. We'll then do it all at once by *optimizing a toy physics analysis from end-to-end*, exploring the common example of a summary statistic based on a neural network, accounting for uncertainties all the while.
 
@@ -1287,7 +1286,7 @@ The story doesn't change too much with more bins, with all the training strategi
 
 I'll also show the histograms and neural network contours in data space -- there are some pretty funky ones for the high-bin case. You'll see that the types of histogram model learned by the neural network fluctuate much more with this additional granularity provided by the new bins, especially for the hypothesis test-based metrics (seed 2 and 3 are particularly strange for $p_0$).
 
-For the contours themselves, there are many things to see here, but I'll just point out one of my favourites: for seed 3 in @fig-hists-20nobin-CLs and @fig-hists-20bin-discovery, we see the network struggling to untie the systematic variations from the signal bins. However, for  the same seed in @fig-hists-20bin-comb, where we're training on a combination of those metrics, the network seems to manage! No idea why this behaviour is there, and indeed it is just one seed. But I thought that was pretty cool.
+For the contours themselves, there are many things to see here, but I'll just point out one of my favourites: for seed 3 in @fig-hists-20nobin-CLs and @fig-hists-20bin-discovery, we see the network struggling to untie the systematic variations from the signal bins. However, for the same seed in @fig-hists-20bin-comb, where we're training on a combination of those metrics, the network seems to manage! No idea why this behaviour is there, and indeed it is just one seed. But I thought that was pretty cool.
 
 ![Histograms from optimizing with respect to binary cross-entropy between signal and nominal background.](images/new-hist-models-bce-20nobin){#fig-hists-20bin-bce}
 
@@ -1295,7 +1294,7 @@ For the contours themselves, there are many things to see here, but I'll just po
 
 ![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-20bin){#fig-hists-20nobin-CLs}
 
-![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-20nobin){#fig-hists-20in-comb}
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-20nobin){#fig-hists-20bin-comb}
 
 ![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-hist-models-poi_uncert-20nobin){#fig-hists-20bin-poi-uncert}
 
@@ -1317,7 +1316,7 @@ Results from this experiment are fairly similar to the fixed-bin case, and are s
 
 ## What's next?
 
-The first question that arises when reading this work for most -- which mirrors accurately the same question I get when giving talks about this -- is *how does it scale to optimize with a $p$-value?* Great question; I wish I knew. I've not personally managed to apply this to a real use-case where this method could thrive (e.g. a physics analysis where systematic uncertainties serve as a bottleneck for performance). But if we were to do so, scaling will come with some challenges: the first being that the accuracy of the model construction per iteration is dependent on the batch size being large enough to faithfully represent the analysis. In practice, this was overcome by applying scale factors to the batches that normalized their event counts to something expected by the whole sample (in our toy case, we made the arbitrary choice of a 1/5 ratio between signal and background, with a normalization to around ~10 events or so). Moreover, the unavoidable truth already mentioned in @sec-neos-issues is that the cost of the forward pass + backward pass = $\mathcal{O}(\sim 2\times \text{analysis cost})$, which may scale in complicated ways depending on the complexity of the model at hand. One would probably need to prune any workspace to only include systematic uncertainties that have been studied to impact the analysis result significantly.
+The first question that arises when reading this work for most -- which mirrors accurately the same question I get when giving talks about this -- is *how does it scale to optimize with a $p$-value?* Great question; I wish I knew. I've not personally managed to apply this to a real use-case where this method could thrive (e.g. a physics analysis where systematic uncertainties serve as a bottleneck for performance). But if we were to do so, scaling will come with some challenges: the first being that the accuracy of the model construction per iteration is dependent on the batch size being large enough to faithfully represent the analysis. In practice, this was overcome by applying scale factors to the batches that normalized their event counts to something expected by the whole sample (in our toy case, we made the arbitrary choice of a 1/5 ratio between signal and background, with a normalization to around ~10 events or so). Moreover, the unavoidable truth already mentioned in @sec-neos-issues is that the cost of the forward pass + backward pass = ~$\mathcal{O}(2\times \text{analysis cost})$, which may scale in complicated ways depending on the complexity of the model at hand. One would probably need to prune any workspace to only include systematic uncertainties that have been studied to impact the analysis result significantly.
 
 A whole world of things could be targets for being made differentiable. As a simple extension to what's already been shown here, one could imagine making upper limits differentiable in the same way as the profile likelihood; there's no conceptual restriction, but since there's an optimization procedure to determine the upper limit (find the value of the parameter that gives a certain $p$-value), we can reuse the idea of implicit gradients that exist for functions with fixed points. There's also a nice [set of operations that could benefit from being differentiable](http://github.com/gradhep/relaxed/list_of_operations.md) curated by Kyle Cranmer, including things like sorting, statistical methods, and peer review (perhaps more relevant after AI take over the world -- we can optimize their weights to help us get accepted at major conferences)^[Thinking about it though, AI having a workshop about the workings of AI would be more like biology/philosophy. Perhaps this whole thesis is then unethical through this lens, exploiting and manipulating machines for our own curiosity. The complementary idea of inverting this exploitation is a rather dystopian one.]. It's possible that I've gotten around to implementing some of these in [`relaxed`](http://github.com/gradhep/relaxed) [@relaxed] by the time you read this, which is a differentiable toolbox of sorts that implements all of the advances that you've seen in this chapter.
 
@@ -1351,3 +1350,7 @@ relaxed.infer.hypotest(
 To see more of what this looks like in practice, I encourage you to check out the [repository (e.g. the tests)](http://github.com/gradhep/relaxed), a [set of examples that I wrote](http://github.com/phinate/differentiable-analysis-examples) [@examples], and my [PyHEP 2022 video tutorial](https://youtu.be/cOv7W-moO6k).
 
 Beyond quantities that stem from statistical inference, differentiable simulation is another promising area that could allow simulator-in-the-loop optimization. An example could be tuning your simulator parameters to model data by gradient descent, or perhaps having a pipeline with a loss function that simulates physics on-the-fly based on learned parameters. Moreover, there has been a very interesting recent line of work that looks at making key physics processes differentiable, such as the calculation of matrix elements for scattering amplitudes [@madjax] and parton showering  [@jaxshower]. This is certainly an area to keep an eye on over the coming years.
+
+## Credits
+
+Many thanks go to Lukas Heinrich for the inspiration, debugging help, and original proposal, and also to Tomasso Dorigo/Pablo de Castro for their initial assistance and work on INFERNO [@inferno], which lay lots of the groundwork for this topic. Thanks also to the other `pyhf` authors Matthew Feickert and Giordon Stark, and to Alex Held for his great notebook on differentiable cuts and other advice.
