@@ -244,7 +244,7 @@ The fit strategies proposed are both clearly effective, but they both have their
 - The 2-D fit is *simple* and *powerful*, but suffers from the *high number of bins* needed to compute the likelihood, leading to things like ad-hoc region selection to reduce the bins we include.
 - The pNN strategy is much more *efficient*, as a 1-D distribution is far more simple to compute from an inference perspective. However, we need to *assign signal masses to background*, which don't exist and so could affect our performance.
 
-To address these points, we can be inspired by the literature for **learning likelihood ratios**, e.g. @lr, where we exploit the fact that a perfect 1-D classifier between signal and background trained with binary cross-entropy would learn the distribution
+To address these points, we can be inspired by the literature for **learning likelihood ratios**, e.g. the likelihood ratio trick [@lrt], where we exploit the fact that a perfect 1-D classifier between signal and background trained with binary cross-entropy would learn the distribution
 
 $$
 s^*(x) = \frac{p_{\text{sig}}(x)}{p_{\text{sig}}(x) + p_{\text{bkg}}(x)}~,
@@ -266,10 +266,10 @@ where the distribution $q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S)$ is the ou
 
 $$
 s_{\text{flow}}(x | m_X, m_S) \pm \sigma_{s} = \frac{q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) \pm \sigma^{({\text{flow}})}_{\text{sig}}}{\left(q^{({\text{flow}})}_{\text{sig}}(x  |m_X, m_S) \pm \sigma^{({\text{flow}})}_{\text{sig}}\right) + \left(q^{({\text{flow}})}_{\text{bkg}}(x) \pm \sigma^{({\text{flow}})}_{\text{bkg}}\right)}~,
-$$ {#eq-sflow}
+$$
 $$
 \Rightarrow  \sigma_{s} = \sqrt{\frac{\left(q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) \sigma^{({\text{flow}})}_{\text{bkg}}\right)^2 + \left(q^{({\text{flow}})}_{\text{bkg}}(x) \sigma^{({\text{flow}})}_{\text{sig}}\right)^2}{\left( q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) + q^{({\text{flow}})}_{\text{bkg}}(x) \right)^4}}~.
-$$
+$${#eq-sflow}
 
 <!-- For implementation purposes, I include a pseudocoded version of this in @
 
