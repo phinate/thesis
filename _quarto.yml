@@ -24,6 +24,8 @@ book:
   appendices:
     - neos-extra.qmd
 
+execute:
+  freeze: auto
 
 bibliography: references.bib
 pdf-engine: pdflatex

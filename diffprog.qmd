@@ -4,7 +4,7 @@ execute:
 format:
   html:
     code-fold: true
-    default-image-extension: svg
+    default-image-extension: png
   pdf:
     default-image-extension: pdf
 jupyter: python3
