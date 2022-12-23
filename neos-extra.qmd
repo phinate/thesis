@@ -1,0 +1,65 @@
+---
+execute:
+  echo: false
+format:
+  html:
+    code-fold: true
+    default-image-extension: png
+  pdf:
+    default-image-extension: pdf
+jupyter: python3
+---
+# Results when optimizing a neural network observable and binning simultaneously {#sec-bins-app}
+## 5-bin observable
+
+### Metrics {-}
+
+![Plots of the different metrics calculated on the test set for different training strategies using a 5-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).](images/test_metricsfewbins)
+
+### Histograms {-}
+
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-5bin)
+
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-5bin)
+
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-5bin)
+
+![](images/new-hist-models-poi_uncert-5bin)
+
+
+### Neural network contours in data space {-}
+
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-grid-models-discovery-5bin)
+
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-grid-models-CLs-5bin)
+
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-grid-models-COMB-5bin)
+
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-grid-models-poi_uncert-5bin)
+
+## 20-bin observable
+
+### Metrics {-}
+
+![Plots of the different metrics calculated on the test set for different training strategies using a 20-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).](images/test_metricsfewbins)
+
+### Histograms {-}
+
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-hist-models-discovery-20bin)
+
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-hist-models-CLs-20bin)
+
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-hist-models-COMB-20bin)
+
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-hist-models-poi_uncert-20bin)
+
+
+### Neural network contours in data space {-}
+
+![Histograms from optimizing with respect to the discovery $p$-value $p_0$.](images/new-grid-models-discovery-20bin)
+
+![Histograms from optimizing with respect to the $\mathrm{CL}_s$.](images/new-grid-models-CLs-20bin)
+
+![Histograms from optimizing with respect to a combination of discovery $p$-value and $\mathrm{CL}_s$.](images/new-grid-models-COMB-20bin)
+
+![Histograms from optimizing with respect to the Fisher information estimate of $\sigma_{\hat{\mu}}$.](images/new-grid-models-poi_uncert-20bin)
