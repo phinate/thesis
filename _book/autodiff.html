@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - 5&nbsp; Automatic differentiation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./ml.html" rel="next">
+<link href="./diffprog.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Analysis in High-Energy Physics as a Differentiable Program</a>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container">
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Fundamentals</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./physics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./stat-fundamentals.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./stat-practical.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./diffprog.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./autodiff.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./ml.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Applications</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./diffprog-hep.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./flow-interp.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./sh.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Appendices</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+
+  <ul>
+  <li><a href="#building-blocks-of-automatic-differentiation" id="toc-building-blocks-of-automatic-differentiation" class="nav-link active" data-scroll-target="#building-blocks-of-automatic-differentiation"><span class="toc-section-number">5.1</span>  Building blocks of automatic differentiation</a>
+  <ul class="collapse">
+  <li><a href="#jacobian-vectorvector-jacobian-products" id="toc-jacobian-vectorvector-jacobian-products" class="nav-link" data-scroll-target="#jacobian-vectorvector-jacobian-products"><span class="toc-section-number">5.1.1</span>  Jacobian-vector/vector-Jacobian products</a></li>
+  <li><a href="#from-sequences-to-graphs" id="toc-from-sequences-to-graphs" class="nav-link" data-scroll-target="#from-sequences-to-graphs"><span class="toc-section-number">5.1.2</span>  From sequences to graphs</a></li>
+  </ul></li>
+  <li><a href="#building-the-computation-graph" id="toc-building-the-computation-graph" class="nav-link" data-scroll-target="#building-the-computation-graph"><span class="toc-section-number">5.2</span>  Building the computation graph</a></li>
+  <li><a href="#sec-fixed-points" id="toc-sec-fixed-points" class="nav-link" data-scroll-target="#sec-fixed-points"><span class="toc-section-number">5.3</span>  Differentiating fixed points</a></li>
+  <li><a href="#other-approaches-to-taking-gradients-of-programs" id="toc-other-approaches-to-taking-gradients-of-programs" class="nav-link" data-scroll-target="#other-approaches-to-taking-gradients-of-programs"><span class="toc-section-number">5.4</span>  Other approaches to taking gradients of programs</a>
+  <ul class="collapse">
+  <li><a href="#numerical-differentiation" id="toc-numerical-differentiation" class="nav-link" data-scroll-target="#numerical-differentiation"><span class="toc-section-number">5.4.1</span>  Numerical differentiation</a></li>
+  <li><a href="#symbolic-differentiation" id="toc-symbolic-differentiation" class="nav-link" data-scroll-target="#symbolic-differentiation"><span class="toc-section-number">5.4.2</span>  Symbolic differentiation</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+
+
+  </div>
+
+
+</header>
+
+<p><span class="citation" data-cites="NNLOPS">(<a href="references.html#ref-NNLOPS" role="doc-biblioref">Hamilton et al. 2013</a>)</span>, <span class="citation" data-cites="mgmc">(<a href="references.html#ref-mgmc" role="doc-biblioref">Alwall et al. 2011</a>)</span>, <span class="citation" data-cites="matplotlib">(<a href="references.html#ref-matplotlib" role="doc-biblioref">Hunter 2007</a>)</span></p>
+<p>One may think that the pace of scientific discovery is determined by the speed at which new ideas are formed. That was likely true in the early days; if I posited that a rock, when thrown, will roughly trace a parabolic arc, we likely don’t need to take leaps in experimental physics to test this hypothesis to some ballpark degree of accuracy – maybe we could even get away with just a ruler and the naked eye. In contrast to this, science as done in the present requires a little additional technology in order to probe the questions that we’re interested in (unless we get really, really good rulers).</p>
+<p>I say this to emphasize that the advancements made in deep learning over the past couple decades can be largely attributed to the ability to run <em>efficient and exact</em> learning algorithms at scale. For this, we have <strong>automatic differentiation</strong> to thank (which we playfully term “autodiff”), which allows us to take the gradient of pretty much arbitrary computer code. Which is pretty damn cool.</p>
+<p>This section will take a tour through the basics of gradient computation, and then we’ll compare the different types of automatic differentiation mechanisms (do we build a graph of our program before executing the code, or do we trace it at runtime?), and then show some example code for each.</p>
+<section id="building-blocks-of-automatic-differentiation" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="building-blocks-of-automatic-differentiation"><span class="header-section-number">5.1</span> Building blocks of automatic differentiation</h2>
+<p>The core idea of autodiff is the breaking down of a potentially complicated calculation into a set of computational <strong>primitives</strong>: basic operations with known derivatives. Think of things like <span class="math inline">\(+\)</span>, <span class="math inline">\(\times\)</span>, <span class="math inline">\(-\)</span>, <span class="math inline">\(\div\)</span>, <span class="math inline">\(\sin\)</span>, <span class="math inline">\(\log\)</span>, and so on. We know how to take the derivative across each of these operations analytically, so we can say to a computer “Every time you see a <span class="math inline">\(\sin\)</span>, replace it with a <span class="math inline">\(\cos\)</span> in the gradient calculation”. Then, thanks to the chain rule, we can build up the gradient of the whole program by multiplying these gradient results together.</p>
+<p>Getting into the specifics of this, we’ll begin by focusing on a function <span class="math inline">\(F: \mathbb{R}^n \rightarrow \mathbb{R}\)</span>, which is a scalar valued function that takes in a vector input of dimensionality <span class="math inline">\(n\)</span>, and returns a scalar. We deliberately choose this to mimic an objective function as seen in deep learning, which typically maps a high-dimensional vector of weights &amp; biases to a single real number. We can also explicitly denote the application and output of <span class="math inline">\(F\)</span> as <span class="math inline">\(F(\mathbf{x}\in\mathbb{R}^n) \rightarrow y \in \mathbb{R}\)</span>.</p>
+<p>If we break down <span class="math inline">\(F\)</span> into a composition of (arbitrarily) four other functions, we would write that as <span class="math inline">\(F = D \circ C \circ B \circ A\)</span>. Each one of these can be any random operation, like adding 5, taking the logarithm, or hooking into your OS to gain <code>root</code> access (equivalent to the identity operation from a numerical perspective). We can write this explicit chain of computations as <span class="math inline">\(y = F(\mathbf{x}) = D(C(B(A(\mathbf{x}))))\)</span>, where we can interpret the computation as starting from the inner level, i.e.&nbsp;application of <span class="math inline">\(A\)</span> to <span class="math inline">\(\mathbf{x}\)</span>, then <span class="math inline">\(B\)</span> to <span class="math inline">\(\mathbf{a} =\)</span> the output of <span class="math inline">\(A(\mathbf{x})\)</span>), and so on. Let’s also define <span class="math inline">\(\mathbf{b} = B(\mathbf{a})\)</span>, <span class="math inline">\(\mathbf{c} = C(\mathbf{b})\)</span>, and <span class="math inline">\(y = D(\mathbf{c})\)</span>.</p>
+<p>We’ll see why function composition is important to cover – a core idea of automatic differentiation is to break down the gradient of the whole into the composition of the gradient of its parts via the chain rule. But more on that later.</p>
+<p>Let’s turn to gradients: we define the <strong>Jacobian matrix</strong> of partial derivatives of <span class="math inline">\(F\)</span> as</p>
+<p><span id="eq-jacobian"><span class="math display">\[
+J_F(\mathbf{x}) = F'(\mathbf{x}) = \left[\begin{array}{ccc}\frac{\partial y_{1}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial y_{1}}{\partial x_{n}} \\\vdots &amp; \ddots &amp; \vdots \\\frac{\partial y_{m}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial y_{m}}{\partial x_{n}}\end{array}\right],
+\tag{5.1}\]</span></span></p>
+<p>assuming <span class="math inline">\(y\)</span> has multiple components (<span class="math inline">\(y_1\)</span>, <span class="math inline">\(y_2\)</span>, etc.). However, since we’re going from <span class="math inline">\(\mathbb{R}^n \rightarrow \mathbb{R}\)</span>, the Jacobian is just one row vector:</p>
+<p><span class="math display">\[
+F'(\mathbf{x}) =  \left[ \frac{\partial y}{\partial x_1} , \frac{\partial y}{\partial x_2}, \cdots, \frac{\partial y}{\partial x_n}\right].
+\]</span></p>
+<p>Given the decomposition of <span class="math inline">\(F\)</span> above, we can break this down into a product of individual Jacobian matricies for each of the intermediate functions via the chain rule:</p>
+<p><span class="math display">\[
+F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \frac{\partial \mathbf{a}}{\partial \mathbf{x}},
+\]</span></p>
+<p>One can note the sizes of each of the intermediate matricies in the format (# rows, # columns):</p>
+<p><span class="math display">\[\begin{align*}
+\mathrm{size}(\partial y / \partial \mathbf{c}) &amp;= (1,len(c)) \\
+\mathrm{size}(\partial \mathbf{c} / \partial \mathbf{b} ) &amp;= (len(c), len(b)) \\
+\mathrm{size}(\partial \mathbf{b} / \partial \mathbf{a} ) &amp;= (len(b), len(a)) \\
+\mathrm{size}(\partial \mathbf{a} / \partial \mathbf{x} ) &amp;= (len(a), n)
+\end{align*}\]</span></p>
+<p>The size of the final Jacobian matrix is then <span class="math inline">\((1, n)\)</span>, as shown earlier (i.e.&nbsp;one row vector). We’ll come back to why these sizes are important – for instance, these matricies could be very hard to store if <span class="math inline">\(n\)</span> is large.</p>
+<p>This kind of sequential matrix multiplication can be called “accumulating” the Jacobian piece-by-piece. The order of the multiplication of these matricies (i.e.&nbsp;where to put the parentheses) matters to optimize computational load, but we’ll look at two particular extreme cases:</p>
+<ul>
+<li><strong>Forward accumulation</strong>: Start from the input and work forwards to the output (right to left)</li>
+</ul>
+<p><span class="math display">\[
+F'(\mathbf{x}) = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\right)\right),
+\]</span></p>
+<p>Here’s an example of what that first matrix product looks like: <span class="math display">\[
+\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \cdot \frac{\partial \mathbf{a}}{\partial \mathbf{x}}\ =\frac{\partial \mathbf{b}}{\partial \mathbf{x}}=\left[\begin{array}{ccc}\frac{\partial b_{1}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial b_{1}}{\partial x_{n}} \\\vdots &amp; \ddots &amp; \vdots \\\frac{\partial b_{m}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial b_{m}}{\partial x_{n}}\end{array}\right].
+\]</span></p>
+<ul>
+<li><strong>Reverse accumulation</strong>: vice-versa!</li>
+</ul>
+<p><span class="math display">\[
+F'(\mathbf{x}) = \left( \left( \frac{\partial y}{\partial \mathbf{c}} \cdot \frac{\partial \mathbf{c}}{\partial \mathbf{b}} \right)\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \right)\frac{\partial \mathbf{a}}{\partial \mathbf{x}},
+\]</span></p>
+<p>Again, let’s take a look at the result of the first matrix product:</p>
+<p><span class="math display">\[
+\frac{\partial y}{\partial \mathbf{c}} \cdot \frac{\partial \mathbf{c}}{\partial \mathbf{b}}\ =\frac{\partial y}{\partial \mathbf{b}}= \left[ \frac{\partial y}{\partial b_1} , \frac{\partial y}{\partial b_2}, \cdots, \frac{\partial y}{\partial b_n}\right]
+\]</span></p>
+<p>Why is that so much smaller than forward accumulation? Our initial matrix <span class="math inline">\(\partial y / \partial \mathbf{c}\)</span> has only one row due to <span class="math inline">\(y\)</span> being 1-dimensional. Moreover, we note that this causes the size of every intermediate matrix product to always be <span class="math inline">\((1, \dots)\)</span>, meaning if we have this situation where we’re going from <span class="math inline">\(\mathbb{R}^n \rightarrow \mathbb{R}\)</span> like with <span class="math inline">\(F\)</span>, reverse accumulation looks much more efficient in terms of memory usage and compute to get the same result, since we’re only ever storing intermediate vectors and not high-dimensional matricies. This is the typical setting with a neural network: we have a very large input space (could even be ~billions of parameters), and we want to evaluate the Jacobian matrix of a scalar (which would have one row and ~billions of columns) with respect to those parameters. If we had the complementary setting, i.e.&nbsp;<span class="math inline">\(\mathbb{R} \rightarrow \mathbb{R}^n\)</span>, which could maybe be some parametrization of a simulator that produces high-dimensional data, we would probably want to compute the Jacobian with forward-mode accumulation instead.</p>
+<section id="jacobian-vectorvector-jacobian-products" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="jacobian-vectorvector-jacobian-products"><span class="header-section-number">5.1.1</span> Jacobian-vector/vector-Jacobian products</h3>
+<p>Let’s touch again on this idea of only storing intermediate vectors: we can see this arose in the case of reverse accumulation from the fact that our first multiplication had a 1 in the external dimensions, i.e.&nbsp;was a <em>row</em> vector <span class="math inline">\(\mathbf{v}^T\)</span> multiplying from the left. We can recover this situation for forward mode if we pre-multiply the Jacobian matrix by some <em>column</em> vector <span class="math inline">\(\mathbf{v}\)</span> from the right. This leads us to think about the generality offered by considering Jacobian-vector and vector-Jacobian products (JVP/VJPs) as primary functions of forward and reverse mode autodiff respectively.</p>
+<p>To illustrate this with equations, we can write a JVP for our function <span class="math inline">\(F\)</span> with the same operation ordering as with the <em>forward</em> accumulation of a Jacobian:</p>
+<p><span class="math display">\[
+F'(\mathbf{x})\,\mathbf{v} = \frac{\partial y}{\partial \mathbf{c}}\left(\frac{\partial \mathbf{c}}{\partial \mathbf{b}}\left(\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \left(\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \mathbf{v} \right) \right)\right)
+\]</span></p>
+<p>Thinking of the rules of matrix multiplication, we note that <span class="math inline">\(\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \mathbf{v}\)</span> is only tractable if <span class="math inline">\(\mathbf{v}\)</span> is of size <code>(n, 1)</code>, since <span class="math inline">\(\frac{\partial \mathbf{a}}{\partial \mathbf{x}}\)</span> is of size <code>(len(a), n)</code>. Provided this is the case, all following computations will include 1 as one of the outer dimensions, meaning we once again only need to consider intermediary vectors instead of matricies when computing this quantity.</p>
+<p>Now, you may be thinking “Nathan, this is all well and good, but what <em>is</em> the vector <span class="math inline">\(\mathbf{v}\)</span>, and why are you showing it to me? Aren’t we interested in the Jacobian itself, and not its product with some arbitrary vector?”</p>
+<p>Firstly, I would respond by asking why you’re saying this in a thick British accent. After that, I would then go on to say that we can still use this formulation to recover the whole Jacobian – we can simply let <span class="math inline">\(\mathbf{v}\)</span> be a <em>one-hot encoding</em> (or <em>unit vector</em> if you’re more mathematically inclined) of one of the input dimensions, e.g.&nbsp;<span class="math inline">\(\mathbf{v} = [1, 0, \dots, 0]^T\)</span>, and the result of our JVP will then be the first <em>column</em> of the Jacobian:</p>
+<p><span class="math display">\[\begin{align}
+    F'(\mathbf{x})\,\mathbf{v} &amp;= \begin{bmatrix}
+            \frac{\partial y_1}{\partial x_1} \\
+            \frac{\partial y_2}{\partial x_1}\\
+            \vdots
+        \end{bmatrix}
+\end{align}\]</span></p>
+<p>We can repeat this for each dimension by changing the place we put the 1 in <span class="math inline">\(\mathbf{v}\)</span>, then concatenate the results to get the whole Jacobian. So by building up the Jacobian one column at a time when doing forward accumulation, we gain this advantage we talked about earlier of only storing intermediate vectors, and never having to instantiate any potentially large matricies, regardless of the dimensionality of the input or output.</p>
+<p>Ah, but wait a minute, I used <span class="math inline">\(y_1, y_2\)</span> etc. above – my mistake, we don’t actually have a vector for our choice of <span class="math inline">\(F\)</span> from earlier. We only have just one scalar output <span class="math inline">\(y\)</span>. That means that the result of our computation above would be the single first element of the Jacobian: <span class="math inline">\(\partial y / \partial x_1\)</span>, and we would need one JVP calculation for each element. That seems a bit excessive! Wasn’t reverse mode meant to be better? Shouldn’t we use that?</p>
+<p>Agreed. Let’s do the same thing, and produce a <em>vector-Jacobian product</em> with a one-hot encoding of the output dimensions.</p>
+<p><span class="math display">\[\begin{align}
+\mathbf{v}^T \, F'(\mathbf{x}) &amp;= \left( \left( \left( \mathbf{v}^T \,\frac{\partial y}{\partial \mathbf{c}} \right) \frac{\partial \mathbf{c}}{\partial \mathbf{b}} \right)\frac{\partial \mathbf{b}}{\partial \mathbf{a}} \right)\frac{\partial \mathbf{a}}{\partial \mathbf{x}} \\
+&amp; =\left[ \frac{\partial y_1}{\partial x_1} , \frac{\partial y_1}{\partial x_2}, \cdots, \frac{\partial y_1}{\partial x_n}\right].
+\end{align}\]</span></p>
+<p>We’ve calculated the first <em>row</em> of the Jacobian, and can construct the full thing with a VJP for each row, corresponding to each dimension of the output. In the case of this output <span class="math inline">\(y\)</span> being scalar as before, that would make <span class="math inline">\(\mathbf{v}^T = 1\)</span> (only one output dimension), and we recover the full Jacobian in one go, since it was only one row to begin with! But of course, if <span class="math inline">\(y\)</span> had multiple dimensions (say 5), we would only have to compute 5 VJPs to form the whole Jacobian, never having to worry about the size of the intermediate quantities.</p>
+<p>Based on these appealing properties, it helps when using autodiff to consider the JVP/VJP as the fundamental operation when calculating gradients of programs in practice. It’s a funny way of thinking at first, but the quantity we end up with is just the regular Jacobian (or elements thereof) in the end, so it’s only important when considering implementation details of gradient computations.</p>
+<p>To summarize: we’ve seen the difference between <strong>forward</strong>- and <strong>reverse</strong>-mode autodiff, and their usefulness in constructing Jacobians via <strong>Jacobian-vector</strong> and <strong>vector-Jacobian products</strong>, which bypass the need to store large intermediate matricies by forming the Jacobian one column or one row at a time respectively. We also note that for the deep learning case of interest, where we have an objective function <span class="math inline">\(F\)</span> that maps <span class="math inline">\(\mathbb{R}^n \rightarrow \mathbb{R}\)</span> with <span class="math inline">\(n\)</span> large, we far prefer <em>reverse-mode</em> autodiff to calculate its gradient, which we need to perform optimization.</p>
+</section>
+<section id="from-sequences-to-graphs" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="from-sequences-to-graphs"><span class="header-section-number">5.1.2</span> From sequences to graphs</h3>
+<p>One thing that you may have noticed in our previous section is the fact that we focused only on a simple decomposition of <span class="math inline">\(F\)</span> into the sequential application of four functions <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, <span class="math inline">\(C\)</span>, and <span class="math inline">\(D\)</span> to the input <span class="math inline">\(\mathbf{x}\)</span>. In reality, computer programs are going to look a lot more complicated, and will be represented by the more general construct of a directed acyclic graph (DAG). We need to adapt the above framework for JVPs/VJPs in order to generalize to these real-life scenarios.</p>
+<p>It turns out this is fairly simple: we only need to consider two additional cases than what we’ve considered already. The application of a single operation with a single input and output would be represented as one node in a graph, with an edge going in and coming out. Luckily, the only additional generalization we need to consider is the case of multiple inputs (fan-in) and multiple outputs (fan-out).</p>
+<p>For the fan-in case, i.e.&nbsp;multiple input values from different computations: wwe know how to calculate Jacobians for a single input, so we can just do this process for each input separately. More explicitly: for <span class="math inline">\(F(\mathbf{a}, \mathbf{b})\)</span>, with <span class="math inline">\(\mathbf{a}\)</span> and <span class="math inline">\(\mathbf{b}\)</span> possibly coming from different parts of the program, we calculate the Jacobian for each input separately as before: <span class="math inline">\(F'_\mathbf{a}(\mathbf{a}, \mathbf{b}) = \partial y / \partial \mathbf{a}\)</span> and <span class="math inline">\(F'_\mathbf{b}(\mathbf{a}, \mathbf{b}) = \partial y /\partial \mathbf{b}\)</span>.</p>
+<p>Fan-out is slightly more involved, since we now have the case of multiple return values. Let’s examine a function with this behaviour: <span class="math inline">\(G(\mathbf{x}) = [3\mathbf{x}, 5\mathbf{x}]^T\)</span>. We can see that this input replicates our input <span class="math inline">\(\mathbf{x}\)</span> with different factors applied to each output, which we can represent through the linear function <span class="math inline">\(G(\mathbf{x}) = [3I, 5I]^T\mathbf{x}\)</span>, where <span class="math inline">\(I\)</span> is the identity matrix. The Jacobian of <span class="math inline">\(G\)</span> is then just the coefficients multiplying <span class="math inline">\(\mathbf{x}\)</span>: <span class="math inline">\(G'(\mathbf{x}) = [3I, 5I]^T\)</span>. But in practice, we’re probably going to be computing a VJP across this node in the graph during backpropagation. Remembering that this involves multiplying by a vector <span class="math inline">\(\mathbf{v}^T\)</span> with the same dimensionality of the output of <span class="math inline">\(G\)</span>, we can then write <span class="math inline">\(\mathbf{v}^T = [\mathbf{v_1}^T, \mathbf{v_2}^T]\)</span>, one vector for each vector in <span class="math inline">\(G(\mathbf{x})\)</span>. This then leads to</p>
+<p><span class="math display">\[\begin{align}
+\mathbf{v}^TG'(\mathbf{x})  &amp;= [\mathbf{v_1}^T, \mathbf{v_2}^T][3I, 5I]^T \\
+&amp;= 3\mathbf{v_1}^T +  5\mathbf{v_2}^T.
+\end{align}\]</span></p>
+<p>So if we have a function with multiple outputs, we’ll be accumulating the VJP of that function across the outputs through addition. We can see that this results from the shapes of the vectors being multiplied here, which will always result in an outer shape of <code>(1, 1)</code>, so we can safely generalize this to any number of outputs.</p>
+<div id="fig-fan" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-fanin" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/fanin.png" class="img-fluid figure-img" data-ref-parent="fig-fan"></p>
+<p></p><figcaption class="figure-caption">(a) Fan-in</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-fanout" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/fanout.png" class="img-fluid figure-img" data-ref-parent="fig-fan"></p>
+<p></p><figcaption class="figure-caption">(b) Fan-out</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.1: Demonstration of how functions that fan-in and fan-out are handled when gradients are computed with respect to their input(s).</figcaption><p></p>
+</figure>
+</div>
+<p>That’s pretty much all the scaffolding we need in terms of a framework to calculate gradients. The only missing pieces are:</p>
+<ul>
+<li>A way to express the program in a graph</li>
+<li>An implementation of the vector-Jacobian and Jacobian-vector operations</li>
+</ul>
+<p>We’ll discuss both of these in the following sections.</p>
+</section>
+</section>
+<section id="building-the-computation-graph" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="building-the-computation-graph"><span class="header-section-number">5.2</span> Building the computation graph</h2>
+<p>There are two main existing strategies to represent a series of code computations as a graph. One involves letting the user build up the graph structure manually via library-provided primitives – called <strong>define-and-run</strong>; the resulting construct is known as a <em>static graph</em>, and is the approach taken by libraries like <a href="https://github.com/Theano/Theano">Theano</a> and <a href="https://github.com/google/tensorflow">TensorFlow</a> (when run without eager execution). This has the unfortunate side effect of making code much more difficult to read and write, since you have to use symbolic proxies for operations like control flow and looping (e.g.&nbsp;<code>tf.while_loop</code> instead of Python’s <code>while</code>) in order to instantiate that operation in the graph.</p>
+<p>The other approach, known as <strong>define-by-run</strong>, builds up a <em>dynamic graph</em> structure during a program’s execution. How does this work? The program is <em>traced</em> at runtime, meaning that the autodiff framework is watching which operations occur when a function is run in order to build up the computation graph for that function. When done this way, incorporating loops and conditional structure within the graph is no longer needed: at runtime, loops are unrolled into sequences, and the branching induced by conditional logic will collapse to one branch when the program is actually ran. These properties make define-by-run the more popular approach to autodiff, and is the approach taken by libraries such as <a href="https://github.com/google/jax">JAX</a>, <a href="https://github.com/pytorch/pytorch">PyTorch</a>, and <a href="https://ai.googleblog.com/2017/10/eager-execution-imperative-define-by.html">Tensorflow (eager execution mode)</a>. It’s worth noting that since evaluating the gradients requires tracing the program, i.e.&nbsp;evaluating the function, the runtime cost for the gradient calculation is usually of the same order as the program itself. Why? For each primitive in the program, there’s a corresponding step in the gradient computation (e.g.&nbsp;wherever you see a <span class="math inline">\(\log{x}\)</span> in your program, there’ll be a <span class="math inline">\(1/x\)</span> somewhere in the JVP/VJP call), so the computations are almost totally identical in compute<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+</section>
+<section id="sec-fixed-points" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sec-fixed-points"><span class="header-section-number">5.3</span> Differentiating fixed points</h2>
+<p>We spend a bit of time here on the more niche topic of differentiating a fixed point, as we make use of this result later. A <strong>fixed point</strong> <span class="math inline">\(x^*\)</span> of a function <span class="math inline">\(f\)</span> is defined by the relation</p>
+<p><span class="math display">\[
+f(x^*) = x^*,
+\]</span></p>
+<p>meaning if we apply <span class="math inline">\(f\)</span> (even multiple times), we remain stationary at the point we applied <span class="math inline">\(f\)</span> to. Why is this of interest, i.e.&nbsp;what kind of functions of importance exhibit this behavior?</p>
+<p>The first and easiest thing is of course the straight line <span class="math inline">\(f(x) = x\)</span>, which has the whole real line as fixed points. But maybe we’re more interested in the case where the fixed point is a quantity of interest – this is the case for something like an <em>optimization loop</em>. Here’s an example where <span class="math inline">\(f\)</span> is one gradient descent step:</p>
+<p><span class="math display">\[\begin{align}
+&amp;f(x, \mathrm{loss}) = x - \frac{\partial\, \mathrm{loss}}{\partial x}\left( \times \, \mathrm{learning~rate~etc.}\right)
+\\ \Rightarrow &amp;f(x^*, \mathrm{loss} ) = x^*;~~~x^* = \underset{x}{\mathrm{argmin}}\, \mathrm{loss}.
+\end{align}\]</span></p>
+<p>As above, if our gradient descent is any good, then we’ll hopefully converge to the fixed point <span class="math inline">\(x^*\)</span>, which is the value of <span class="math inline">\(x\)</span> that lies in some local minimum of the loss function. Further iterations will then not do anything – we’ll still be sitting at <span class="math inline">\(x^*\)</span>. How might we take the gradient of this fixed point? Moreover, what if this gradient is with respect to parameters that implicitly define the loss itself?</p>
+<p>The first thing to highlight is that in practice, we’d take many steps to reach the minimum, which corresponds to many sequential applications of <span class="math inline">\(f\)</span> to some initial value of <span class="math inline">\(x\)</span>. In the framework of automatic differentiation outlined in previous sections, this would mean taking the gradient (in a define-by-run setting) would <em>unroll</em> the optimization loop at runtime, and decompose <em>each</em> of these per-iteration applications of <span class="math inline">\(f\)</span> into their primitives, and compose their vector-Jacobian products or similar. For an optimization loop, this could involve thousands of steps! Moreover, all that work that happens in the early stages of optimization far from the fixed point <span class="math inline">\(x^*\)</span> will likely not impact the gradient of the fixed point itself – we’re much more interested in the steps close to convergence.</p>
+<p>To get around this computational issue, we can employ the use of the <strong>implicit function theorem</strong>. The full details of the theorem are beyond the scope of this application, but it guarantees some things that we’ll state here. To be consistent with later sections, we will now switch symbols from <span class="math inline">\(x\)</span> to <span class="math inline">\(\theta\)</span> (which will denote parameters we’re optimizing), and include <span class="math inline">\(\varphi\)</span> as parameters that <em>implicitly</em> define part of <span class="math inline">\(f\)</span> (e.g.&nbsp;that define the objective function used in optimization).Now, for a different function <span class="math inline">\(g(\theta, \varphi)\)</span>, where there exists some solution <span class="math inline">\(g(\theta_0, \varphi_0) = 0\)</span>, then the following holds:</p>
+<p>A <em>solution mapping function</em> exists in the form of <span class="math inline">\(\theta^*(\varphi)\)</span> such that</p>
+<ul>
+<li><span class="math inline">\(\theta^*(\varphi_0) = \theta_0\)</span></li>
+<li><span class="math inline">\(g(\theta^*(\varphi), \varphi) =0~~~\forall \varphi\)</span></li>
+<li><span class="math inline">\(\theta^*\)</span> is <em>differentiable</em> with respect to <span class="math inline">\(\varphi\)</span>!</li>
+</ul>
+<p>To put this into words: as long as there exists <em>some</em> solution that makes <span class="math inline">\(g(\theta, \varphi) = 0\)</span>, we get a mapping for the <em>general solution</em> as a function of <span class="math inline">\(\varphi\)</span>, which is differentiable. This means that as long as we find a way to calculate that gradient, we can directly access the gradients of the solution <span class="math inline">\(\theta_0\)</span> that we found during optimization with respect to the particular <span class="math inline">\(\varphi_0\)</span> that we used, all thanks to the general function <span class="math inline">\(\theta^*\)</span>.</p>
+<p>Now, notice that we wrote this holding for <span class="math inline">\(g(\theta, \varphi) = 0\)</span>, which we don’t have quite yet. But we can define this for our update state <span class="math inline">\(f\)</span> by simply letting <span class="math inline">\(g(\theta, \varphi) = f(\theta, \varphi) - \theta\)</span>. Now, when we arrive at our solution <span class="math inline">\(\theta_0\)</span> as the fixed point of <span class="math inline">\(f\)</span> for some <span class="math inline">\(\varphi_0\)</span>, we’ll get <span class="math inline">\(g(\theta_0, \varphi_0) = \theta_0 - \theta_0 = 0\)</span>, and in turn have access to all those nice properties! We just need to explicitly calculate the gradient of <span class="math inline">\(\theta^*\)</span> now, which we can do by differentiating both sides of <span class="math inline">\(g(\theta^*(\varphi), \varphi) =0\)</span>:</p>
+<p><span class="math display">\[
+\frac{\partial g(\theta^*(\varphi), \varphi)}{\partial\varphi} = \frac{\partial g}{\partial \theta^*}\frac{\partial \theta^*}{\partial \varphi} + \frac{\partial g}{\partial\varphi}~.
+\]</span></p>
+<p>Then in practice, we’ll have <span class="math inline">\(\theta_0\)</span> as our optimization solution and <span class="math inline">\(\varphi_0\)</span> as our implicit parameters, which we can plug in, and then rearrange for <span class="math inline">\(\partial\hat{\theta}/\partial\varphi\)</span>:</p>
+<p><span class="math display">\[
+    \frac{\partial\theta^*}{\partial\varphi} = \frac{\partial\theta_0}{\partial\varphi_0}= -\left[\frac{\partial g}{\partial \theta_0}\right]^{-1}  \frac{\partial g}{\partial \varphi_0} ~.
+\]</span></p>
+<p>Finally, we can substitute in our definition of <span class="math inline">\(g\)</span> in terms of <span class="math inline">\(f\)</span> to get</p>
+<p><span class="math display">\[
+\frac{\partial\theta_0}{\partial\varphi_0}= \left[I - \frac{\partial f}{\partial \theta_0} \right]^{-1} \frac{\partial f}{\partial \varphi_0}~.
+\]</span> We’ve constructed an expression for the gradient of the fixed point <span class="math inline">\(\theta_0\)</span> of an update rule <span class="math inline">\(f\)</span>, and with respect to the parameters <span class="math inline">\(\varphi\)</span> that define the objective used in the optimization! This is a fantastic result, as it means we can just use this expression instead of unrolling the entire optimization loop itself, saving us lots of memory and compute in the process.</p>
+<p>To read more about this construction, and some of the finer details of the implementation on the autodiff side (note how we skipped over the conversation about the fact that we have VJPs and not gradients directly), I would thoroughly recommend <span class="citation" data-cites="implicit">(<a href="references.html#ref-implicit" role="doc-biblioref">Duvenaud, Johnson, and Kolter, n.d.</a>)</span>, which I based this section upon.</p>
+</section>
+<section id="other-approaches-to-taking-gradients-of-programs" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="other-approaches-to-taking-gradients-of-programs"><span class="header-section-number">5.4</span> Other approaches to taking gradients of programs</h2>
+<p>I’ve given most of the spotlight of this section to automatic differentiation, since it’s the best existing way to differentiate programs, and it makes up part of the core of my applications of machine learning to physics in later sections. However, there are a number of alternative ways to calculate gradients that we’ll briefly study now in order to give some perspective on the landscape of existing methods.</p>
+<section id="numerical-differentiation" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="numerical-differentiation"><span class="header-section-number">5.4.1</span> Numerical differentiation</h3>
+<p>I wouldn’t be surprised if one of the first things you thought before reading this section is that we can approximate the gradient of a function at <span class="math inline">\(x\)</span> pretty handily already by just evaluating it at both <span class="math inline">\(x\)</span> and a point close by <span class="math inline">\(x + \Delta x\)</span>, then computing</p>
+<p><span class="math display">\[ \frac{\partial f}{\partial x} \approx \frac{f(x+\Delta x) - f(x)}{\Delta x}.\]</span></p>
+<p>We can see how well this performs on an example problem in <a href="#fig-finite-1">Figure&nbsp;<span>5.2</span></a> for different step sizes, and in <a href="#fig-finite-2">Figure&nbsp;<span>5.3</span></a> for different numbers of evaluations. A smaller <span class="math inline">\(\Delta x\)</span> will result in higher accuracy for that point, but if we’re interested in the actual gradient function, this will then incur many evaluations of the function itself (twice for each gradient estimate) as we build up the envelope of the gradient, or use it frequently in a program (e.g.&nbsp;gradient descent). Moreover, if we want higher-order derivatives, then the error induced in the estimate of <span class="math inline">\(\partial f / \partial x\)</span> from the step size <span class="math inline">\(\Delta x\)</span> not being identically 0 will compound upon finite difference estimation of <span class="math inline">\(\partial^2 f/ \partial x^2\)</span> and so on.</p>
+<div class="cell" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<div id="fig-finite-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="autodiff_files/figure-html/fig-finite-1-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.2: Finite difference gradient calculations for the function <code>y=sin(x)</code>, varying the distance between the evaluated points.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div id="fig-finite-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="autodiff_files/figure-html/fig-finite-2-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5.3: As in <a href="#fig-finite-1">Figure&nbsp;<span>5.2</span></a>, but varying the number of gradient evaluations with a fixed step size of 1e-4.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="symbolic-differentiation" class="level3" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="symbolic-differentiation"><span class="header-section-number">5.4.2</span> Symbolic differentiation</h3>
+<p>Symbolic differentiation endeavors to calculate gradients through algebraic symbols, just like doing it on pen and paper. This approach will definitely appeal at first sight to those that have done any kind of calculus – if we want to differentiate a function that implements <span class="math inline">\(y = x^2\)</span>, then we will instantly think of <span class="math inline">\(2x\)</span>, not of Jacobian-vector products or the like. In this sense, the gradients of the functions produced are analytical. However, even for a simple program, these expressions can swell easily to become horrifically complex compared to the resulting programs from autodiff.</p>
+<p>We’ll omit any further discussion for now for the sake of brevity, but for a much more thorough comparison between this and other methods compared to automatic differentiation, I’ll direct your attention to the nicely-written notebook here that I looked at for inspiration while writing this whole section: <span class="citation" data-cites="lukasautodiff">(<a href="references.html#ref-lukasautodiff" role="doc-biblioref">Heinrich 2020</a>)</span>.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-mgmc" class="csl-entry" role="doc-biblioentry">
+Alwall, Johan, Michel Herquet, Fabio Maltoni, Olivier Mattelaer, and Tim Stelzer. 2011. <span>“<span>MadGraph</span> 5: Going Beyond.”</span> <em>Journal of High Energy Physics</em> 2011 (6). <a href="https://doi.org/10.1007/jhep06(2011)128">https://doi.org/10.1007/jhep06(2011)128</a>.
+</div>
+<div id="ref-implicit" class="csl-entry" role="doc-biblioentry">
+Duvenaud, David, Matt Johnson, and Zico Kolter. n.d. <span>“Deep Implicit Layers - Neural Odes, Deep Equilibirum Models, and Beyond.”</span> <em>Deep Implicit Layers - Neural ODEs, Deep Equilibirum Models, and Beyond</em>. <a href="http://implicit-layers-tutorial.org/">http://implicit-layers-tutorial.org/</a>.
+</div>
+<div id="ref-NNLOPS" class="csl-entry" role="doc-biblioentry">
+Hamilton, Keith, Paolo Nason, Emanuele Re, and Giulia Zanderighi. 2013. <span>“<span>NNLOPS</span> Simulation of Higgs Boson Production.”</span> <em>Journal of High Energy Physics</em> 2013 (10). <a href="https://doi.org/10.1007/jhep10(2013)222">https://doi.org/10.1007/jhep10(2013)222</a>.
+</div>
+<div id="ref-lukasautodiff" class="csl-entry" role="doc-biblioentry">
+Heinrich, Lukas. 2020. <em>Lukasheinrich/Pyhep2020-Autodiff-Tutorial 0.0.2</em> (version 0.0.2). Zenodo. <a href="https://doi.org/10.5281/zenodo.4067099">https://doi.org/10.5281/zenodo.4067099</a>.
+</div>
+<div id="ref-matplotlib" class="csl-entry" role="doc-biblioentry">
+Hunter, J. D. 2007. <span>“Matplotlib: A 2D Graphics Environment.”</span> <em>Computing in Science &amp; Engineering</em> 9 (3): 90–95. <a href="https://doi.org/10.1109/MCSE.2007.55">https://doi.org/10.1109/MCSE.2007.55</a>.
+</div>
+</div>
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>This may not hold when you’re doing fancy things like checkpointing, which I haven’t covered here.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config);
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./diffprog.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></span>
+      </a>
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./ml.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

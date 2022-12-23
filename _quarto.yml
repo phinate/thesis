@@ -33,7 +33,7 @@ pdf-engine: pdflatex
 # biblatexoptions: citestyle=numeric
 format:
   html:
-    theme: cosmo
+    theme: sketchy
   pdf:
     documentclass: scrreprt
     # cite-method: biblatex

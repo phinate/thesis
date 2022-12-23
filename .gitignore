@@ -158,7 +158,6 @@ src/*/_version.py
 .DS_Store
 
 /.quarto/
-_book/
 
 
 # misc in my dir
