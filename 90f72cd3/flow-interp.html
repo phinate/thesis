@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - 8&nbsp; Signal Model Interpolation using Normalizing Flows</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./sh.html" rel="next">
+<link href="./diffprog-hep.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Analysis in High-Energy Physics as a Differentiable Program</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Fundamentals</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./physics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stat-fundamentals.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stat-practical.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffprog.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./autodiff.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ml.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Applications</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffprog-hep.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./flow-interp.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./sh.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Appendices</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#problem-statement" id="toc-problem-statement" class="nav-link active" data-scroll-target="#problem-statement"><span class="toc-section-number">8.1</span>  Problem statement</a></li>
+  <li><a href="#normalizing-flows-recap" id="toc-normalizing-flows-recap" class="nav-link" data-scroll-target="#normalizing-flows-recap"><span class="toc-section-number">8.2</span>  Normalizing flows (recap)</a>
+  <ul class="collapse">
+  <li><a href="#implementing-conditional-density-estimation" id="toc-implementing-conditional-density-estimation" class="nav-link" data-scroll-target="#implementing-conditional-density-estimation"><span class="toc-section-number">8.2.1</span>  Implementing conditional density estimation</a></li>
+  <li><a href="#estimating-predictive-uncertainty" id="toc-estimating-predictive-uncertainty" class="nav-link" data-scroll-target="#estimating-predictive-uncertainty"><span class="toc-section-number">8.2.2</span>  Estimating predictive uncertainty</a></li>
+  </ul></li>
+  <li><a href="#example-1-following-the-mean" id="toc-example-1-following-the-mean" class="nav-link" data-scroll-target="#example-1-following-the-mean"><span class="toc-section-number">8.3</span>  Example 1: Following the mean</a>
+  <ul class="collapse">
+  <li><a href="#loss-curves" id="toc-loss-curves" class="nav-link" data-scroll-target="#loss-curves"><span class="toc-section-number">8.3.1</span>  Loss curves</a></li>
+  <li><a href="#distribution-similarity" id="toc-distribution-similarity" class="nav-link" data-scroll-target="#distribution-similarity"><span class="toc-section-number">8.3.2</span>  Distribution similarity</a></li>
+  <li><a href="#histogram-similarity" id="toc-histogram-similarity" class="nav-link" data-scroll-target="#histogram-similarity"><span class="toc-section-number">8.3.3</span>  Histogram similarity</a></li>
+  <li><a href="#pulls" id="toc-pulls" class="nav-link" data-scroll-target="#pulls"><span class="toc-section-number">8.3.4</span>  Pulls</a></li>
+  </ul></li>
+  <li><a href="#example-2-gaussian-firework" id="toc-example-2-gaussian-firework" class="nav-link" data-scroll-target="#example-2-gaussian-firework"><span class="toc-section-number">8.4</span>  Example 2: Gaussian firework</a>
+  <ul class="collapse">
+  <li><a href="#loss-curves-1" id="toc-loss-curves-1" class="nav-link" data-scroll-target="#loss-curves-1"><span class="toc-section-number">8.4.1</span>  Loss curves</a></li>
+  <li><a href="#distribution-similarity-1" id="toc-distribution-similarity-1" class="nav-link" data-scroll-target="#distribution-similarity-1"><span class="toc-section-number">8.4.2</span>  Distribution similarity</a></li>
+  <li><a href="#histogram-similarity-1" id="toc-histogram-similarity-1" class="nav-link" data-scroll-target="#histogram-similarity-1"><span class="toc-section-number">8.4.3</span>  Histogram similarity</a></li>
+  <li><a href="#pulls-1" id="toc-pulls-1" class="nav-link" data-scroll-target="#pulls-1"><span class="toc-section-number">8.4.4</span>  Pulls</a></li>
+  </ul></li>
+  <li><a href="#sec-flow-discussion" id="toc-sec-flow-discussion" class="nav-link" data-scroll-target="#sec-flow-discussion"><span class="toc-section-number">8.5</span>  Discussion</a>
+  <ul class="collapse">
+  <li><a href="#whats-the-true-test-set" id="toc-whats-the-true-test-set" class="nav-link" data-scroll-target="#whats-the-true-test-set"><span class="toc-section-number">8.5.1</span>  What’s the true “test set”?</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-flow-interp" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<p>One of the primary goals of data analysis in collider physics is to test the viability of proposed models for new physics, which attempt to address the shortcomings of the well-tested Standard Model. We’ll call these models the <strong>signal</strong>. Since we don’t have access to real data from these hypothesized phenomena, we use high-quality simulations of the underlying physics to generate samples that mimic data collected from major experiments, e.g.&nbsp;the Large Hadron Collider. This then lets us identify the most prominent signature that physics process leaves in the data, such as the shape of the invariant mass of some particular final state. We can compare that signature with data generated to mimic the same final state, but with only standard model processes (which we term <strong>background</strong>), and use this comparison as a mechanism to produce an analysis that <em>could</em> discover the signal if it were present. This can then be applied to real data.</p>
+<p>How many models are there to test? In general, there’s no upper limit – arXiv grows thicker every day with more theory model submissions. But what about within a certain class of model with <em>similar free parameters</em>? This scope-narrowing makes our lives much easier, as we’re only now limited by the parameters of the model, e.g.&nbsp;the mass of a new particle. One could then imagine testing each possible value for this new mass… until we realize that there’s only so many times we can do this. Recall that simulating data is in general expensive, and we’d rather avoid it where we can. Moreover, if we have a multi-dimensional parameter space to explore, covering that in an efficient way will be prohibitively expensive to simulate. How do we get around this?</p>
+<p>Well, if we’re interested in some signature from the model in a particular set of variables, we could generate that data for a set of parameters, then find some way to interpolate between them. Specifically, this can be viewed as trying to estimate the probability density (or <em>shape</em>) of a variable of interest, where we want to <em>condition</em> on the physics parameters involved in the generation of that shape. This is the approach taken here.</p>
+<p>It’s worth noting that physics analyses typically don’t interpolate on the level of the statistical model, and instead just interpolate the result of the search itself, e.g.&nbsp;in the space of <span class="math inline">\(p\)</span>-values or on limits for the signal strength <span class="math inline">\(\mu\)</span> across a grid of e.g.&nbsp;different signal masses. This is often quoted without error (a different issue), and does not take into account the fact that we’d expect to be less sensitive to new physics in the regions that we don’t have high-quality simulations for. However, if one can interpolate the signal model in some way <em>before</em> calculating the final result, then incorporate a predictive uncertainty from that interpolation into the statistical treatment of the data, we should hopefully be able to have a more grounded representation of our sensitivity between simulated signal model points.</p>
+<section id="problem-statement" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="problem-statement"><span class="header-section-number">8.1</span> Problem statement</h2>
+<p>Say a simulated signal process outputs a set <span class="math inline">\(\mathbf{x}\)</span> of per-event physics quantities (or <strong>observables</strong>), where each quantity is typically a real number (e.g.&nbsp;kinematics). We’re interested in making a statistical model of this process, and so take interest in the distribution over <span class="math inline">\(\mathbf{x}\)</span>, which we’ll denote <span class="math inline">\(p_s(\mathbf{x} | \theta)\)</span>, with <span class="math inline">\(\theta\)</span> representing the free parameters of the physical model (and <span class="math inline">\(s\)</span> standing for signal). We can partition <span class="math inline">\(\theta\)</span> as <span class="math inline">\(\theta = [\phi, \nu]\)</span>, where <span class="math inline">\(\phi\)</span> effectively parametrizes the hypothesis of the new physics model (e.g.&nbsp;through the mass of a new particle), and <span class="math inline">\(\nu\)</span> represents parameters that are needed to specify the physics conditions, but are not of interest (e.g.&nbsp;a jet energy scale). We focus on conditioning with respect to <span class="math inline">\(\phi\)</span> here, and leave treatment of <span class="math inline">\(\nu\)</span> as part of the statistical modelling process (see <a href="stat-practical.html#sec-hifa-nps"><span>Section&nbsp;3.2.2</span></a> for more on this).</p>
+<p>We don’t have a way to calculate this density due to our inability to access the implicit distribution defined by the simulator, but we do have access to the samples themselves (at some finite number of values of <span class="math inline">\(\theta\)</span>). This means we can empirically estimate the distribution in some way, provided we have the right tools to do so. If successful, we’re free to directly use this empirical estimation of <span class="math inline">\(p_s(\mathbf{x} | \theta)\)</span>, but in practice, we’re often faced with an additional modelling constraint: many analyses in collider physics operate using <em>histograms</em> of observables, and construct a statistical model based on that. As such, it would be desirable if we could find a density estimator that:</p>
+<ul>
+<li>allows for the <em>conditioning</em> of side variables (here, this would be conditioning on <span class="math inline">\(\phi\)</span>)</li>
+<li>has a tractable likelihood (e.g.&nbsp;for direct use in “unbinned” analysis)</li>
+<li>can model discrete densities like a histogram
+<ul>
+<li>or, optionally, allow the generation of samples that can be histogrammed later</li>
+</ul></li>
+<li>(optionally) comes with a notion of uncertainty</li>
+</ul>
+<p>This brings us to normalizing flows!</p>
+</section>
+<section id="normalizing-flows-recap" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="normalizing-flows-recap"><span class="header-section-number">8.2</span> Normalizing flows (recap)</h2>
+<p>A much more extensive motivation for normalizing flows can be found in <a href="ml.html#sec-flows"><span>Section&nbsp;6.3</span></a>, but we’ll recap the main points here.</p>
+<p>Normalizing flows are a class of density estimation technique, which attempts to transform a designated <em>base</em> density into a *target density with the aid of neural networks. This admits the ability to sample from a flow, since you can just transform the samples from the base density, which is usually of simple form (e.g.&nbsp;normal distribution). Moreover, flows have a tractable likelihood, which can be evaluated by transforming the samples using the learned transform, putting that into the base density, and multiplying by the relevant Jacobian, effectively bending the space into the desired shape to mimic the target density.</p>
+<p>To train a flow, we simply fit samples from the base distribution to the training samples such that the negative log-likelihood of the flow model is minimized. This is done across batches of different training data, just as in standard machine learning optimization.</p>
+<p>All of the properties of a flow satisfy most of the bullets above for our criteria, but we’re still missing two parts: conditioning and uncertainty. These are addressed in the following sections.</p>
+<section id="implementing-conditional-density-estimation" class="level3" data-number="8.2.1">
+<h3 data-number="8.2.1" class="anchored" data-anchor-id="implementing-conditional-density-estimation"><span class="header-section-number">8.2.1</span> Implementing conditional density estimation</h3>
+<p>A few different types of models allow for conditional density estimation, e.g.&nbsp;RealNVPs <span class="citation" data-cites="realnvp">(<a href="references.html#ref-realnvp" role="doc-biblioref">Dinh, Sohl-Dickstein, and Bengio 2016</a>)</span>, MADE <span class="citation" data-cites="made">(<a href="references.html#ref-made" role="doc-biblioref">Germain et al. 2015</a>)</span>, and masked autoregressive flows (MAFs) <span class="citation" data-cites="maf">(<a href="references.html#ref-maf" role="doc-biblioref">Papamakarios, Pavlakou, and Murray 2017</a>)</span> – we focus on the latter as the choice for this task. Details on the precise implementation of a MAF can be found in <a href="ml.html#sec-maf"><span>Section&nbsp;6.3.2</span></a>.</p>
+</section>
+<section id="estimating-predictive-uncertainty" class="level3" data-number="8.2.2">
+<h3 data-number="8.2.2" class="anchored" data-anchor-id="estimating-predictive-uncertainty"><span class="header-section-number">8.2.2</span> Estimating predictive uncertainty</h3>
+<p>If we’re using the likelihood (or a histogram of the samples) to make a prediction using the flow, we don’t have a natural way to produce a corresponding uncertainty on that prediction. One way to get around this fact is to take inspiration from the notion of <strong>model ensembles</strong> (see a review in <span class="citation" data-cites="ensembles">(<a href="references.html#ref-ensembles" role="doc-biblioref">Ganaie et al. 2021</a>)</span>), which combine multiple predictive models into one by averaging their predictions at a given point, then providing an uncertainty through the sample standard deviation across those predictions. The intuition behind this is that one would expect models to have the most mutual variance in the region where there is no training data, as that lies outside of the context that the models learned. There’s no particular way in which one needs to form the different elements of an ensemble for it to have some reasonable utility, but one common strategy in the land of neural networks is to train a few models with different weight initializations, and use those as the models to make up the ensemble. This approach is what we do here: both with the likelihood functions, and with the histogram yields produced from samples of those flows.</p>
+</section>
+</section>
+<section id="example-1-following-the-mean" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="example-1-following-the-mean"><span class="header-section-number">8.3</span> Example 1: Following the mean</h2>
+<p>To test out the MAF as a conditional density estimator, it suffices to model some family of distributions parametrized by some context <span class="math inline">\(\phi\)</span>, just as we set out in the problem statement. One thing I thought of when considering this is a 2-D normal distribution, where the mean represents the context. This should be a simple starting problem, and is a similar use case to that which I encountered in a physics context, where the signature left in the invariant mass spectrum clustered around the value of the rest mass of the particles that produced it. We’ll add more complexity to this later.</p>
+<p>We’ll start by sampling a range of normal distributions with different means and unit covariance. The means here are the <em>context</em> – the thing we’ll condition on during training and inference. Training data will then consist of pairs of samples from these distributions, and the mean of the distribution that generated the samples. We’ll also split the different distributions up into context points that are used for training, and unseen points that are used for validation and testing (in practice, these should be two distinct tasks, but we’ll combine them for these examples to portray the proof-of-concept in a best-case way). Points in the test set are not seen during training; we use them purely to assess performance (and select a good model) when interpolating to a context not seen before.</p>
+<p>As a small note here, we also hold out a small number of examples (20% per point) from the training set to use as additional validation in conjunction with the unseen context points. These together are referred to as the “valid” set in the loss curve plots, and are used only for model selection purposes, including making sure we’re not totally biasing our selection to the small number of unseen context points (we want to make sure performance on the whole grid is maintained). This is a hyperparameter that could be played with, or discarded altogether. More discussion on this can be found later on.</p>
+<p>The distributions chosen are shown in <a href="#fig-normalgrid">Figure&nbsp;<span>8.1</span></a>, where 49 different means have been evenly selected across a grid of points, indicated by crosses colored by the set they belong to. Note that the test set points are chosen such that they’re all <em>inside</em> the grid – this is because we’re seeking to interpolate our results within the region we have data as opposed to extrapolate outside of it.</p>
+<div id="fig-normalgrid" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/simple/simple_data_dists.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.1: A grid of 49 different normal distributions, each with a mean corresponding to a cross on the image, and with unit covariance. The contour representing 0 is omitted for visualization purposes.</figcaption><p></p>
+</figure>
+</div>
+<p>10,000 points are then drawn from each distribution, and 3 MAFs are trained on the same training data, but with different weight initializations. The hyperparameters for training those MAFs are as follows:</p>
+<ul>
+<li>Batch size of 4000 points</li>
+<li>10 layers of linear, autoregressive transforms
+<ul>
+<li>Each transform’s neural network has one hidden layer of 6 neurons</li>
+</ul></li>
+<li>Adam optimizer with a learning rate of 1e-3</li>
+<li>3000 iterations total (common reasonable plateau point for all examples)</li>
+</ul>
+<p>During training, the inputs and context are each scaled to standard normal distributions through fitting a <code>StandardScaler</code> from Scikit-Learn <span class="citation" data-cites="scikit-learn">(<a href="references.html#ref-scikit-learn" role="doc-biblioref">Pedregosa et al. 2011</a>)</span> to the train data. Any samples produced from the flow are then transformed back using this same scaler. Training was done using the <code>nflows</code> software package <span class="citation" data-cites="nflows">(<a href="references.html#ref-nflows" role="doc-biblioref">Durkan et al. 2020</a>)</span>, which builds on PyTorch <span class="citation" data-cites="torch">(<a href="references.html#ref-torch" role="doc-biblioref">Paszke et al. 2019</a>)</span>.</p>
+<p>It’s worth noting that since we trained three MAFs, when I refer to the “flow” in later sections, I’m referring to the ensemble of all three models, where their predictions (either likelihoods or histograms) are averaged together, and their predictive uncertainty is the corresponding standard deviations.</p>
+<p>We can examine the results of the training through different types of visualizations, as we’ll see below:</p>
+<section id="loss-curves" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="loss-curves"><span class="header-section-number">8.3.1</span> Loss curves</h3>
+<p>See <a href="#fig-simple-loss">Figure&nbsp;<span>8.2</span></a> for a comparison of the negative log-likelihood loss for train and test sets. This is for just one of the three flows, and shows the similarity of the train and test losses due to the fact that the train and test data are so similar (there’s not much domain shift needed, just learning the position of the mean).</p>
+<div id="fig-simple-loss" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/simple/simple_example_loss.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.2: Example loss curves from a single flow trained on the “following the mean” scenario. The model weights are extracted from the best test loss.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="distribution-similarity" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="distribution-similarity"><span class="header-section-number">8.3.2</span> Distribution similarity</h3>
+<p>It’s illustrative to plot the likelihoods learned by the flow for each of the context points, including the ones for which we didn’t see during training. We could, in theory, supply any value of the context for this evaluation, but it’s much more useful to do it in the region that we have test data so we can compare the result.</p>
+<p>We can find this plot in <a href="#fig-simple-lhoods">Figure&nbsp;<span>8.3</span></a>, where the plot from <a href="#fig-normalgrid">Figure&nbsp;<span>8.1</span></a> is shown as a comparison metric side-by-side. We can immediately see that the likelihood shapes are about what we’d expect, but we note the contours are coloured in log scale for the flow, which is done so to enhance visibility of the shape close to the mean, since the contours increase more rapidly in value around the center of the distribution. Additionally, the values of the normalization are much higher for the flow, which can be attributed to the fact that the training data is very concentrated around the mean, and so a distribution with all it’s density there will quickly give a good solution, as opposed to distributing that over a larger range in a more diffuse way. This could likely just be due to the training data being capped at 10k points.</p>
+<div id="fig-simple-lhoods" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/simple/simpleflowvsdata.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.3: Left: the same grid of 49 different normal distributions from <a href="#fig-normalgrid">Figure&nbsp;<span>8.1</span></a>. Right: the learned likelihood from the flow evaluated with context equal to the values of the means from the grid.</figcaption><p></p>
+</figure>
+</div>
+<p>This is a nice visual check, but it’s probably more useful to quantify this similarity in some way.</p>
+</section>
+<section id="histogram-similarity" class="level3" data-number="8.3.3">
+<h3 data-number="8.3.3" class="anchored" data-anchor-id="histogram-similarity"><span class="header-section-number">8.3.3</span> Histogram similarity</h3>
+<p>Since we’re interested in possibly using the result as a histogram, we can directly compare histograms of samples from the flow with histograms of the original data. Plots of the raw data versus flow differences can be found in <a href="#fig-simple-hists-train">Figure&nbsp;<span>8.4</span></a> for training points, and <a href="#fig-simple-hists-test">Figure&nbsp;<span>8.5</span></a> for test points. The plots are made using a histogram of the whole dataset for each context point (10k data points in total per histogram) versus a histogram of 100k samples conditioned on the same context points from the flow to get the overall shape, which is then re-normalized back to 10k overall counts. The x-y axes are omitted for a cleaner plot, but the histogram range is around +/- 2.5 in each direction about the mean (imagine a square around one of the distributions in <a href="#fig-normalgrid">Figure&nbsp;<span>8.1</span></a>).</p>
+<div id="fig-simple-hists-train" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/simple/simplehistdifftrain-reallyunscaled.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.4: Differences between flow and data histograms across training context points, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-simple-hists-test" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/simple/simplehistdifftest-errors.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.5: Differences between flow and data histograms across unseen, test set context points, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.</figcaption><p></p>
+</figure>
+</div>
+<p>The main thing we can get from this visualization is the imprint that subtracting the flow histogram from the data leaves. We can see this more prominently in <a href="#fig-simple-hists-test">Figure&nbsp;<span>8.5</span></a>, where there are some biases left from the flow network getting the area around the mean slightly off. Green represents where the data counts are larger, and brown represents where the flow predicts larger counts. The scale of the colorbar in each case is worth noting – for a histogram of size 10k, these are relatively tame differences, but differences nonetheless (relative bin-wise differences would also be nice to view, but are inflated somewhat by small bin counts away from the mean).</p>
+</section>
+<section id="pulls" class="level3" data-number="8.3.4">
+<h3 data-number="8.3.4" class="anchored" data-anchor-id="pulls"><span class="header-section-number">8.3.4</span> Pulls</h3>
+<p>These plots are only half the story; we’d much rather see how the flow <em>uncertainties</em> affect these results. Instead of doing this bin-by-bin where small localized uncertainties make for difficult visualization, we plot the <em>pulls</em> aggregated over all training and test points separately. The pull here for one bin is defined as</p>
+<p><span class="math display">\[
+\text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~,
+\]</span></p>
+<p>where the uncertainty <span class="math inline">\(\sigma_{\text{flow}}\)</span> comes from the standard deviation of the counts from the three histograms in that bin, which were produced by sampling each flow in turn. Without making any strong theoretical claim, the reasoning to plot this quantity is to loosely follow the intuition behind the central limit theorem, where we assume that the bin counts will tend to a normal distribution in the limit of many repeated experiments. If the flow is a good predictor of the mean of that normal distribution, we’d observe the data being distributed as approximately <span class="math inline">\(\mathrm{Normal}(\text{flow}, \sigma_{\mathrm{flow}})\)</span>. This ballpark statement is somewhat realized in <a href="#fig-simple-pulls">Figure&nbsp;<span>8.6</span></a>, where we plot histograms of the pull aggregated across all training contexts (left plot) and testing contexts (right plot).</p>
+<p>The results are fairly unbiased in either case, with a spread of pulls being fitted a little wider than a standard normal. Beyond this, it’s clear that if the error in the denominator is of comparable to the difference between data and flow, we’re fairly happy that we know where we’re wrong to some degree. Using this ensemble uncertainty is then a reasonable way to predict the failure modes of the flow for this simple example.</p>
+<div id="fig-simple-pulls" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/simple/simpleflowpulls.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.6: Plot of the pull for training contexts (left plot) and testing contexts (right plot). A fitted normal distribution is also shown for illustrative purposes.</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="example-2-gaussian-firework" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="example-2-gaussian-firework"><span class="header-section-number">8.4</span> Example 2: Gaussian firework</h2>
+<p>We now add a degree of complexity. Keeping with the theme of normal distributions, we’ll let the mean influence the covariance matrix such that the distribution will rotate based on its position relative to the origin. More formally, for <span class="math inline">\(\mu = [\mu_x, \mu_y]\)</span>, this parametrization <span class="math inline">\(\mathrm{Normal}(\mu, \Sigma)\)</span> can be constructed by the following steps:</p>
+<p><span class="math display">\[
+\theta = \arctan (\mu_y / \mu_x);~~~r=\sqrt{\mu_x^2 + \mu_y^2}
+\]</span> <span id="eq-complex-cov"><span class="math display">\[
+\Rightarrow \Sigma = MM^T \text{,     where } M = \left[\begin{array}{cc}
+\cos \theta &amp; \sin \theta \\
+-\sin \theta &amp; \cos \theta
+\end{array}\right] \left[\begin{array}{cc}
+1/r &amp;0 \\
+0 &amp; 1
+\end{array}\right]~.
+\tag{8.1}\]</span></span></p>
+<p>This rather weird formula, found using inspiration from a blog post on a geometric interpretation of the covariance in a Gaussian <span class="citation" data-cites="covariance">(<a href="references.html#ref-covariance" role="doc-biblioref">Spruyt 2014</a>)</span>, applies a rotation and a scaling in proportion to the mean. By generating the same grid of points as in <a href="#fig-normalgrid">Figure&nbsp;<span>8.1</span></a>, we end up with the result in <a href="#fig-complex-normalgrid">Figure&nbsp;<span>8.7</span></a>. I’ve affectionately termed it a Gaussian firework, since it makes a wonderful explosive pattern when plotted symmetrically about the origin, which I additionally show some examples of in <a href="#fig-firework">Figure&nbsp;<span>8.8</span></a>.</p>
+<div id="fig-complex-normalgrid" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/complex/non-simple_data_dists.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.7: A grid of 49 different normal distributions, each with a mean corresponding to a cross on the image, and with covariance as defined by <a href="#eq-complex-cov">Equation&nbsp;<span>8.1</span></a>. The contour representing 0 is omitted for visualization purposes.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-firework" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/flows/complex/cont.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Some distributions plotted symmetrically about the origin.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/flows/complex/disc.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Histogram of many samples drawn from a grid of distributions about the origin.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.8: A couple of fun plots to show the naming convention of “Gaussian firework”.</figcaption><p></p>
+</figure>
+</div>
+<p>Modelling this firework is more challenging for a couple reasons. The first is that we have some kind of symmetry of rotation that the flow needs to pick up on, using only information from the mean. The second is that the distributions are very tight about their means – a slight mis-guess will show a considerable error when making the same visualizations as in the simple example.</p>
+<p>The hyperparameters for the training are the same as the previous example, including the points in the train/test sets, so we jump straight to the results.</p>
+<section id="loss-curves-1" class="level3" data-number="8.4.1">
+<h3 data-number="8.4.1" class="anchored" data-anchor-id="loss-curves-1"><span class="header-section-number">8.4.1</span> Loss curves</h3>
+<p>See <a href="#fig-complex-loss">Figure&nbsp;<span>8.9</span></a> for a comparison of the negative log-likelihood loss for train and test sets. Again, this is just one of the three flows for illustrative purposes. We notice that the training stops much earlier, which is due to the fact that the difference between train and test sets is much more significant here, with it being easier to overfit to the training samples alone.</p>
+<div id="fig-complex-loss" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/complex/non-simple_example_loss.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.9: Example loss curves from a single flow trained on the Gaussian firework scenario. The model weights are extracted from the best test loss.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="distribution-similarity-1" class="level3" data-number="8.4.2">
+<h3 data-number="8.4.2" class="anchored" data-anchor-id="distribution-similarity-1"><span class="header-section-number">8.4.2</span> Distribution similarity</h3>
+<p>We can see the plots of the learned likelihoods from the flow ensemble in <a href="#fig-complex-lhoods">Figure&nbsp;<span>8.10</span></a>. The topic of the scale difference is exacerbated further, which I’d guess is due to the concentrated nature of the distribution, allowing for the clustering of all the density in one place to quickly achieve a good loss for the training data.</p>
+<p>We note the fairly good modelling of the way the distribution shape varies across the training points in particular. The shape of the distribution far from the mean at the unseen test set points (red crosses) is a little less well-modelled, with the mean being slightly off-center sometimes, and the contours not being as even.</p>
+<div id="fig-complex-lhoods" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/complex/non-simpleflowvsdata.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.10: Left: the same grid of 49 different normal distributions from <a href="#fig-complex-normalgrid">Figure&nbsp;<span>8.7</span></a>. Right: the learned likelihood from the flow evaluated with context equal to the values of the means from the grid.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="histogram-similarity-1" class="level3" data-number="8.4.3">
+<h3 data-number="8.4.3" class="anchored" data-anchor-id="histogram-similarity-1"><span class="header-section-number">8.4.3</span> Histogram similarity</h3>
+<p>Coming again to histograms, we do the same plots as for the first example, beginning with the raw differences in <a href="#fig-complex-hists-train">Figure&nbsp;<span>8.11</span></a> and <a href="#fig-complex-hists-test">Figure&nbsp;<span>8.12</span></a>. The scale of the errors in the training set are equivalent to those in the simple example, but we see that the test errors have some vast differences by comparison. Since the distributions are so concentrated, you can effectively see the flow distribution in brown, and the data distribution in green for the test context points. This example is particularly unforgiving for the biases introduced as a result of the flow not having seen these points, since a slight mismodelling introduces a large error. Additionally, from a shape perspective, the centers are roughly coincident, but the rotation inferred from the context is a little different in most cases.</p>
+<div id="fig-complex-hists-train" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/complex/non-simplehistdifftrain-reallyunscaled.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.11: Differences between flow and data histograms across training context points for the Gaussian firework example, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-complex-hists-test" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/complex/non-simplehistdifftest-errors.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.12: Differences between flow and data histograms across unseen, test set context points for the Gaussian firework example, where each histogram is of 10k data points. The red cross marks the position of the mean of the true distribution.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="pulls-1" class="level3" data-number="8.4.4">
+<h3 data-number="8.4.4" class="anchored" data-anchor-id="pulls-1"><span class="header-section-number">8.4.4</span> Pulls</h3>
+<p>Unlike in the simple example, the magnitude of the flow ensemble uncertainty is not great enough to save us in every case when we make the pull plots, which are shown in <a href="#fig-complex-pulls">Figure&nbsp;<span>8.13</span></a>. We see that the flow applied to the training distribution is reasonably unbiased in its prediction of the histogram counts, but the test set is far less forgiving – we have some points that are extremely far from 0, due to the flow difference being large and the uncertainty being comparably small.</p>
+<div id="fig-complex-pulls" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/flows/complex/non-simpleflowpulls.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8.13: Plot of the pull for training contexts (left plot) and testing contexts (right plot) for the Gaussian firework example. A fitted normal distribution is also shown for illustrative purposes.</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-flow-discussion" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="sec-flow-discussion"><span class="header-section-number">8.5</span> Discussion</h2>
+<p>By and large, this method performed fairly well on the two toy examples it was tested on. It’s clear that there is some very deliberate contextual inference, which is found from training in a way that conditions on the parameters that generated the samples, and generates a good proof of context for the viability of this method. This being said, there are definite shortcomings in the test set of the second example, which I’ll address with my thoughts below, including how it’s inherently linked to some of the training methodology decisions, and why I’m not overwhelmingly pessimistic about it.</p>
+<p>We can point at many things that could explain the interpolation failure modes in the second example: flow architectures that are too inflexible to model the very concentrated shapes, the limitation of training data points provided (both in number of data points and context grid density), not training with the best hyperparameters (no tuning was done), or perhaps the flow ensemble was too small.</p>
+<section id="whats-the-true-test-set" class="level3" data-number="8.5.1">
+<h3 data-number="8.5.1" class="anchored" data-anchor-id="whats-the-true-test-set"><span class="header-section-number">8.5.1</span> What’s the true “test set”?</h3>
+<p>Another reason for interpolation failures is that removing the test set points will fundamentally bias the model away from learning to generalize to the points we removed, when we technically had that information to learn from in the first place. This creates a paradox with assuming a train and test split – in what way should we do this? One could think of an example involving vital medical data, where it’s essential to learn from the points provided instead of discounting large numbers of examples for validation.</p>
+<p>One way to do this is to just do the train/test split in the <em>data</em> instead of in the <em>context</em>. That would be akin to more standard practice in traditional machine learning, for instance, but neglects keeping a good measure of the interpolation performance. As mentioned previously, there was a notion of a “valid” set that was played with during the examples that does this to some extent already by holding out a small fraction of data from training context points. However, if we did this for <em>all</em> context points, we’d have to blindly trust the flow uncertainty to account for the predictive uncertainty to new points. One could perhaps do some k-fold or leave-one-out cross validation, where the model’s generalization ability could be conservatively quantified by training multiple flows on data with one context point removed, repeating this across all points in the interpolation regime, and quote the ensemble uncertainty or the predicted vs actual error for each of these cases as a better idea of the predictive uncertainty. A caveat to this is that these models are all different to the one that actually would be used in practice, and there would have to also be some kind of secondary interpolation/extrapolation mechanism to produce this cross-validation uncertainty in a continuous way across the context space. These ideas were not tried due to time constraints, but could be the subject of further work.</p>
+<p>In the next section, we’ll re-use this method, but we’ll also compare it to statistical uncertainties in the histograms themselves, and see if we do better than just the predictive uncertainty on the flow (not here purely due to time).</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-realnvp" class="csl-entry" role="doc-biblioentry">
+Dinh, Laurent, Jascha Sohl-Dickstein, and Samy Bengio. 2016. <span>“Density Estimation Using Real <span>NVP</span>.”</span> <em>CoRR</em> abs/1605.08803. <a href="http://arxiv.org/abs/1605.08803">http://arxiv.org/abs/1605.08803</a>.
+</div>
+<div id="ref-nflows" class="csl-entry" role="doc-biblioentry">
+Durkan, Conor, Artur Bekasov, Iain Murray, and George Papamakarios. 2020. <em><span class="nocase">nflows</span>: Normalizing Flows in <span>PyTorch</span></em> (version v0.14). Zenodo. <a href="https://doi.org/10.5281/zenodo.4296287">https://doi.org/10.5281/zenodo.4296287</a>.
+</div>
+<div id="ref-ensembles" class="csl-entry" role="doc-biblioentry">
+Ganaie, Mudasir A., Minghui Hu, Mohammad Tanveer, and Ponnuthurai N. Suganthan. 2021. <span>“Ensemble Deep Learning: <span>A</span> Review.”</span> <em>CoRR</em> abs/2104.02395. <a href="https://arxiv.org/abs/2104.02395">https://arxiv.org/abs/2104.02395</a>.
+</div>
+<div id="ref-made" class="csl-entry" role="doc-biblioentry">
+Germain, Mathieu, Karol Gregor, Iain Murray, and Hugo Larochelle. 2015. <span>“<span>MADE:</span> Masked Autoencoder for Distribution Estimation.”</span> <em>CoRR</em> abs/1502.03509. <a href="http://arxiv.org/abs/1502.03509">http://arxiv.org/abs/1502.03509</a>.
+</div>
+<div id="ref-maf" class="csl-entry" role="doc-biblioentry">
+Papamakarios, George, Theo Pavlakou, and Iain Murray. 2017. <span>“Masked Autoregressive Flow for Density Estimation.”</span> arXiv. <a href="https://doi.org/10.48550/ARXIV.1705.07057">https://doi.org/10.48550/ARXIV.1705.07057</a>.
+</div>
+<div id="ref-torch" class="csl-entry" role="doc-biblioentry">
+Paszke, Adam, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, et al. 2019. <span>“PyTorch: An Imperative Style, High-Performance Deep Learning Library.”</span> <em>CoRR</em> abs/1912.01703. <a href="http://arxiv.org/abs/1912.01703">http://arxiv.org/abs/1912.01703</a>.
+</div>
+<div id="ref-scikit-learn" class="csl-entry" role="doc-biblioentry">
+Pedregosa, F., G. Varoquaux, A. Gramfort, V. Michel, B. Thirion, O. Grisel, M. Blondel, et al. 2011. <span>“Scikit-Learn: Machine Learning in <span>P</span>ython.”</span> <em>Journal of Machine Learning Research</em> 12: 2825–30.
+</div>
+<div id="ref-covariance" class="csl-entry" role="doc-biblioentry">
+Spruyt, Vincent. 2014. <span>“A Geometric Interpretation of the Covariance Matrix.”</span> website.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./diffprog-hep.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./sh.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
