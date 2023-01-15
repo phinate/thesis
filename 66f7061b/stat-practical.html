@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - 3&nbsp; Probability and Statistics, in practice</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./diffprog.html" rel="next">
+<link href="./stat-fundamentals.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Analysis in High-Energy Physics as a Differentiable Program</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Fundamentals</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./physics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stat-fundamentals.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stat-practical.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffprog.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./autodiff.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ml.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Applications</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffprog-hep.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./flow-interp.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./sh.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Appendices</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#estimating-distributions-from-data" id="toc-estimating-distributions-from-data" class="nav-link active" data-scroll-target="#estimating-distributions-from-data"><span class="toc-section-number">3.1</span>  Estimating distributions from data</a>
+  <ul class="collapse">
+  <li><a href="#sec-hists" id="toc-sec-hists" class="nav-link" data-scroll-target="#sec-hists"><span class="toc-section-number">3.1.1</span>  Histograms</a></li>
+  <li><a href="#sec-kde" id="toc-sec-kde" class="nav-link" data-scroll-target="#sec-kde"><span class="toc-section-number">3.1.2</span>  Kernel density estimation</a></li>
+  <li><a href="#fitting-an-existing-distribution" id="toc-fitting-an-existing-distribution" class="nav-link" data-scroll-target="#fitting-an-existing-distribution"><span class="toc-section-number">3.1.3</span>  Fitting an existing distribution</a></li>
+  <li><a href="#other-data-driven-methods" id="toc-other-data-driven-methods" class="nav-link" data-scroll-target="#other-data-driven-methods"><span class="toc-section-number">3.1.4</span>  Other data-driven methods</a></li>
+  </ul></li>
+  <li><a href="#sec-hifa" id="toc-sec-hifa" class="nav-link" data-scroll-target="#sec-hifa"><span class="toc-section-number">3.2</span>  HistFactory: modelling nature as a set of counts</a>
+  <ul class="collapse">
+  <li><a href="#baseline-model-for-a-chosen-statistic" id="toc-baseline-model-for-a-chosen-statistic" class="nav-link" data-scroll-target="#baseline-model-for-a-chosen-statistic"><span class="toc-section-number">3.2.1</span>  Baseline model for a chosen statistic</a></li>
+  <li><a href="#sec-hifa-nps" id="toc-sec-hifa-nps" class="nav-link" data-scroll-target="#sec-hifa-nps"><span class="toc-section-number">3.2.2</span>  Uncertainty modelling through nuisance parameters</a></li>
+  <li><a href="#constraint-terms" id="toc-constraint-terms" class="nav-link" data-scroll-target="#constraint-terms"><span class="toc-section-number">3.2.3</span>  Constraint terms</a></li>
+  </ul></li>
+  <li><a href="#sec-asymptotics" id="toc-sec-asymptotics" class="nav-link" data-scroll-target="#sec-asymptotics"><span class="toc-section-number">3.3</span>  Hypothesis testing and asymptotic formulae in HEP</a>
+  <ul class="collapse">
+  <li><a href="#sec-sampling" id="toc-sec-sampling" class="nav-link" data-scroll-target="#sec-sampling"><span class="toc-section-number">3.3.1</span>  Sampling distributions for <span class="math inline">\(-2 \ln \lambda\)</span></a></li>
+  <li><a href="#sec-test-stats" id="toc-sec-test-stats" class="nav-link" data-scroll-target="#sec-test-stats"><span class="toc-section-number">3.3.2</span>  The catalog of test statistics</a></li>
+  </ul></li>
+  <li><a href="#asymptotic-formulae-for-simple-p-value-calculations" id="toc-asymptotic-formulae-for-simple-p-value-calculations" class="nav-link" data-scroll-target="#asymptotic-formulae-for-simple-p-value-calculations"><span class="toc-section-number">3.4</span>  Asymptotic formulae for simple <span class="math inline">\(p\)</span>-value calculations</a></li>
+  <li><a href="#the-asimov-dataset-and-sigma_hatmu" id="toc-the-asimov-dataset-and-sigma_hatmu" class="nav-link" data-scroll-target="#the-asimov-dataset-and-sigma_hatmu"><span class="toc-section-number">3.5</span>  The Asimov dataset and <span class="math inline">\(\sigma_{\hat{\mu}}\)</span></a></li>
+  <li><a href="#the-textcl_s-quantity" id="toc-the-textcl_s-quantity" class="nav-link" data-scroll-target="#the-textcl_s-quantity"><span class="toc-section-number">3.6</span>  The <span class="math inline">\(\text{CL}_s\)</span> quantity</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<p>This section focuses on how fundamental statistical ideas are translated into meaningful physics insights. We’ll look at common practice, and summarize the main components needed to set the scene for applications that involve building new ideas with these techniques.</p>
+<p>My primary resources for this section were the seminal asymptotics paper <span class="citation" data-cites="asymptotics">(<a href="references.html#ref-asymptotics" role="doc-biblioref">Cowan et al. 2011</a>)</span> and Kyle Cranmer’s stats notes <span class="citation" data-cites="kylenotes">(<a href="references.html#ref-kylenotes" role="doc-biblioref">Cranmer 2014</a>)</span>.</p>
+<section id="estimating-distributions-from-data" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="estimating-distributions-from-data"><span class="header-section-number">3.1</span> Estimating distributions from data</h2>
+<p>Often we’re not equipped with a way to describe some data we’re interested in using a probability distribution. In that situation, it’s useful to have a set of <strong>density estimation</strong> techniques within your toolkit. Here we go over a couple.</p>
+<section id="sec-hists" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="sec-hists"><span class="header-section-number">3.1.1</span> Histograms</h3>
+<p>Ah yes, the infamous histogram. Exceedingly simple by design, it approximates a data distribution through counting the number of data points that lie in a set of adjacent disjoint intervals, or <strong>bins</strong>. A histogram, then, is expressible as a set of counts and a set of bin edges. See some example histograms in <a href="#fig-hist">Figure&nbsp;<span>3.1</span></a> to see how the binning can affect the overall envelope of the distribution.</p>
+<div class="cell" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<div id="fig-hist" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="stat-practical_files/figure-html/fig-hist-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.1: Histogram of some bi-modal data <span class="math inline">\(x\)</span>, shown with different binnings.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The area under the histogram is equal to <span class="math inline">\(\sum_{\mathrm{bins~i}} \mathrm{count}_i \times \mathrm{bin~width}_i\)</span>; we can force this to unit area by dividing each term in the sum by the bin width and the total number of counts. This produces something that can be interpreted as a (discrete) probability density, which can be useful when looking at just the shape of the distribution, for instance.</p>
+<section id="sec-whyhist" class="level4" data-number="3.1.1.1">
+<h4 data-number="3.1.1.1" class="anchored" data-anchor-id="sec-whyhist"><span class="header-section-number">3.1.1.1</span> Why histograms in HEP? {-}</h4>
+<p>I <a href="https://twitter.com/phi_nate/status/1251124042012274693?s=20&amp;t=_miEUw-BGQwuWl1rsgyHuQ">asked this question on Twitter</a> because I was confused: the HEP analysis paradigm has the histogram as a central object, but why? The reasons I discovered are as follows:</p>
+<ul>
+<li><strong>Data structures</strong>: the histogram has many benefits as a vessel to store data, e.g.&nbsp;their memory footprint is <em>independent of the size of the input data</em> – large numbers for the counts are still just single numbers! They also have effectively no cost to evaluate (you just look up the count number based on the bin)</li>
+<li><strong>Poisson modelling</strong>: a simple and tractable way to model the likelihood of a collider physics process is with a Poisson-based likelihood function, which has an expected number of counts that is parametrized using templates from signal and background processes. When you make a histogram of your physics quantities, you can model it in this way through having one Poisson distribution per bin!</li>
+</ul>
+<p>There was also more in that thread on ease parallel computation, the fact that histograms are good at respecting physical boundaries, and some birds-eye view perspectives on how things are (and could be) done in the field. Many thanks to Kyle Cranmer, Jim Pivarski, Stan Seibert, Nick Smith, and Pablo De Castro for contributing to that discussion – I encourage you to check out the thread!</p>
+</section>
+</section>
+<section id="sec-kde" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="sec-kde"><span class="header-section-number">3.1.2</span> Kernel density estimation</h3>
+<p>If you wanted a smooth distribution instead of a discrete one, the <em>kernel density estimate</em> (KDE) has you covered.</p>
+<p>It’s a pretty simple but powerful idea: for each data point, define some <em>kernel function</em> that uses the point as a centre (e.g.&nbsp;normal distribution). Then, the distribution of the data at a point <span class="math inline">\(x\)</span> is equal to the average of the kernel functions evaluated at <span class="math inline">\(x\)</span>.</p>
+<p>There are many different choices of kernel function, each with their own tradeoffs, but the most common one in practice is indeed the standard normal distribution <span class="math inline">\(\mathrm{Normal}(0, 1)\)</span>. If we specify the mean as the data, then there’s one missing ingredient – the <em>width</em> of these distributions. That number is called the <strong>bandwidth</strong>, and controls the width of every kernel at once. Interestingly, the choice of bandwidth affects the resulting shape in general much more than the choice of kernel – see <a href="#fig-kde">Figure&nbsp;<span>3.2</span></a> for some examples of the bandwidth’s influence on the distribution.</p>
+<div class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div id="fig-kde" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="stat-practical_files/figure-html/fig-kde-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3.2: KDE of some bi-modal data <span class="math inline">\(x\)</span>, shown with different bandwidths.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Some talk on a midpoint between KDEs and histograms will appear in the applications part of the thesis!</p>
+</section>
+<section id="fitting-an-existing-distribution" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="fitting-an-existing-distribution"><span class="header-section-number">3.1.3</span> Fitting an existing distribution</h3>
+<p>If you have a decent idea on a distribution that may reasonably describe your data, you can simply perform a maximum-likelihood optimization to fit the parameters of the model to the data. One can even compose multiple distributions into a more complex likelihood. Not too much more to say about this, as it essentially comes under point estimation of a model parameter, which we talked about in the previous chapter!</p>
+</section>
+<section id="other-data-driven-methods" class="level3" data-number="3.1.4">
+<h3 data-number="3.1.4" class="anchored" data-anchor-id="other-data-driven-methods"><span class="header-section-number">3.1.4</span> Other data-driven methods</h3>
+<p>We’ll talk more about these in the machine learning section, e.g.&nbsp;Gaussian processes and normalizing flows. These are generally reserved for when you need a little bit of extra work in order to get a robust result, or to go beyond 1-D and 2-D variables in a scalable way.</p>
+</section>
+</section>
+<section id="sec-hifa" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-hifa"><span class="header-section-number">3.2</span> HistFactory: modelling nature as a set of counts</h2>
+<p>HistFactory <span class="citation" data-cites="hifa">(<a href="references.html#ref-hifa" role="doc-biblioref">Cranmer et al. 2012</a>)</span> is by far the most common statistical modelling tool used for collider physics data analysis. It’s known for being difficult to understand at first – if you’ve ever seen the full expression for the general likelihood, you’ll have wondered if there was a need to extend the Greek alphabet to write down all the symbols that are used. Here, we’ll take a slower and more gentle approach, building up the HistFactory likelihood piece-by-piece, until hopefully it’s clear enough what’s going on.</p>
+<section id="baseline-model-for-a-chosen-statistic" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="baseline-model-for-a-chosen-statistic"><span class="header-section-number">3.2.1</span> Baseline model for a chosen statistic</h3>
+<p>Given some (new) physics process exists, we may expect <span class="math inline">\(\lambda\)</span> events to appear in our detector from that process. This number could come from e.g.&nbsp;simulating the physics process. It could also come from e.g.&nbsp;some data driven extrapolation method, but I’m going to call all of this simulation for the sake of the arguments below. The point is that we estimate it before looking at the important data in the region that would contain new physics.</p>
+<p>So: say we run our detector, and we record <span class="math inline">\(n\)</span> <em>independent</em> events. What’s the likelihood of observing these <span class="math inline">\(n\)</span> events with <span class="math inline">\(\lambda\)</span> expected from simulation?</p>
+<p>We know from the previous chapter that this is modelled well with a Poisson distribution:</p>
+<p><span id="eq-poisson"><span class="math display">\[
+p(n|\lambda) = \mathrm{Poisson}(n|\lambda)~.
+\tag{3.1}\]</span></span></p>
+<p>Along with the overall number of events we recorded, we may pick some statistic of the data <span class="math inline">\(x\)</span> that we choose to measure. That variable will have a distribution we can predict from simulation. How do we describe it?</p>
+<p>We know that our data is divided into two categories: stuff that came from physics we’re interested in (<strong>signal</strong>), and stuff that came from everything else (<strong>background</strong>). We can then say we have <span class="math inline">\(s\)</span> signal events in our sample and <span class="math inline">\(b\)</span> background events, with <span class="math inline">\(s+b=\lambda\)</span>, our overall number of expected counts from simulation.</p>
+<p>Each value of <span class="math inline">\(x\)</span> that comes from a signal event can be viewed as a sample from the unknown signal distribution <span class="math inline">\(f_s(x)\)</span>, and likewise for background <span class="math inline">\(f_b(x)\)</span>. We can even think of any particular value we measured (e.g.&nbsp;<span class="math inline">\(x_0\)</span>) as being “marked” with an extra number – either <span class="math inline">\(f_s(x_0)\)</span> if it came from signal, or <span class="math inline">\(f_b(x_0)\)</span> if it belongs to the background. This means that our overall distribution for the variable <span class="math inline">\(x\)</span> is described by “<span class="math inline">\(s\)</span>” much of <span class="math inline">\(f_s(x)\)</span>, and “<span class="math inline">\(b\)</span>”-much of <span class="math inline">\(f_b(x)\)</span>, i.e.&nbsp;for any value of <span class="math inline">\(x\)</span>, it’s density is then</p>
+<p><span id="eq-balance"><span class="math display">\[
+p(x) = \frac{sf_s(x) + bf_b(x)}{s+b}~,
+\tag{3.2}\]</span></span></p>
+<p>where we choose to normalize by the total number of events <span class="math inline">\(s+b\)</span> to treat <span class="math inline">\(p(x)\)</span> as a proper density.</p>
+<p>We can then model the whole dataset <span class="math inline">\(\{x_i\}_{i=1}^n\)</span> by multiplying the densities of all the individual events, since we assumed they were independent (otherwise we couldn’t use the Poisson distribution!). We can then incorporate <a href="#eq-poisson">Equation&nbsp;<span>3.1</span></a> with <a href="#eq-balance">Equation&nbsp;<span>3.2</span></a> through multiplication of the densities:</p>
+<p><span id="eq-histcomb"><span class="math display">\[
+p(\{x_i\}_{i=1}^n) = \mathrm{Poisson}(n|s+b)\prod_{i=1}^n\frac{sf_s(x_i) + bf_b(x_i)}{s+b}~.
+\tag{3.3}\]</span></span></p>
+<p>Notice that we don’t have any free parameters right now – the counts <span class="math inline">\(s\)</span> and <span class="math inline">\(b\)</span> will be fixed from our physics simulation once we get around to it. But what if wanted to infer the amount of signal present in our data? How would we do that? We can accomplish this through a little trick: we can multiply the number of signal events <span class="math inline">\(s\)</span> with an additional number <span class="math inline">\(\mu\)</span> that controls the overall <strong>signal strength</strong>. Estimating the value of <span class="math inline">\(\mu\)</span> would then tell us information about the amount of signal present in the data (assuming our model is accurate enough)!</p>
+<p>We can now replace <span class="math inline">\(s\)</span> with <span class="math inline">\(\mu s\)</span> in <a href="#eq-histcomb">Equation&nbsp;<span>3.3</span></a> to get</p>
+<p><span id="eq-bothparts"><span class="math display">\[
+p(\{x_i\}_{i=1}^n | \mu) = \mathrm{Poisson}(n|\mu s+b)\prod_{i=1}^n\frac{\mu sf_s(x_i) + bf_b(x_i)}{\mu s+b}~.
+\tag{3.4}\]</span></span></p>
+<p>In this formalism so far, we’ve kept things generalized to the “unknown” pdfs <span class="math inline">\(f_s(x)\)</span> and <span class="math inline">\(f_b(x)\)</span>, but we don’t actually have access to them. We can approximate them using a KDE or some other method, but it’s more common to find us with a <em>histogram</em> for this representation (reasons for why are outlined in <a href="#sec-whyhist"><span>Section&nbsp;3.1.1.1</span></a>).</p>
+<p>Say we histogram our simulated signal and background data with the same binning (not required to be uniform) that uses a number of bins <span class="math inline">\(k\)</span>, giving us sets of counts <span class="math inline">\(\mathbf{h}^{\mathrm{sig}} = \{h_1^{\mathrm{sig}}, h_2^{\mathrm{sig}}, \dots, h_k^{\mathrm{sig}}\}\)</span> and <span class="math inline">\(\mathbf{h}^{\mathrm{bkg}} = \{h_1^{\mathrm{bkg}}, h_2^{\mathrm{bkg}}, \dots, h_k^{\mathrm{bkg}}\}\)</span>. Recall from <a href="#sec-hists"><span>Section&nbsp;3.1.1</span></a> that we can use these to approximate a density by normalizing with respect to bin width and number of events. Then, if we say a given value of <span class="math inline">\(x\)</span> falls into some bin with index <span class="math inline">\(j\)</span>, we can write that the density at <span class="math inline">\(x\)</span> is approximated by the (normalized) count in that bin, for both signal and background separately:</p>
+<p><span class="math display">\[
+f_s(x \in \mathrm{bin~}j) \approx \frac{h^{\mathrm{sig}}_j}{s\times\mathrm{width~of~bin}~j};~~~f_b(x \in \mathrm{bin~}j ) \approx \frac{h^{\mathrm{bkg}}_j}{b\times\mathrm{width~of~bin}~j}
+\]</span></p>
+<!-- Fill me in with possible details on going to a binned model -->
+<p>From here, we can express <a href="#eq-bothparts">Equation&nbsp;<span>3.4</span></a> as a product over bins <span class="math inline">\(j\)</span> instead of events <span class="math inline">\(i\)</span>:</p>
+<p><span class="math display">\[
+p(\{n_j\}_{j=1}^k | \mu) = \mathrm{Poisson}(n|\mu s+b)\prod_{j=1}^k\frac{\mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j}{\mu s+b}~.
+\]</span></p>
+<p>Note that we’ve shifted from talking about values of <span class="math inline">\(x_i\)</span> to bin counts <span class="math inline">\(n_j\)</span>, where <span class="math inline">\(\sum_{j=1}^k n_i = n\)</span>. These counts don’t seem to appear in the likelihood yet, but we can make this explicit through the following relation<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:</p>
+<p><span class="math display">\[
+\mathrm{Poisson}(n|\mu s+b)\prod_{j=1}^k\frac{\mu h^{\mathrm{sig}}_i  + h^{\mathrm{bkg}}_i}{\mu s+b} \propto \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~,
+\]</span></p>
+<p>where the constant of proportionality is a factor involving factorials of the individual counts (also referred to as combinatorics). Since we don’t care about the overall normalization when we do inference (e.g.&nbsp;the maximum likelihood value is independent of the scale, and the normalization cancels in a likelihood ratio), we will consider this proportionality as an equivalence.</p>
+<p>These gymnastics have left us with the following likelihood:</p>
+<p><span id="eq-hifabase"><span class="math display">\[
+p(\{n_j\}_{j=1}^k | \mu) = \prod_{j=1}^k \mathrm{Poisson}(n_j | \mu h^{\mathrm{sig}}_j  + h^{\mathrm{bkg}}_j)~,
+\tag{3.5}\]</span></span></p>
+<p>which is simply a product over Poisson distribution for each bin within a histogram, where we expect a contribution of <span class="math inline">\(\mu h^{\mathrm{sig}}_j + h^{\mathrm{bkg}}_j\)</span> from each of signal and background respectively per bin <span class="math inline">\(j\)</span>. This expression forms the core of the HistFactory approach.</p>
+</section>
+<section id="sec-hifa-nps" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="sec-hifa-nps"><span class="header-section-number">3.2.2</span> Uncertainty modelling through nuisance parameters</h3>
+<p>Now, we’ll extend the model from <a href="#eq-hifabase">Equation&nbsp;<span>3.5</span></a> in a similar way to when we added <span class="math inline">\(\mu\)</span> to manipulate the signal scale, but this time, it’s in order to be able to model uncertainties.</p>
+<p>The origin of systematic uncertainties in simulation is this: we’re uncertain as to the true values of the physics parameters that we should put into the simulator. Let’s denote an example parameter with <span class="math inline">\(\alpha\)</span>. To quantify how varying <span class="math inline">\(\alpha\)</span> changes the likelihood in the ideal world, we would just include those parameters of the simulator within our likelihood model. However, this would require the ability to simulate data on-the-fly at any given value of the physics parameter, and then propagate that change all the way through our analysis selection requirements. This is difficult from both a practical and a computational perspective (the simulators we use are expensive to evaluate), plus it would have to be done for all the parameters we may want to model in this way. So what do we do instead? Here I give one example.</p>
+<p>We may have a best prediction for <span class="math inline">\(\alpha\)</span> from studies carried out by e.g.&nbsp;a performance group in your collaboration that focuses on measuring <span class="math inline">\(\alpha\)</span>, but we’ll also have some notion of uncertainty on that value, perhaps in the form of a distribution on <span class="math inline">\(\alpha\)</span>. An example procedure that we often do in this case is to just simulate our physics data at the best guess for that parameter <span class="math inline">\(\alpha\)</span> – we’ll refer to this as the <strong>nominal</strong> value <span class="math inline">\(\alpha_{\mathrm{nom}}\)</span> – and then also simulate data for values at <span class="math inline">\(\alpha_{\mathrm{nom}}+\sigma_{\alpha} = \alpha_{\mathrm{up}}\)</span> and <span class="math inline">\(\alpha_{\mathrm{nom}}-\sigma_{\alpha} = \alpha_{\mathrm{down}}\)</span>, where <span class="math inline">\(\sigma_{\alpha}\)</span> is some notion of a standard deviation on <span class="math inline">\(\alpha\)</span> (e.g.&nbsp;calculated arithmetically on a sample or fitted as part of a normal distribution).</p>
+<p>We’re not restricted to the choice of <span class="math inline">\(\alpha_{\mathrm{up}}\)</span> and <span class="math inline">\(\alpha_{\mathrm{down}}\)</span>, but it’s pretty commonplace as a quick way to get a rough idea of the influence of <span class="math inline">\(\alpha\)</span> on the histograms. And that’s the point – we really only care about how varying <span class="math inline">\(\alpha\)</span> changes the resulting histogram for that process – either <span class="math inline">\(\mathbf{h}^{\mathrm{sig}}\)</span> or <span class="math inline">\(\mathbf{h}^{\mathrm{bkg}}\)</span>. We can then estimate the effect of <span class="math inline">\(\alpha\)</span> as a continuous change by some kind of <em>interpolation between the resulting histogram yields</em>. All of this results in the addition of as many extra factors as you like to <a href="#eq-hifabase">Equation&nbsp;<span>3.5</span></a>, which can be broken up into <em>mulitplicative terms</em> and <em>additive terms</em> applied to both <span class="math inline">\(s\)</span> and <span class="math inline">\(b\)</span>, all of which serve to influence the shape and/or overall normalization of the resulting histogram.</p>
+</section>
+<section id="constraint-terms" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="constraint-terms"><span class="header-section-number">3.2.3</span> Constraint terms</h3>
+<p>We discussed constraint terms briefly in <a href="stat-fundamentals.html#sec-nps"><span>Section&nbsp;2.1.7</span></a>, where we asserted that if a parameter <span class="math inline">\(\alpha\)</span> had some kind of external measurement that we wanted to incorporate into the <em>model</em> (not as a Bayesian prior), then we would have to include the likelihood function for that measurement <span class="math inline">\(p(y|\alpha)\)</span> in the full model, where <span class="math inline">\(y\)</span> is the measured quantity that provides information about <span class="math inline">\(\alpha\)</span>. We would then multiply the likelihood in <a href="#eq-hifabase">Equation&nbsp;<span>3.5</span></a> (after we added in our nuisance parameter <span class="math inline">\(\alpha\)</span>) by <span class="math inline">\(p(y|\alpha)\)</span> – the only problem is that we don’t readily have access to this full likelihood. What we do instead is to introduce an approximate constraint that makes use of the provided information (e.g.&nbsp;up/down variations). The way this works is that we take a simple distribution like a standard normal, then choose our “units” such that , and the up/down variations are at +/- 1 standard deviation of, for example, a standard Normal distribution. This would then lead to multiplying <a href="#eq-hifabase">Equation&nbsp;<span>3.5</span></a> by <span class="math inline">\(\mathrm{Normal}(y | \alpha , 1)\)</span>, where the nuisance parameter <span class="math inline">\(\alpha\)</span> is shared between both this part and the <span class="math inline">\(\mathrm{Poisson}\)</span> part of the overall likelihood.</p>
+<p>To get some intuition for this: if <span class="math inline">\(\hat{\alpha}\neq 0\)</span> (which would correspond to being different to <span class="math inline">\(\alpha_{\text{nom}}\)</span>), the value of <span class="math inline">\(\mathrm{Normal}(y | \alpha , 1)\)</span> will be lower than its maximum (since it’s centered around 0), and will <em>penalize</em> the likelihood for contradicting the information on our best guess of <span class="math inline">\(\alpha\)</span>, i.e.&nbsp;we got a lower likelihood than we could have if we agreed more with our previous information on <span class="math inline">\(\alpha\)</span>.</p>
+</section>
+</section>
+<section id="sec-asymptotics" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-asymptotics"><span class="header-section-number">3.3</span> Hypothesis testing and asymptotic formulae in HEP</h2>
+<p>In <a href="stat-fundamentals.html#sec-hyptests"><span>Section&nbsp;2.3.3</span></a>, which covered frequentist hypothesis tests, we noted that we don’t necessarily have access to the <em>sampling distribution</em> of the test statistic <span class="math inline">\(p(t(x)|H_0)\)</span> given a particular null hypothesis <span class="math inline">\(H_0\)</span>, which is the key quantity we need to be able to set our cutoff value for the test. One way to estimate <span class="math inline">\(p(t(x)|H_0)\)</span> is to simply calculate <span class="math inline">\(t(x)\)</span> for many samples <span class="math inline">\(x \sim p(x|H_0)\)</span>, and build up the distribution empirically. However, there exist some choices of <span class="math inline">\(t(x)\)</span> that give us <em>asymptotic guarantees</em> as to the form of <span class="math inline">\(p(t(x)|H_0)\)</span>, i.e.&nbsp;we can fairly reliably know its shape as long as we have a decent enough sample size of <span class="math inline">\(x\)</span>.</p>
+<p>One of these choices that we’ve seen a couple times already is the likelihood ratio between a point null at <span class="math inline">\(\mu\)</span> and a composite alternative represented by the maximum likelihood point <span class="math inline">\(\hat{\mu}\)</span>:</p>
+<p><span class="math display">\[
+R(x, \mu) = \frac{p(x|\mu)}{p(x|\hat{\mu})}~.
+\]</span></p>
+<p>We’ll likely have to deal with nuisance parameters in the likelihood, for which we extend this as shown in <a href="stat-fundamentals.html#eq-profile-lhood-ratio">Equation&nbsp;<span>2.9</span></a> to:</p>
+<p><span class="math display">\[
+\lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)},
+\]</span></p>
+<p>where we recall that <span class="math inline">\(\hat{\hat{\theta}}(\mu)\)</span> represents fitting the value of <span class="math inline">\(\theta\)</span> while holding <span class="math inline">\(\mu\)</span> fixed at it’s value from the input to <span class="math inline">\(\lambda\)</span>.</p>
+<p>This quantity (or <span class="math inline">\(-2\ln\)</span> of it at least) forms the basis of all test statistics that we use in tests for the discovery of a new particle, or for setting a limit on a physical quantity (e.g.&nbsp;a particle mass or process cross-section).</p>
+<section id="sec-sampling" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="sec-sampling"><span class="header-section-number">3.3.1</span> Sampling distributions for <span class="math inline">\(-2 \ln \lambda\)</span></h3>
+<p>The first result we’ll exploit to our advantage is that of Wald <span class="citation" data-cites="wald">Wald (<a href="references.html#ref-wald" role="doc-biblioref">1943</a>)</span>, who showed that we can relate <span class="math inline">\(\lambda(x,\mu)\)</span> with the maximum likelihood estimate <span class="math inline">\(\hat{\mu}\)</span> in the following way:</p>
+<p><span id="eq-wald"><span class="math display">\[
+-2\ln \lambda(x,\mu) = \left(\frac{\mu - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 + \mathcal{O}(\frac{1}{\sqrt{N}})~,
+\tag{3.6}\]</span></span></p>
+<p>where <span class="math inline">\(\sigma_{\hat{\mu}}\)</span> is the standard deviation of <span class="math inline">\(\hat{\mu}(x)\)</span>, which will tend to a normal distribution of this width with sufficient data (and is assumed to do so here), and <span class="math inline">\(N\)</span> is our data size. This equation is known as <strong>Wald’s relation</strong>. Note that this is just a quadratic in <span class="math inline">\(\hat{\mu}(x)\)</span> – the plot of <span class="math inline">\(-2\ln \lambda(x,\mu)\)</span> vs <span class="math inline">\(\hat{\mu}(x)\)</span> will be a parabola (to the extent that we can neglect the <span class="math inline">\(\mathcal{O}(1/ \sqrt{N})\)</span> term). The uncertainty <span class="math inline">\(\sigma_{\hat{\mu}}\)</span> is an important quantity that we’ll talk about in later sections after doing some groundwork.</p>
+<p>Another interesting result is that since we’re already incorporating nuisance parameters within <span class="math inline">\(\lambda\)</span>, the shape of the test statistic against <span class="math inline">\(\hat{\mu}(x)\)</span> will follow this relation independent of the value of the nuisance parameters.</p>
+<p>How do we go from here to <span class="math inline">\(p(-2\ln \lambda(x,\mu) | H_0)\)</span>? We can take another look at <a href="#eq-wald">Equation&nbsp;<span>3.6</span></a> and notice that the RHS has the quantity <span class="math inline">\((\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}\)</span> all squared. In the large sample size limit (asymptotically), <span class="math inline">\(\hat{\mu}(x)\)</span> is normally distributed around <span class="math inline">\(\mu\)</span> with width <span class="math inline">\(\sigma_{\hat{\mu}}\)</span>, meaning that <span class="math inline">\((\mu - \hat{\mu}(x))/\sigma_{\hat{\mu}}\)</span> follows a standard normal distribution! So if we have a standard normally distributed variable squared, i.e.&nbsp;<span class="math inline">\(\lambda(x,\mu)\)</span>, we have a <span class="math inline">\(\chi^2\)</span> distribution with one degree of freedom!</p>
+<p>This is a powerful result. Let’s apply it for our case of interest, which is the test statistic distribution evaluated at the null, <span class="math inline">\(-2\ln \lambda(x,\mu_0)\)</span>. Neglecting the <span class="math inline">\(\mathcal{O}(1/ \sqrt{N})\)</span> term for now, we write</p>
+<p><span id="eq-wilks"><span class="math display">\[
+-2\ln \lambda(x,\mu_0) = \left(\frac{\mu_0 - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 ~.
+\tag{3.7}\]</span></span></p>
+<p>We can then say that, under the assumption of <span class="math inline">\(H_0\)</span> (i.e.&nbsp;assuming <span class="math inline">\(x\sim p(x|\mu_0)\)</span>), the MLE <span class="math inline">\(\hat{\mu}\)</span> will be normally distributed around <span class="math inline">\(\mu_0\)</span>, and <span class="math inline">\(-2\ln \lambda(x,\mu_0)\)</span> then follows a <span class="math inline">\(\chi^2\)</span> distribution with one degree of freedom. This is known as <strong>Wilks’ theorem</strong> <span class="citation" data-cites="wilks">Wilks (<a href="references.html#ref-wilks" role="doc-biblioref">1938</a>)</span>, and gives us access to the sampling distribution we need for hypothesis testing.</p>
+<p>What happens when the value of <span class="math inline">\(\mu\)</span> in the data set is different to <span class="math inline">\(\mu_0\)</span>, and instead is some value <span class="math inline">\(\mu'\)</span>? The result from Wald in <a href="#eq-wald">Equation&nbsp;<span>3.6</span></a> allows us to generalize the result from Wilks, where we instead find that have a <em>non-central chi-square distribution</em> with one degree of freedom, written as <span class="math inline">\(\chi^2(\Lambda)\)</span>, which is determined by the non-centrality parameter <span class="math inline">\(\Lambda\)</span>, given by</p>
+<p><span id="eq-wald-noncentral"><span class="math display">\[
+\Lambda = \left(\frac{\mu_0 - \mu'}{\sigma_{\hat{\mu}}}\right)^2 ~.
+\tag{3.8}\]</span></span></p>
+<p>We can see that when we’re back in the regime of <span class="math inline">\(\mu'=\mu_0\)</span>, the non-centrality parameter is 0, which makes the distribution a regular (central) chi-square, as in <a href="#eq-wilks">Equation&nbsp;<span>3.7</span></a>. This result will be particularly useful in later sections.</p>
+<p>Just to recap notation here, since we’re accumulating a few forms of <span class="math inline">\(\mu\)</span>:</p>
+<ul>
+<li><span class="math inline">\(\mu_0\)</span> is the value of <span class="math inline">\(\mu\)</span> being <em>tested as the null hypothesis</em>, with the alternative being <span class="math inline">\(\mu\neq\mu_0\)</span>.</li>
+<li><span class="math inline">\(\hat{\mu}\)</span> is the value <em>fitted to the observed data</em> by maximum likelihood.</li>
+<li><span class="math inline">\(\mu'\)</span> is the <em>assumed</em> value of <span class="math inline">\(\mu\)</span> present in the data itself.</li>
+</ul>
+<p>The reason to make the distinction between <span class="math inline">\(\mu_0\)</span> and <span class="math inline">\(\mu'\)</span> in particular is that we may not always want the distribution of the test statistic under the null. An example for this is that when we report the expected discovery significance, we’re testing a null of <span class="math inline">\(\mu_0=0\)</span>, but would like to see if we can discover the signal assuming it exists in the data, which would mean we want <span class="math inline">\(p(-2\ln \lambda(x,\mu_0) | \mu')\)</span>, with <span class="math inline">\(\mu'\)</span> usually being taken as the nominal value of 1 for the signal hypothesis. For that, we’re able to leverage Wald’s result of having a non-central chi-squared distribution, with the non-centrality parameter given as in <a href="#eq-wald-noncentral">Equation&nbsp;<span>3.8</span></a>.</p>
+</section>
+<section id="sec-test-stats" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="sec-test-stats"><span class="header-section-number">3.3.2</span> The catalog of test statistics</h3>
+<p>The results we showed in the previous section hold for a test statistic of <span class="math inline">\(-2\ln \lambda(x,\mu)\)</span>. In practice, we tend to use some slight variations on this, depending on the physics task we want to undertake. Here are some examples.</p>
+<section id="discovery" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="discovery">Discovery</h4>
+<p>When we are searching to <strong>discover</strong> a new physics process, we will test using</p>
+<p><span id="eq-q0"><span class="math display">\[
+q_0(x) = \begin{cases}
+    -2\ln \lambda(x,0)&amp; \text{if } \hat{\mu} \geqslant 0,\\
+    0              &amp; \text{if } \hat{\mu} &lt; 0
+\end{cases}
+~,
+\tag{3.9}\]</span></span></p>
+<p>where we have a null hypothesis of <span class="math inline">\(\mu_0 = 0\)</span>, i.e.&nbsp;we test the background-only model. The reason we set <span class="math inline">\(q_0=0\)</span> when <span class="math inline">\(\hat{\mu} &lt; 0\)</span> is that this would imply that the MLE for the expected number of events is even smaller than the nominal background, so we assume no signal is present. That means rejection of <span class="math inline">\(\mu=0\)</span> would then only indicate a positive signal strength <span class="math inline">\(\mu&gt;0\)</span>, indicating the potential presence of some amount of signal.</p>
+</section>
+<section id="upper-limit-setting" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="upper-limit-setting">Upper limit setting</h4>
+<p>We can also use our hypothesis test as a mechanism to set an <strong>exclusion limit</strong> on the signal strength <span class="math inline">\(\mu\)</span>, which is conventionally done through an upper limit, as defined in <a href="stat-fundamentals.html#sec-conf-intervals"><span>Section&nbsp;2.3.2</span></a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. For this, we again turn to <span class="math inline">\(-2\ln \lambda(x,\mu)\)</span>, but only for fitted values of <span class="math inline">\(\mu\)</span> that are <em>less</em> than the value of <span class="math inline">\(\mu\)</span> being tested. The reason for this is that data with <span class="math inline">\(\hat{\mu}\)</span> <em>above</em> our tested value would make it even more signal-like than the null, which for the purposes of bounding <span class="math inline">\(\mu\)</span> from above, would not be desirable to be in the “extreme” region of the data, i.e.&nbsp;in the rejection area for the hypothesis test. We can circumvent this by setting the test statistic to 0 for <span class="math inline">\(\hat{\mu} &gt; \mu\)</span>, giving us the expression</p>
+<p><span id="eq-qmu"><span class="math display">\[
+q_\mu(x) = \begin{cases}-2 \ln \lambda(x, \mu) &amp; \text{if } \hat{\mu} \leq \mu, \\ 0 &amp; \text{if }\hat{\mu}&gt;\mu\end{cases}~.
+\tag{3.10}\]</span></span></p>
+<p>Alternative test statistics exist in both cases (denoted by <span class="math inline">\(\tilde{q\mu}\)</span>) for when the model disallows negative values of <span class="math inline">\(\mu\)</span>. These are not discussed here, but only require minor changes to the definitions of <a href="#eq-q0">Equation&nbsp;<span>3.9</span></a> and <a href="#eq-qmu">Equation&nbsp;<span>3.10</span></a>.</p>
+<!-- In the case of an upper limit, values of $\mu$ that are greater than $\mu_{\mathrm{upper}}$ consider our observed data as extreme, so we term these values as *excluded* at our chosen confidence level.  -->
+<!--
+If the MLE signal strength $\hat{\mu}$ is greater than the null hypothesis $\mu_0$, then $\lambda(x,\mu_0)$ will be different than 1, indicating less compatibility between $H_0$ and $H_1$ since their likelihoods differ. -->
+</section>
+</section>
+</section>
+<section id="asymptotic-formulae-for-simple-p-value-calculations" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="asymptotic-formulae-for-simple-p-value-calculations"><span class="header-section-number">3.4</span> Asymptotic formulae for simple <span class="math inline">\(p\)</span>-value calculations</h2>
+<p>The formulae presented here all stem from the result by Wald in <a href="#eq-wald">Equation&nbsp;<span>3.6</span></a>; they will be stated without lengthy derivation, but the working is mostly algebraic in nature, and builds upon the fact that we neglect the <span class="math inline">\(\mathcal{O}(1/ \sqrt{N})\)</span> term in that equation<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>We start with the fact that the <span class="math inline">\(p\)</span>-value (denoted <span class="math inline">\(p_\mu\)</span> here to highlight the selection of the null hypotheses)from any hypothesis test that we plan to do here can be written as</p>
+<p><span class="math display">\[
+p_\mu = 1 - F(t(x, \mu) | \mu')~,
+\]</span></p>
+<p>where <span class="math inline">\(F(t(x, \mu) | \mu')\)</span> is the <em>cumulative distribution function</em> for our test statistic <span class="math inline">\(t(x, \mu)\)</span>, some chosen value of <span class="math inline">\(\mu\)</span> as our point null, and an assumed signal strength <span class="math inline">\(\mu'\)</span> in the data.</p>
+<p>As in <a href="#sec-test-stats"><span>Section&nbsp;3.3.2</span></a>, when trying to discover a signal, we choose the test statistic <span class="math inline">\(t(x, \mu) = q_0\)</span>. In this case, the cumulative distribution <span class="math inline">\(F(q_0 | \mu')\)</span> can be derived from the results in <a href="#sec-sampling"><span>Section&nbsp;3.3.1</span></a>, which comes out to be</p>
+<p><span class="math display">\[
+F\left(q_0 \mid \mu'\right)=\Phi\left(\sqrt{q_0}-\frac{\mu'}{\sigma_{\hat{\mu}}}\right)~,
+\]</span></p>
+<p>where <span class="math inline">\(\Phi\)</span> is the cumulative distribution of the standard Normal distribution. In the case that the data is drawn from the null distribution (<span class="math inline">\(\mu'=0\)</span>), this reduces to</p>
+<p><span id="eq-discovery-cumulative"><span class="math display">\[
+F\left(q_0 \mid \mu'\right)=\Phi\left(\sqrt{q_0}\right)~,
+\tag{3.11}\]</span></span></p>
+<p>meaning our <span class="math inline">\(p\)</span>-value is then</p>
+<p><span class="math display">\[
+p_0 = 1 - \Phi\left(\sqrt{q_0}\right)~.
+\]</span></p>
+<p>For upper limits, we’re switching to using <span class="math inline">\(q_\mu\)</span> as our test statistic. Similarly to <span class="math inline">\(q_0\)</span>, this leads to the cumulative distribution</p>
+<p><span class="math display">\[
+F\left(q_\mu \mid \mu'\right)=\Phi\left(\sqrt{q_\mu}-\frac{\mu-\mu'}{\sigma_{\hat{\mu}}}\right)~,
+\]</span></p>
+<p>which, if the data is from the null (<span class="math inline">\(\mu=\mu'\)</span>), leads to the same result as <a href="#eq-discovery-cumulative">Equation&nbsp;<span>3.11</span></a>:</p>
+<p><span class="math display">\[
+F\left(q_\mu \mid \mu'\right)=\Phi\left(\sqrt{q_\mu}\right)~.
+\]</span></p>
+<p>Our <span class="math inline">\(p\)</span>-value is then just</p>
+<p><span id="eq-upper-lim-p-value"><span class="math display">\[
+p_\mu = 1 - \Phi\left(\sqrt{q_\mu}\right)~.
+\tag{3.12}\]</span></span></p>
+<p>These simple formulae underpin pretty much all major data analysis at the Large Hadron Collider – we too will make use of them later on.</p>
+</section>
+<section id="the-asimov-dataset-and-sigma_hatmu" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="the-asimov-dataset-and-sigma_hatmu"><span class="header-section-number">3.5</span> The Asimov dataset and <span class="math inline">\(\sigma_{\hat{\mu}}\)</span></h2>
+<p>In <span class="citation" data-cites="asymptotics">Cowan et al. (<a href="references.html#ref-asymptotics" role="doc-biblioref">2011</a>)</span>, they proposed the notion of the <strong>Asimov dataset</strong> <span class="math inline">\(x_A(\mu')\)</span>, which is defined for a given value of the signal strength <span class="math inline">\(\mu'\)</span> as the dataset that would cause the fitted value <span class="math inline">\(\hat{\mu}\)</span> to equal <span class="math inline">\(\mu'\)</span> (and also some value of the nuisances <span class="math inline">\(\theta\)</span> to equal <span class="math inline">\(\theta'\)</span>, just to fully specify the parameters). As a simple example, assuming no background uncertainty in the model, this would just be the expected counts at <span class="math inline">\(\mu=\mu'\)</span>, i.e.&nbsp;<span class="math inline">\(\mu' s+b\)</span>.</p>
+<p>This may not appear that useful at first, but we can use this in conjunction with the results from <a href="#sec-asymptotics"><span>Section&nbsp;3.3</span></a> to produce some simple formulae that let us perform hypothesis tests without much computation at all. We start by remembering the result from Wald in <a href="#eq-wald">Equation&nbsp;<span>3.6</span></a>, which tells us</p>
+<p><span class="math display">\[
+-2\ln \lambda(x,\mu_0) \approx \left(\frac{\mu_0 - \hat{\mu}(x)}{\sigma_{\hat{\mu}}}\right)^2 ~.
+\]</span></p>
+<p>Evaluating this at the Asimov dataset:</p>
+<p><span class="math display">\[
+-2\ln \lambda(x_A(\mu'),\mu_0) \approx \left(\frac{\mu_0 - \mu'}{\sigma_{\hat{\mu}}}\right)^2 ~,
+\]</span></p>
+<p>since, by definition of <span class="math inline">\(x_A\)</span>, <span class="math inline">\(\hat{\mu}=\mu'\)</span>. This is exactly the definition of the non-centrality parameter <span class="math inline">\(\Lambda\)</span> from <a href="#eq-wald-noncentral">Equation&nbsp;<span>3.8</span></a>! So using this specific construction of the Asimov dataset, we can get an estimate of <span class="math inline">\(\Lambda\)</span>, which characterizes the <em>general</em> distribution of <span class="math inline">\(-2\ln \lambda(x,\mu_0)\)</span>. Moreover, we can simply rearrange this equation to get</p>
+<p><span id="eq-asimov-sigma"><span class="math display">\[
+\sigma^2_{\hat{\mu}} \approx - \frac{(\mu_0 - \mu')^2}{2\ln \lambda(x_A(\mu'),\mu_0)} ~,
+\tag{3.13}\]</span></span></p>
+<p>which is an estimate of the variance that characterizes the Normal distribution of <span class="math inline">\(\hat{\mu}\)</span>, irrespective of the value it often takes in practice (this will just shift the mean).</p>
+<p>Another way to estimate <span class="math inline">\(\sigma^2_{\hat{\mu}}\)</span> is using the Fisher information matrix of the HistFactory likelihood as in <a href="stat-fundamentals.html#sec-fisher"><span>Section&nbsp;2.2.1</span></a>, where the diagonal term in its inverse corresponding to the index in the likelihood for <span class="math inline">\(\mu\)</span> would provide such an estimate, under similar requirements for the asymptotic unbiasedness of the maximum likelihood estimate <span class="math inline">\(\hat{\mu}\)</span>. Both approaches are perfectly valid, though <span class="citation" data-cites="asymptotics">Cowan et al. (<a href="references.html#ref-asymptotics" role="doc-biblioref">2011</a>)</span> claim that <a href="#eq-asimov-sigma">Equation&nbsp;<span>3.13</span></a> generally performed better in their experiments.</p>
+</section>
+<section id="the-textcl_s-quantity" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="the-textcl_s-quantity"><span class="header-section-number">3.6</span> The <span class="math inline">\(\text{CL}_s\)</span> quantity</h2>
+<p>When setting upper limits, instead of calculating <span class="math inline">\(p\)</span>-values as in <a href="#eq-upper-lim-p-value">Equation&nbsp;<span>3.12</span></a>, the ATLAS experiment mainly uses a modification of <span class="math inline">\(p_\mu\)</span> that divides by the <em>power of the test</em> <span class="math inline">\(1-\beta\)</span>. Originally proposed in <span class="citation" data-cites="cls">(<a href="references.html#ref-cls" role="doc-biblioref">Read 2002</a>)</span>, in which it was termed <span class="math inline">\(\mathrm{CL}_s\)</span>, the quantity is defined as the ratio</p>
+<p><span class="math display">\[
+\mathrm{CL}_s = \frac{p_{\mu}}{1-p_{\mu=0}}~,
+\]</span></p>
+<p>where <span class="math inline">\(p_{\mu=0}\)</span> is the <span class="math inline">\(p\)</span>-value for the background-only hypotheses, which corresponds to the type-II error <span class="math inline">\(\beta\)</span>, since <span class="math inline">\(\mu=0\)</span> faithfully represents the alternative when setting limits. At first glance, there’s no statistically obvious interpretation of a ratio of two <span class="math inline">\(p\)</span>-values, but it does have the desirable property that, for tests with low power (i.e.&nbsp;low sensitivity to the alternative model), the <span class="math inline">\(\mathrm{CL}_s\)</span> value will be higher than the associated <span class="math inline">\(p\)</span>-value, and we have less chance to erroneously reject the null when we don’t have good test power to begin with.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-asymptotics" class="csl-entry" role="doc-biblioentry">
+Cowan, Glen, Kyle Cranmer, Eilam Gross, and Ofer Vitells. 2011. <span>“Asymptotic Formulae for Likelihood-Based Tests of New Physics.”</span> <em>The European Physical Journal C</em> 71 (2). <a href="https://doi.org/10.1140/epjc/s10052-011-1554-0">https://doi.org/10.1140/epjc/s10052-011-1554-0</a>.
+</div>
+<div id="ref-kylenotes" class="csl-entry" role="doc-biblioentry">
+Cranmer, Kyle. 2014. <span>“<span class="nocase">Practical Statistics for the LHC</span>.”</span> In <em><span class="nocase">2011 European School of High-Energy Physics</span></em>, 267–308. <a href="https://doi.org/10.5170/CERN-2014-003.267">https://doi.org/10.5170/CERN-2014-003.267</a>.
+</div>
+<div id="ref-hifa" class="csl-entry" role="doc-biblioentry">
+Cranmer, Kyle, George Lewis, Lorenzo Moneta, Akira Shibata, and Wouter Verkerke. 2012. <span>“<span class="nocase">HistFactory: A tool for creating statistical models for use with RooFit and RooStats</span>.”</span> New York: New York U. <a href="https://cds.cern.ch/record/1456844">https://cds.cern.ch/record/1456844</a>.
+</div>
+<div id="ref-cls" class="csl-entry" role="doc-biblioentry">
+Read, A L. 2002. <span>“Presentation of Search Results: The CLs Technique.”</span> <em>Journal of Physics G: Nuclear and Particle Physics</em> 28 (10): 2693. <a href="https://doi.org/10.1088/0954-3899/28/10/313">https://doi.org/10.1088/0954-3899/28/10/313</a>.
+</div>
+<div id="ref-wald" class="csl-entry" role="doc-biblioentry">
+Wald, Abraham. 1943. <span>“Tests of Statistical Hypotheses Concerning Several Parameters When the Number of Observations Is Large.”</span> <em>Transactions of the American Mathematical Society</em> 54 (3): 426–82. <a href="http://www.jstor.org/stable/1990256">http://www.jstor.org/stable/1990256</a>.
+</div>
+<div id="ref-wilks" class="csl-entry" role="doc-biblioentry">
+Wilks, S. S. 1938. <span>“<span class="nocase">The Large-Sample Distribution of the Likelihood Ratio for Testing Composite Hypotheses</span>.”</span> <em>The Annals of Mathematical Statistics</em> 9 (1): 60–62. <a href="https://doi.org/10.1214/aoms/1177732360">https://doi.org/10.1214/aoms/1177732360</a>.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>This relation arises from noticing that <span class="math inline">\(\lambda^n = \lambda^{\sum n_j} = \prod_j \lambda^{n_j}\)</span>, and using it to manipulate the Poisson on the left-hand side, amongst other things. We gloss over the full working, but I would like to include it if I have time (reading this means I probably didn’t, but I do plan to release a blog post in future).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>We could equally well look at other ordering choices, e.g.&nbsp;a central interval for <span class="math inline">\(\mu\)</span>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>In <span class="citation" data-cites="asymptotics">Cowan et al. (<a href="references.html#ref-asymptotics" role="doc-biblioref">2011</a>)</span>, they show that <span class="math inline">\(N\)</span> need only be 10 or so for this to work well in their experiments.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./stat-fundamentals.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./diffprog.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
