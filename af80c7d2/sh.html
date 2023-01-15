@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - 9&nbsp; Search for a heavy scalar particle \(X\) decaying to a scalar \(S\) and a Higgs boson, with final state \(b\bar{b}\gamma\gamma\) in the ATLAS detector</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./flow-interp.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Analysis in High-Energy Physics as a Differentiable Program</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Fundamentals</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./physics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stat-fundamentals.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./stat-practical.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffprog.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./autodiff.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ml.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Applications</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffprog-hep.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./flow-interp.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./sh.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Appendices</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview-and-motivation" id="toc-overview-and-motivation" class="nav-link active" data-scroll-target="#overview-and-motivation"><span class="toc-section-number">9.1</span>  Overview and motivation</a></li>
+  <li><a href="#simulated-data" id="toc-simulated-data" class="nav-link" data-scroll-target="#simulated-data"><span class="toc-section-number">9.2</span>  Simulated data</a></li>
+  <li><a href="#preprocessing-and-selection" id="toc-preprocessing-and-selection" class="nav-link" data-scroll-target="#preprocessing-and-selection"><span class="toc-section-number">9.3</span>  Preprocessing and selection</a>
+  <ul class="collapse">
+  <li><a href="#tagging-b-jets" id="toc-tagging-b-jets" class="nav-link" data-scroll-target="#tagging-b-jets"><span class="toc-section-number">9.3.1</span>  Tagging <span class="math inline">\(b\)</span>-jets</a></li>
+  <li><a href="#selection-for-this-work" id="toc-selection-for-this-work" class="nav-link" data-scroll-target="#selection-for-this-work"><span class="toc-section-number">9.3.2</span>  Selection for this work</a></li>
+  </ul></li>
+  <li><a href="#sec-fit-strategies" id="toc-sec-fit-strategies" class="nav-link" data-scroll-target="#sec-fit-strategies"><span class="toc-section-number">9.4</span>  Fit strategies</a>
+  <ul class="collapse">
+  <li><a href="#d-fit-in-the-m_bbgammagamma-and-m_bb-plane" id="toc-d-fit-in-the-m_bbgammagamma-and-m_bb-plane" class="nav-link" data-scroll-target="#d-fit-in-the-m_bbgammagamma-and-m_bb-plane"><span class="toc-section-number">9.4.1</span>  2-D fit in the <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span> plane</a></li>
+  <li><a href="#d-fit-using-a-parametrized-neural-network-based-summary-statistic" id="toc-d-fit-using-a-parametrized-neural-network-based-summary-statistic" class="nav-link" data-scroll-target="#d-fit-using-a-parametrized-neural-network-based-summary-statistic"><span class="toc-section-number">9.4.2</span>  1-D fit using a parametrized neural network-based summary statistic</a></li>
+  </ul></li>
+  <li><a href="#sec-sh-flows" id="toc-sec-sh-flows" class="nav-link" data-scroll-target="#sec-sh-flows"><span class="toc-section-number">9.5</span>  Interpolation between signal shapes</a>
+  <ul class="collapse">
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="toc-section-number">9.5.1</span>  Results</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="toc-section-number">9.5.2</span>  Discussion</a></li>
+  </ul></li>
+  <li><a href="#interpolation-between-overall-yields" id="toc-interpolation-between-overall-yields" class="nav-link" data-scroll-target="#interpolation-between-overall-yields"><span class="toc-section-number">9.6</span>  Interpolation between overall yields</a>
+  <ul class="collapse">
+  <li><a href="#gaussian-process-interpolation" id="toc-gaussian-process-interpolation" class="nav-link" data-scroll-target="#gaussian-process-interpolation"><span class="toc-section-number">9.6.1</span>  Gaussian process interpolation</a></li>
+  </ul></li>
+  <li><a href="#a-new-flow-based-observable-s_textflow" id="toc-a-new-flow-based-observable-s_textflow" class="nav-link" data-scroll-target="#a-new-flow-based-observable-s_textflow"><span class="toc-section-number">9.7</span>  A new flow-based observable <span class="math inline">\(s_{\text{flow}}\)</span></a></li>
+  <li><a href="#future-and-outlook" id="toc-future-and-outlook" class="nav-link" data-scroll-target="#future-and-outlook"><span class="toc-section-number">9.8</span>  Future and outlook</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-anal" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<p>As part of my PhD, I made some various contributions to a search for a physics process <span class="math inline">\(X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma\)</span>, where <span class="math inline">\(X\)</span> and <span class="math inline">\(S\)</span> are scalar particles beyond the Standard Model. My contributions include:</p>
+<ul>
+<li>building a faster framework for data processing</li>
+<li>assisting with the development of a pipeline to classify signal versus background using a neural network parametrized in the truth-level masses <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span></li>
+<li>using the method I developed with normalizing flows to interpolate a 2-D signal shape across different signal mass points</li>
+<li>various small contributions to the statistical analysis setup</li>
+<li>the proposal of a new observable based on normalizing flows</li>
+</ul>
+<p>The analysis of this data is still in the preliminary stages at the time of writing, so take all these studies with a grain of salt.</p>
+<p>Also, a quick note on shorthand for this section – you’ll see me write notation like <span class="math inline">\(H(bb)\)</span> – this means that we’re looking at the case where a Higgs boson is decaying to two <span class="math inline">\(b\)</span>-quarks as its final state.</p>
+<section id="overview-and-motivation" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="overview-and-motivation"><span class="header-section-number">9.1</span> Overview and motivation</h2>
+<p>The new particle discovered in 2012 <span class="citation" data-cites="higgs">(<a href="references.html#ref-higgs" role="doc-biblioref">ATLAS-Collaboration 2012</a>)</span> is widely regarded to represent the Higgs boson as predicted by the Standard Model, which is predicted to have a rest mass of <span class="math inline">\(125 \, \text{GeV}\)</span>. While this is confirmatory of the existence of some flavor of the Standard Model, we know this isn’t the end of the story. Many physics theories beyond the Standard Model predict some kind of Higgs sector, where additional scalar bosons could exist and interact with the Higgs in some way, but have yet to be discovered. To this effect, it is useful to probe data taken from proton-proton collisions to see if particles produce states that correspond to e.g.&nbsp;resonances that look like these new scalars.</p>
+<p>In particular, this work looks at the process <span class="math inline">\(X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma\)</span>, where <span class="math inline">\(X\)</span> is a heavy scalar with a mass large enough to produce a Higgs with Standard Model mass (i.e.&nbsp;<span class="math inline">\(m_H = 125 \text{ GeV}\)</span>) and a scalar <span class="math inline">\(S\)</span> with mass <span class="math inline">\(m_S\)</span> such that <span class="math inline">\(m_X &gt; m_S + m_H\)</span>, which makes the decay <span class="math inline">\(X\rightarrow SH\)</span> satisfy energy conservation. I found an example for something that looks like a candidate event for this process as-seen by the ATLAS detector, shown in <a href="#fig-evt">Figure&nbsp;<span>9.1</span></a>.</p>
+<div id="fig-evt" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/evtdisplay1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Cross-sectional view.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/evtdisplay2.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">3-D view for depth.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.1: An example of a event’s wake in the ATLAS detector, which looks very similar to that we would see from <span class="math inline">\(X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma\)</span>, where there are two blue lines that the photons leave as a signature, and two cones from the <span class="math inline">\(b\)</span>-jets. Attribution: <span class="citation" data-cites="evt">(<a href="references.html#ref-evt" role="doc-biblioref">Aad et al. 2022</a>)</span>.</figcaption><p></p>
+</figure>
+</div>
+<p>This particular process is predicted by a number of different theories, including but not limited to:</p>
+<ul>
+<li>Next-to-Minimal two-Higgs Doublet Model <span class="citation" data-cites="N2HDM">(<a href="references.html#ref-N2HDM" role="doc-biblioref">He et al. 2009</a>)</span></li>
+<li>Next-to-Minimal Supersymmetric Standard Model <span class="citation" data-cites="NMSSM">(<a href="references.html#ref-NMSSM" role="doc-biblioref">Ellwanger, Hugonie, and Teixeira 2010</a>)</span></li>
+<li>Complex two-Higgs Doublet Model <span class="citation" data-cites="C2HDM">(<a href="references.html#ref-C2HDM" role="doc-biblioref">Ilya F. Ginzburg, Maria Krawczyk and Per Osland 2002</a>)</span></li>
+<li>Two-Real-Scalar Standard Model extension <span class="citation" data-cites="TRSM">(<a href="references.html#ref-TRSM" role="doc-biblioref">Tania Robens and Wittbrodt 2020</a>)</span></li>
+</ul>
+<p>It’s worth noting the problems that these theories solve (i.e.&nbsp;why they are interesting at all), which span combatting matter-antimatter asymmetry mechanisms in the early universe (<span class="citation" data-cites="asym1">Jiang et al. (<a href="references.html#ref-asym2" role="doc-biblioref">2016</a>)</span>) to producing possible dark matter candidates (<span class="citation" data-cites="dm1">Gonderinger, Lim, and Ramsey-Musolf (<a href="references.html#ref-dm2" role="doc-biblioref">2012</a>)</span>) amongst other things. Recall our discussion in <a href="physics.html#sec-bsm"><span>Section&nbsp;1.5</span></a> that went over some extra issues of this nature, e.g.&nbsp;the hierarchy problem.</p>
+<p>The next thing to address is why it’s worth it to look at <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> as a final state. The first reason is that if we assign the di-photon state as originating from a Higgs boson, we would have a a very clear way to select events we want to analyze, as experiments at the Large Hadron Collider have the ability to precisely determine the energies of photons in their electromagnetic calorimeters. Events originating from decays of interest would then leave a fairly sharp peak at 125 GeV in the invariant mass spectrum of the two-photon system, which we can turn into a requirement for including those events in our analysis. This would leave the <span class="math inline">\(b\)</span> quarks (which would be seen in the detector as jets due to hadronization) as originating from the <span class="math inline">\(S\)</span> particle, which is the dominant decay mode of the <span class="math inline">\(S\)</span> when one assumes that it has properties similar to the Standard Model Higgs. Of course, despite all this, choosing any one particular final state is a needle-in-a-high-dimensional-haystack approach, with there being many other choices of theories and states to consider. In that sense, there is no particular reason other than to look where has not been checked yet.</p>
+<p>What exactly are we looking for then? As alluded to in <a href="stat-practical.html#sec-asymptotics"><span>Section&nbsp;3.3</span></a>, searches for new particles involve calculating <span class="math inline">\(p\)</span>-values (or <span class="math inline">\(\text{CL}_s\)</span> values), either trying to reject a background-only hypothesis for discovery, or to set an upper limit on the signal strength. We concentrate on the latter, with the steps ahead demonstrating the task of the analyzer to optimize the workflow for this purpose.</p>
+</section>
+<section id="simulated-data" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="simulated-data"><span class="header-section-number">9.2</span> Simulated data</h2>
+<p>Data for the signal process of <span class="math inline">\(X\rightarrow SH \rightarrow b\bar{b}\gamma\gamma\)</span>, where the <span class="math inline">\(b\)</span> quarks are associated to the <span class="math inline">\(S\)</span> and the photons are associated to the Higgs boson, was generated at a variety of possible combinations of <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span>. We can see the points chosen in <a href="#fig-mass-grid">Figure&nbsp;<span>9.2</span></a>, where the upper-left quadrant is kinematically forbidden (there, <span class="math inline">\(m_X &lt; m_S + m_H\)</span>). Sensitivity to this process is forecast to be reasonable up to around <span class="math inline">\(m_X \approx\)</span> 900 GeV and <span class="math inline">\(m_S \approx\)</span> 300 GeV (by <span class="citation" data-cites="sh-sens">(<a href="references.html#ref-sh-sens" role="doc-biblioref">Sebastian Baum, Nausheen R. Shah 2010</a>)</span>), which we conservatively extended to 1000 GeV and 500 GeV respectively. We began with just the grid on the bottom-left, and later extended this sparsely to the high mass region.</p>
+<div id="fig-mass-grid" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/mass-grid.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.2: A grid of the different points for which data originating from the signal process was simulated.</figcaption><p></p>
+</figure>
+</div>
+<p>The different specific event generator tools used for all of the simulation were PYTHIA <span class="citation" data-cites="pythia">(<a href="references.html#ref-pythia" role="doc-biblioref">Sjöstrand et al. 2015</a>)</span>, SHERPA <span class="citation" data-cites="sherpa">(<a href="references.html#ref-sherpa" role="doc-biblioref">Bothmann et al. 2019</a>)</span>, EvtGen <span class="citation" data-cites="evtgen">(<a href="references.html#ref-evtgen" role="doc-biblioref">Ryd et al. 2005</a>)</span>, and NNPDF <span class="citation" data-cites="nnpdf">(<a href="references.html#ref-nnpdf" role="doc-biblioref">Ball et al. 2015</a>)</span>. We can segment their use for the two cases for signal and background.</p>
+<p>For signal processes, samples were generated for each mass point in <a href="#fig-mass-grid">Figure&nbsp;<span>9.2</span></a> at leading order (i.e.&nbsp;only the simplest processes for that interaction) with Pythia 8 doing the underlying quantum field theory calculations. EvtGen was used to simulate the fragmentation of the <span class="math inline">\(b\)</span>-quark jets into hadrons. NNPDF 2.3 controlled the set of parton distribution functions used, which dictate the interior structure of the protons that are colliding, and therefore play an important role in the calculations for different scattering probabilities when the constituents of those protons collide. Additionally, there are effects It’s worth mentioning that the new scalar particles <span class="math inline">\(X\)</span> and <span class="math inline">\(S\)</span> were generated using what’s called the <em>narrow-width approximation</em>, which simplifies calculations greatly by assuming the particles are very short-lived before decaying, and results in more narrow invariant mass spectra as a result.</p>
+<p>In the case of background – that is, every Standard Model process that could possibly generate a final state of two <span class="math inline">\(b\)</span> quarks and two photons – things get a lot more complicated, since there are many more processes we need to consider. To add more granularity to this, the main contributions that were simulated include:</p>
+<ul>
+<li>Interactions involving the strong force (known as QCD, or quantum chromodynamics) that result in two photons and two jets (shorthand <span class="math inline">\(\gamma\gamma jj\)</span>)</li>
+<li>Associated production of a Higgs boson and two top quarks (<span class="math inline">\(tt(bb)H(\gamma \gamma)\)</span>)</li>
+<li>Fusion of two gluons to a Higgs, where a gluon in the process fragments to a <span class="math inline">\(bb\)</span> pair of jets (<span class="math inline">\(ggH\)</span>)</li>
+<li>Associated production of a <span class="math inline">\(Z\)</span> boson and a Higgs, where the <span class="math inline">\(Z\)</span> decays hadronically to quarks (<span class="math inline">\(Z(qq)H(\gamma \gamma)\)</span>)</li>
+<li>Different types of di-Higgs events, where two Higgs bosons are produced</li>
+</ul>
+<p>Despite this separation, when event weights are produced, the <span class="math inline">\(\gamma\gamma jj\)</span> background completely dominates all the others (&gt; 99% of the contribution to the total event weights). The different simulation contributions are summarized in <a href="#tbl-bkg">Table&nbsp;<span>9.1</span></a> for those that want more detail, but it’s worth noting that the methods I worked on treat the background sample as one unit, equal to the concatenation of all events from these processes, which is an intentional simplification.</p>
+<div id="tbl-bkg" class="anchored">
+<table class="table">
+<caption>Table&nbsp;9.1: Different simulation tools used for the individual background processes.</caption>
+<colgroup>
+<col style="width: 14%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 43%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Process Type</strong></th>
+<th><strong>Physics simulators</strong></th>
+<th><strong>Parton distributions (Probabilities)</strong></th>
+<th><strong>Parton distributions (Showering)</strong></th>
+<th><strong>Production Mode</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Single Higgs</td>
+<td>NNLOPS + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>AZNLOCTEQ6</td>
+<td><span class="math inline">\(ggH\)</span></td>
+</tr>
+<tr class="even">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>AZNLOCTEQ6</td>
+<td>Vector-boson fusion</td>
+</tr>
+<tr class="odd">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>AZNLOCTEQ6</td>
+<td><span class="math inline">\(W^{+}H\)</span></td>
+</tr>
+<tr class="even">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>AZNLOCTEQ6</td>
+<td><span class="math inline">\(W^{-}H\)</span></td>
+</tr>
+<tr class="odd">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>AZNLOCTEQ6</td>
+<td><span class="math inline">\(qq \rightarrow ZH\)</span></td>
+</tr>
+<tr class="even">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>AZNLOCTEQ6</td>
+<td><span class="math inline">\(gg \rightarrow ZH\)</span></td>
+</tr>
+<tr class="odd">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>A14NNPDF23</td>
+<td><span class="math inline">\(ttH\)</span></td>
+</tr>
+<tr class="even">
+<td>Single Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>A14NNPDF23</td>
+<td><span class="math inline">\(bbH\)</span></td>
+</tr>
+<tr class="odd">
+<td>Single Higgs</td>
+<td>MGMCatNLO + PYTHIA8</td>
+<td>NNPDF</td>
+<td>A14NNPDF23</td>
+<td><span class="math inline">\(tHbj\)</span></td>
+</tr>
+<tr class="even">
+<td>Single Higgs</td>
+<td>MGMCatNLO + PYTHIA8</td>
+<td>NNPDF</td>
+<td>A14NNPDF23</td>
+<td><span class="math inline">\(tHW\)</span></td>
+</tr>
+<tr class="odd">
+<td>di-Higgs</td>
+<td>POWHEG + PYTHIA8</td>
+<td>PDFLHC</td>
+<td>A14NNPDF23</td>
+<td><span class="math inline">\(ggHH\)</span></td>
+</tr>
+<tr class="even">
+<td>di-Higgs</td>
+<td>MGMCatNLO + PYTHIA8</td>
+<td>NNPDF</td>
+<td>A14NNPDF23</td>
+<td>VBF <span class="math inline">\(HH\)</span> without <span class="math inline">\(VHH\)</span></td>
+</tr>
+<tr class="odd">
+<td>QCD</td>
+<td>SHERPA2</td>
+<td>SHERPA2</td>
+<td>SHERPA2</td>
+<td><span class="math inline">\(\gamma\gamma\)</span>+jets (0-4), <span class="math inline">\(m_{\gamma\gamma} \in 90-175\, \text{GeV}\)</span></td>
+</tr>
+<tr class="even">
+<td>QCD</td>
+<td>MGMCatNLO + PYTHIA8</td>
+<td>MGMCatNLO</td>
+<td>MGMCatNLO</td>
+<td><span class="math inline">\(t\bar{t}\gamma\gamma\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="preprocessing-and-selection" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="preprocessing-and-selection"><span class="header-section-number">9.3</span> Preprocessing and selection</h2>
+<p>Before analyzing the data we simulated above, which gives us access to kinematic quantities of the objects in the detector, there is typically a pre-filtering stage – called a <strong>preselection</strong> – where we slim down this dataset to only things that we’re interested in based on a set of criteria. To talk about that, we’ll have to first speak a little about jets, which need a bit more work due to their very messy signature from all the showering into hadrons.</p>
+<section id="tagging-b-jets" class="level3" data-number="9.3.1">
+<h3 data-number="9.3.1" class="anchored" data-anchor-id="tagging-b-jets"><span class="header-section-number">9.3.1</span> Tagging <span class="math inline">\(b\)</span>-jets</h3>
+<p>Just as a reminder, quarks are never seen alone – they’re always in some composite state with other quarks, which we call hadrons. When a quark is produced in a decay, it will really be bound somehow to a different quark, which we can picture as a rope. When the rope breaks from them going too far away, we can think of each end of the rope turning into a new quark to keep the state stable. We call this <strong>hadronization</strong>, and it’s this process happening over and over again that forms a spray of particles that has a conic shape, which we call a jet.</p>
+<p>Now, how might we distinguish a jet that comes from two different quark types? There aren’t any particularly clear differences from first principles that I know of, but since quarks differ in concrete ways (mass being the main one), we’d expect the jets to have subtly differing dynamics. That’s why we need more complicated algorithmic systems to tell these jets apart based on their properties, which are colloquially called <em>taggers</em> since they tag a jet with a label of the quark type. Taggers are usually something like a neural network, which can take in many different inputs about the structure of the jet, and give us a single number that represents the likelihood of that jet being of a certain type. Since the Higgs boson most commonly decays to two <span class="math inline">\(b\)</span>-jets, we have very specialized <span class="math inline">\(b\)</span>-taggers in particle physics. We’re very interested in making use of these <span class="math inline">\(b\)</span>-taggers to help us identify which jets in our events came from <span class="math inline">\(b\)</span>-quarks, which could sign our scalar <span class="math inline">\(S\)</span>.</p>
+<p>The way this appears to the analyzer is that each jet object in our data will have a score that the <span class="math inline">\(b\)</span>-tagger has given the jet based on its properties. (working point)</p>
+</section>
+<section id="selection-for-this-work" class="level3" data-number="9.3.2">
+<h3 data-number="9.3.2" class="anchored" data-anchor-id="selection-for-this-work"><span class="header-section-number">9.3.2</span> Selection for this work</h3>
+<p>There are many different analyses selections being trialed at the time of writing; the results that follow are all performed with a simple “loose” criteria imposed on the data, which requires:</p>
+<ul>
+<li>at least two selected photons</li>
+<li>no leptons</li>
+<li>at least 2 central jets (central = originating from the main collision center, or <em>primary vertex</em>)</li>
+<li>less than 6 central jets</li>
+<li>at least one jet above the 70% working point threshold for <span class="math inline">\(b\)</span>-tagging</li>
+<li>less than 3 <span class="math inline">\(b\)</span>-tagged jets at the 77% working point</li>
+</ul>
+<p>We also accept any data with exactly 2 <span class="math inline">\(b\)</span>-jets at the 77% working point threshold, as this will likely allow us to reconstruct the invariant mass <span class="math inline">\(m_{bb}\)</span> well – something very important if we want to precisely determine if our events peak at the mass of our new scalar <span class="math inline">\(S\)</span>.</p>
+</section>
+</section>
+<section id="sec-fit-strategies" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="sec-fit-strategies"><span class="header-section-number">9.4</span> Fit strategies</h2>
+<p>A few strategies were investigated to see which variables provided the most discriminating power when comparing their distribution in signal and in background. The reason for this is that we want to pick a <em>summary statistic</em> of the data to use as a foundation for the HistFactory statistical model construction (<a href="stat-practical.html#sec-hifa"><span>Section&nbsp;3.2</span></a>), and choosing something that differs in a significant way across signal and background distributions should hopefully give us smaller <span class="math inline">\(p\)</span>-values and stronger limits.</p>
+<p>We go over the two main approaches explored in the following sections.</p>
+<section id="d-fit-in-the-m_bbgammagamma-and-m_bb-plane" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="d-fit-in-the-m_bbgammagamma-and-m_bb-plane"><span class="header-section-number">9.4.1</span> 2-D fit in the <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span> plane</h3>
+<p>A somewhat natural choice to look at is the variables that, when constructed, recover the mass resonance for each of the proposed new particles <span class="math inline">\(X\)</span> and <span class="math inline">\(S\)</span>. We thus look at the invariant mass of the overall final state <span class="math inline">\(m_{bb\gamma\gamma}\)</span> (which should peak at the chosen value of <span class="math inline">\(X\)</span>) and the invariant mass of the <span class="math inline">\(b\)</span>-tagged jets <span class="math inline">\(m_{bb}\)</span> (which should peak at the chosen value of <span class="math inline">\(S\)</span>). Some example plots for the shape of these distributions in the signal and background Monte-Carlo samples can be found in <a href="#fig-2d-examples">Figure&nbsp;<span>9.3</span></a>.</p>
+<div id="fig-2d-examples" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/sh/sh-bkg-shape.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Total background shape.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/sh/sh-sig-shapes.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Some example signal shapes.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.3: Some example distributions of the <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span> invariant mass plane.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="d-fit-using-a-parametrized-neural-network-based-summary-statistic" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="d-fit-using-a-parametrized-neural-network-based-summary-statistic"><span class="header-section-number">9.4.2</span> 1-D fit using a parametrized neural network-based summary statistic</h3>
+<p>You may have thought based on earlier discussion that it may not be the case that a one-size-fits-all variable (or variables) exists across every combination of <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span> featured in <a href="#fig-mass-grid">Figure&nbsp;<span>9.2</span></a>, or indeed across any possible combination of hypothesized masses. It is then of interest to look for an observable that can be <em>parametrized</em> in the truth masses <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span> such that the chosen observable can adapt to provide better results depending on the hypothesis we’re probing. An example of such an observable is the so-called <strong>parametrized neural network</strong> (pNN), originally proposed in <span class="citation" data-cites="pnn">Baldi et al. (<a href="references.html#ref-pnn" role="doc-biblioref">2016</a>)</span>.</p>
+<p>We’re interested in neural networks more generally for their ability to provide flexible outputs (here, 1-D) that can learn to perform as we train them to do so, e.g.&nbsp;to discriminate strongly between events coming from signal and background respectively. The way a pNN is structured is no different to that of any other neural network, with the only change being the inclusion of the parameters of your physics model (here, <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span>) as additional inputs. This aims to essentially use those inputs as choosing the best model for the use case; when comparing different values of the inputs, the information from one set of values will likely be propagated through the network in a very different way to the other set, which can provide information about the context in which the network is performing inference in. Training a pNN is then no different to standard procedures – by providing the additional inputs within a batch, the loss structure of choice doesn’t have to change in any way to accommodate this, but will optimize for good average performance across all provided contexts. Moreover, if the network is able to infer this context well from the provided physics parameters, the performance of the network should carry over to new, unseen parameter points (which for us would be the gaps between the points in <a href="#fig-mass-grid">Figure&nbsp;<span>9.2</span></a>).</p>
+<section id="practical-training-considerations" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="practical-training-considerations">Practical training considerations</h4>
+<p>When training this model for our use case, a number of practical issues arose. The first is that we need to provide a set of signal truth masses for <em>all</em> events, including those coming from background. Of course, these labels do not exist; following the approach in <span class="citation" data-cites="pnn">Baldi et al. (<a href="references.html#ref-pnn" role="doc-biblioref">2016</a>)</span>, we then circumvented this to some degree by uniformly sampling these labels from the distribution present in the signal events, and assigning these as the labels to background events. The rationale behind this is to try and encode as little additional information as possible, hoping that the network will still be able to pick up the distribution of the signal context instead. Another issue is that of scaling the input variables, with it being common practice to scale all inputs to either reside in the range [0,1], or to have zero mean and unit variance. This scaling also needs to be applied to the truth masses; depending on the method chosen, the distribution of the masses could become very skewed to 0, which has the potential to make it more difficult to encode the context information for having very low values numerically.</p>
+<p>Many combinations of input variables were tried, with some examples being kinematics like <span class="math inline">\(p_T\)</span>, <span class="math inline">\(\eta\)</span>, <span class="math inline">\(\phi\)</span> (for the 2 photons and the 2 jets with highest <span class="math inline">\(p_T\)</span>), differences in these variables such as <span class="math inline">\(\Delta\phi(\gamma_1, \gamma_2)\)</span>, <span class="math inline">\(\Delta\eta(\gamma_1, \gamma_2)\)</span>, and also non-linear quantities like the angular distance between objects <span class="math inline">\(\Delta R = \sqrt{\Delta\phi + \Delta\eta}\)</span>. Despite all this, the most effective training input configuration was found to just be using only the invariant masses <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span>, which speaks to the power of the 2-D fit approach previously mentioned. An example pNN output for one of the signal points (evaluated on unseen test data only) can be found in <a href="#fig-laura">Figure&nbsp;<span>9.4</span></a>, created by my collaborator Laura Pereira Sánchez, who spearheads this work.</p>
+<div id="fig-laura" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/laura-pnn.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.4: Example pNN showing discriminating power post-training when conditioned on the signal point <span class="math inline">\(m_X\)</span> = 250 GeV, <span class="math inline">\(m_S\)</span> = 100 GeV. (Attribution: Laura Pereira Sánchez, Stockholm University)</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+</section>
+<section id="sec-sh-flows" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="sec-sh-flows"><span class="header-section-number">9.5</span> Interpolation between signal shapes</h2>
+<p>For either strategy in <a href="#sec-fit-strategies"><span>Section&nbsp;9.4</span></a>, we’re interested in some kind of way to make inference about points in-between those we’ve already simulated in <a href="#fig-mass-grid">Figure&nbsp;<span>9.2</span></a>. We would of course like to just simulate points on the fly for any hypothesis we want to probe, but that’s time, compute, and CO<span class="math inline">\(_2\)</span> that we’d rather not have in excess. In order to do this simulation-free, we need to produce the expected shape of the counts from simulation of that signal process. We’re now in the regime of somehow trying to <em>interpolate</em> the shape of the signal in whatever variables we want to use as input to the HistFactory model. Moreover, it would be great if this could come with a notion of uncertainty; by adding this uncertainty to our statistical model, we’ll be able to quantify the fact that we’re going to have a worse result in the regions for which we didn’t simulate data directly.</p>
+<p>This is exactly the context in which I developed the method presented in <a href="flow-interp.html">Chapter&nbsp;<span>8</span></a>! I use <strong>normalizing flows</strong> that are conditioned on the truth masses <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span> as a mechanism to interpolate between the signal shapes used for fitting. While this was initially designed as a strategy for the 2-D fit of <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span>, where samples from the flow would be drawn from the joint conditional distribution <span class="math inline">\(p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)\)</span> and histograms of those samples made for use as 2-D templates, the method works equally well for the 1-D pNN strategy. The reason for this is that we can just draw samples in the same way, and then build up the shape of the pNN output by computing the results given the flow samples, since the flow is defined over the same set of input variables <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span>. The resulting interpolation uncertainty can be found from averaging the yields from the 5 sets of samples, and the uncertainty from their standard deviation. We can then normalize this histogram to the appropriate amount, provided we have access to that factor (more on that later; we have to interpolate that too).</p>
+<p>Exactly like in <a href="flow-interp.html">Chapter&nbsp;<span>8</span></a>, a train/test split is made across a number of <span class="math inline">\((m_X, m_S)\)</span> points, which can be seen in <a href="#fig-train-test-sh">Figure&nbsp;<span>9.5</span></a>. Here, we don’t make any separate valid split that involves the training grid data.</p>
+<div id="fig-train-test-sh" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/flow-mass-grid.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.5: The train/test split across the grid of the different points for which signal process data was simulated.</figcaption><p></p>
+</figure>
+</div>
+<p>The training setup is then to look at event-wise pairs of <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span>, along with the context label <span class="math inline">\((m_X, m_S)\)</span> representing the parameters at which the event was generated. These will be provided in batches, and used as input to the flow, which assesses its quality though calculating the mean negative log-likelihood across the batch, and then uses the gradient of this to update it’s transform parameters. The results from this training procedure are the continuously defined conditional distribution <span class="math inline">\(p(m_{bb\gamma\gamma} m_{bb} | m_X, m_S)\)</span>, as well as the ability to draw samples from this distribution.</p>
+<p>One practical aspect of this training procedure that I didn’t cover in <a href="flow-interp.html">Chapter&nbsp;<span>8</span></a> is that of <em>event weights</em>. When applying this problem to a particle physics context, we’re conscious of the fact that events are not supplied alone, but also with a weight that controls its relevance as a proportion of the distributions defined by that physics process. This means that the distributions we’re trying to imitate with the flow need to be appropriately scaled according to these weights. A fairly simple way to do this is to just weight the contribution to the loss from a given event proportional to it’s event weight, i.e.&nbsp;<em>multiply the loss of an event (the negative log-likelihood) by its weight</em>. The intuition behind this is that one would expect an event with weight 2 to have the contribution to the distribution of two individual events with identical <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span> values. It follows that the loss expected from those two events is just two equal contributions of loss at the same values of <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span>.</p>
+<section id="results" class="level3" data-number="9.5.1">
+<h3 data-number="9.5.1" class="anchored" data-anchor-id="results"><span class="header-section-number">9.5.1</span> Results</h3>
+<p>I performed the training procedure as described for 5 flows with different initializations, and use their ensemble as the predictive model, with the standard deviations of these predictions (for likelihood values or histogram yields) acting as an uncertainty. The hyperparameters of the training procedure are very similar to the work in <a href="flow-interp.html">Chapter&nbsp;<span>8</span></a>:</p>
+<ul>
+<li>Batch size of 4000 points</li>
+<li>8 layers of linear, autoregressive transforms
+<ul>
+<li>Each transform’s neural network has one hidden layer of 16 neurons</li>
+</ul></li>
+<li>Adam optimizer with a learning rate of 1e-3</li>
+<li>10000 iterations total (from which the best performing iteration on the test set is selected).</li>
+</ul>
+<!-- We can see some of the resulting distributions for the test context points in @fig-flow-vs-data-sh.
+
+![Example shapes of the distributions for the test set, both from the flow and from data.](images/sh/data-vs-flow){#fig-flow-vs-data-sh} -->
+<p>We’ll start by looking at the <em>binwise pull values</em> just as in<a href="flow-interp.html">Chapter&nbsp;<span>8</span></a>, i.e.</p>
+<p><span id="eq-pull2"><span class="math display">\[
+\text{pull } = \frac{\text{flow prediction }-\text{ data prediction}}{\sigma_{\text{flow}}}~.
+\tag{9.1}\]</span></span></p>
+<!-- We can inspect this bin-by-bin for histograms with bins of size 20 GeV in both directions, which we can see for the training set in @fig-pulls-train-sh and the test set in @fig-pulls-test-sh, where the histograms are formed 300 GeV either side of the mass value in both directions where the majority of the distribution lies. Note that green is where the flow histogram is overpredicting, and brown is where it underpredicts. Immediately, we can notice the difference between the training and test set points; while many of the training points have a more diffuse pattern with lower values of the pull, there are clear hotspots and coldspots for some of the test points. Notably, the points $m_X, m_S = 750, 110$ GeV and $m_X, m_S = 600, 200$ GeV show that the flow has a predictive bias in a region away from the peak of the distribution (which usually coincides with the mass point at which the distribution was generated).
+
+![Plots of the bin-by-bin pull across different context points from the training set. The axes are omitted for legibility, but the histogram range is +/- 300 GeV in both directions from the red cross (without including negative values).](images/sh/sh-train-diff){#fig-pulls-train-sh}
+
+![Plots of the bin-by-bin pull across different context points from the test set. The axes are omitted for legibility, but the histogram range is +/- 300 GeV in both directions from the red cross (without including negative values).](images/sh/sh-test-diff){#fig-pulls-test-sh} -->
+<p><a href="#fig-pulls-sh">Figure&nbsp;<span>9.6</span></a> shows histograms of the pull accumulated over all training and test points separately, where the 2-D histograms of the pull in the <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span> plane are aggregated for each category of point. There’s also a thresholding condition on these histograms such that the data doesn’t predict less than 10 events in any given bin, else we could artificially inflate the performance of the flow when it’s good at predicting values far from the bulk of the distribution. We notice that the performance on the test set has both a larger bias and variance due to the presence of some very large biases for a few of the test points. It’s then of course interesting to investigate which points are the most problematic. We can visualize this through coloring each point on the signal mass grid with it’s corresponding mean and standard deviation, which we do in <a href="#fig-pull-dist">Figure&nbsp;<span>9.7</span></a>. Here, it’s clear that there are a few test points that are particularly problematic (strong pink coloring on both plots).</p>
+<div id="fig-pulls-sh" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/sh-pulls-flow.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.6: Left: Histogram of the bin-by-bin pull (using the flow ensemble uncertainty) accumulated across different context points from the training set. Right: Same for the test set. Both plots have a normal distribution fit overlayed.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-pull-dist" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/pull-dist.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.7: Left: Signal grid points colored by the mean of the pulls (using the flow ensemble uncertainty) for that point. Right: Signal grid points colored by the standard deviation of the pulls for that point.</figcaption><p></p>
+</figure>
+</div>
+<p>Before advancing the discussion further, it’s worth touching on another possible source of uncertainty. If we treat each bin count from simulation as the expected number of events <span class="math inline">\(\lambda\)</span> for a Poisson distribution (as is done when modelling real data using HistFactory), we know that those shapes look remarkably like normal distributions of width <span class="math inline">\(\sqrt{\lambda}\)</span> for <span class="math inline">\(\lambda \geqslant 10\)</span> (see <a href="stat-fundamentals.html#sec-poisson"><span>Section&nbsp;2.1.6.2</span></a>). The square root of the bin count then serves as a notion of so-called <strong>statistical uncertainty</strong> – a standard deviation’s worth of room in which the actual count may differ from that predicted by simulation, purely from how many events lie in that bin<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. We can then do the same method as above, but replace the flow ensemble uncertainty with the square root of the bin count. These plots are shown in <a href="#fig-pulls-sh-stats">Figure&nbsp;<span>9.8</span></a> and <a href="#fig-pull-dist-stats">Figure&nbsp;<span>9.9</span></a>. We see a dramatic improvement in the test set! It would appear that while there are definitely distinct differences between flow predictions and data (a bias clearly still exists on the right), those differences are often within statistical uncertainties.</p>
+<div id="fig-pulls-sh-stats" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/sh-pulls-stats.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.8: Left: Histogram of the bin-by-bin pull (using the statistical uncertainty only) accumulated across different context points from the training set. Right: Same for the test set. Both plots have a normal distribution fit overlayed.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-pull-dist-stats" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/pull-dist-stats.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.9: Left: Signal grid points colored by the mean of the pulls (using the statistical uncertainty only) for that point. Right: Signal grid points colored by the standard deviation of the pulls for that point.</figcaption><p></p>
+</figure>
+</div>
+<p>We can repeat this exercise one more time: instead of choosing one of these two uncertainties, we can just look at the maximum of either one in any given bin to attempt to cover us in the worst case scenario. Those plots are found in</p>
+<div id="fig-pulls-sh-both" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/sh-pulls-stats-and-flow-more-data.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.10: Left: Histogram of the bin-by-bin pull (using both the statistical and the flow uncertainty) accumulated across different context points from the training set. Right: Same for the test set. Both plots have a normal distribution fit overlayed.</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-pull-dist-both" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/pull-dist-both.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.11: Left: Signal grid points colored by the mean of the pulls (using both the statistical and the flow uncertainty) for that point. Right: Signal grid points colored by the standard deviation of the pulls for that point.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="discussion" class="level3" data-number="9.5.2">
+<h3 data-number="9.5.2" class="anchored" data-anchor-id="discussion"><span class="header-section-number">9.5.2</span> Discussion</h3>
+<p>Overall, the flow training here shows clear signs of the ability to interpolate the signal shapes. In terms of criticisms, many of the relevant points from <a href="flow-interp.html#sec-flow-discussion"><span>Section&nbsp;8.5</span></a> apply here too, including not using any more advanced flow model, and the significant fact that we’re restricting our ability to interpolate by holding out information in what is an inherently sparse feature space. The next thing to try in my view – which was not tried due to time and compute cost – would be to do a train/valid/test split in the <em>data</em> (so <span class="math inline">\(m_{bb\gamma\gamma}\)</span> and <span class="math inline">\(m_{bb}\)</span> values), then within that training set, doing some kind of k-fold validation to select hyperparameters across the different <span class="math inline">\(m_X, m_S\)</span> points, i.e.&nbsp;removing random permutations of points at a time, then select the hyperparameters that cause the best average generalization to those removed points. Ensembles of flows with those hyperparameters would then be trained, and model selection performed with the valid set, then assessed on the test set. This foregoes our ability to precisely benchmark the interpolation performance as above, but any such assessment would inherently bias both model selection and apparent interpolation ability (the models may not interpolate well in other regions).</p>
+</section>
+</section>
+<section id="interpolation-between-overall-yields" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="interpolation-between-overall-yields"><span class="header-section-number">9.6</span> Interpolation between overall yields</h2>
+<p>In addition to the method presented in <a href="#sec-sh-flows"><span>Section&nbsp;9.5</span></a>, there’s a missing component: the overall normalization of the produced histograms. This is important from the perspective of interpretation of the signal strength <span class="math inline">\(\mu\)</span>, which represents the relative overall cross-section of <span class="math inline">\(X\rightarrow SH\)</span> multiplied by the branching ratios for <span class="math inline">\(S \rightarrow bb\)</span> and <span class="math inline">\(H \rightarrow \gamma\gamma\)</span>. Why? Consider that events are generated with some assumed cross-section, and that information is encoded in the event weights. If we do not provide this information as a normalization when inputting predicted counts from simulation into our statistical model, then the resulting signal strength limits will not accurately reflect the cross-section used, since the counts are incorrectly normalized. We then desire a second, simpler interpolation across the space of the total event count per process, which is the <em>sum of the event weights</em>.</p>
+<section id="gaussian-process-interpolation" class="level3" data-number="9.6.1">
+<h3 data-number="9.6.1" class="anchored" data-anchor-id="gaussian-process-interpolation"><span class="header-section-number">9.6.1</span> Gaussian process interpolation</h3>
+<p>A flexible class of models that come with a notion of uncertainty are <strong>Gaussian processes</strong> (GPs). I include only a brief description; a working knowledge of GPs is not needed to gauge the quality of the results, but one can find that in the excellent article in <span class="citation" data-cites="gps">Görtler, Kehlbeck, and Deussen (<a href="references.html#ref-gps" role="doc-biblioref">2019</a>)</span>. To describe how we’d use GPs in this case, give each member the set of signal mass grid points (<span class="math inline">\(m_X, m_S\)</span> values) a corresponding label for the sum of the event weights (<span class="math inline">\(\sum_i w_i\)</span>) produced for that mass tuple. Each of these <span class="math inline">\(m_X, m_S\)</span> values represents a random variable that we can model as having a normal distribution over the yields, where the means are often either zero or centered on the data, and the covariances are determined from a functional form which is called the <em>kernel</em>. The kernel is where the magic happens in GPs, and acts as the prior in a Bayesian inference context. The kernel parameters are subsequently fit to the training data.</p>
+<p>Speaking of inference, we’re then interested in inferring the values of <span class="math inline">\(\sum_i w_i\)</span> for new, unseen pairs of <span class="math inline">\(m_X, m_S\)</span> values. By treating the joint distribution of the test and training points as a multivariate normal, with dimensions equal to the size of each set of points combined, we can condition this distribution on just the training data to get the distribution of the points in test set only. Since normal distributions are closed under conditioning, the resulting distribution will also be a multivariate normal; predictions for these points are then just samples from this distribution, which lends itself naturally to the notion of uncertainty, since we can include intervals of our choosing from that distribution along with the predicted samples.</p>
+<p>Applying all this leads to the set of predicted values from this conditional distribution shown in <a href="#fig-sh-gp">Figure&nbsp;<span>9.12</span></a>, where the left-hand plot shows the interpolated yield predictions, and the right-hand plot shows the corresponding relative uncertainties. The exact functional form of the kernel was chosen somewhat arbitrarily; I took many combinations of common kernels, and applied k-fold validation (with 10 folds) across the training points, then chose the form that minimized the average absolute error divided by the uncertainty from the GP (c.f. the pull from <a href="#eq-pull2">Equation&nbsp;<span>9.1</span></a>). We can see that the bottom-left hand corner is white, which represents the model predicting negative yields. This is not considered problematic, as this region is outside the realm of interpolation, which is the planned context in which this would be used. Moreover, one can notice in the right-hand plot the increase in relative uncertainty as we go to the bottom-left hand corner (to nearly 100% for some values) despite that being a region of high data density. This is attributed to the fact that there is a very rapid variation in the yields in this corner of parameter space, which can be seen in the left-hand plot with the concentration of blue lines.</p>
+<div id="fig-sh-gp" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/gp.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.12: Left: Plot of the interpolated yields using a Gaussian process model, with the full post-fit kernel function described in the top of the plot. Right: The map of the corresponding uncertainties for the GP predictions.</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="a-new-flow-based-observable-s_textflow" class="level2" data-number="9.7">
+<h2 data-number="9.7" class="anchored" data-anchor-id="a-new-flow-based-observable-s_textflow"><span class="header-section-number">9.7</span> A new flow-based observable <span class="math inline">\(s_{\text{flow}}\)</span></h2>
+<p>In addition to the work above, I had one more idea for this analysis. It results from thinking about the fact that we’ve trained a continuous likelihood function <span class="math inline">\(p(m_{bb\gamma\gamma}, m_{bb} | m_X, m_S)\)</span>, but are in a sense throwing some of this information away by discretizing the result. The idea presented here tries to make use of this information from a practical standpoint, and not necessarily an optimality one.</p>
+<p>The fit strategies proposed are both clearly effective, but they both have their shortcomings:</p>
+<ul>
+<li>The 2-D fit is <em>simple</em> and <em>powerful</em>, but suffers from the <em>high number of bins</em> needed to compute the likelihood, leading to things like ad-hoc region selection to reduce the bins we include.</li>
+<li>The pNN strategy is much more <em>efficient</em>, as a 1-D distribution is far more simple to compute from an inference perspective. However, we need to <em>assign signal masses to background</em>, which don’t exist and so could affect our performance.</li>
+</ul>
+<p>To address these points, we can be inspired by the literature for <strong>learning likelihood ratios</strong>, e.g.&nbsp;the likelihood ratio trick <span class="citation" data-cites="lrt">(<a href="references.html#ref-lrt" role="doc-biblioref">Cranmer, Pavez, and Louppe 2015</a>)</span>, where we exploit the fact that a perfect 1-D classifier between signal and background trained with binary cross-entropy would learn the distribution</p>
+<p><span class="math display">\[
+s^*(x) = \frac{p_{\text{sig}}(x)}{p_{\text{sig}}(x) + p_{\text{bkg}}(x)}~,
+\]</span></p>
+<p>which is then typically rearranged to construct the likelihood ratio of signal and background in terms of <span class="math inline">\(s^*\)</span>. Here, <span class="math inline">\(x\)</span> would be our variables of interest for classifying, e.g.&nbsp;<span class="math inline">\(x = m_{bb\gamma\gamma}, m_{bb}\)</span>. If we were to do this using our <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span> values (i.e.&nbsp;the pNN classifier), our signal distribution is then parametrized by <span class="math inline">\(m_X\)</span> and <span class="math inline">\(m_S\)</span>, so we may expect something more like</p>
+<p><span class="math display">\[
+s^*(x | m_X, m_S) = \frac{p_{\text{sig}}(x |m_X, m_S)}{p_{\text{sig}}(x  |m_X, m_S) + p_{\text{bkg}}(x)}~.
+\]</span></p>
+<p>This distribution <span class="math inline">\(p_{\text{sig}}(x | m_X, m_S)\)</span> is directly the product of our work with signal interpolation! If, then, we could learn a background distribution in the same way (e.g.&nbsp;with an unconditional flow), we could construct the observable</p>
+<p><span id="eq-sflow"><span class="math display">\[
+s_{\text{flow}}(x | m_X, m_S) = \frac{q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S)}{q^{({\text{flow}})}_{\text{sig}}(x  |m_X, m_S) + q^{({\text{flow}})}_{\text{bkg}}(x)}~,
+\tag{9.2}\]</span></span></p>
+<p>where the distribution <span class="math inline">\(q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S)\)</span> is the output from training the flow interpolation model, and <span class="math inline">\(q^{({\text{flow}})}_{\text{bkg}}(x)\)</span> comes from training a flow to learn the background distribution over <span class="math inline">\(x\)</span>. By constructing <span class="math inline">\(s_{\text{flow}}\)</span>, we’re making something that – in the limit of well-modelled distributions for signal and background – could provide some notion of optimality when it comes to discriminating power. Moreover, unlike the pNN, we’d be explicitly modelling the background component of this, and don’t have to assign values of the truth masses to the background points during training. We can also include a notion of uncertainty; if we model the flows using <em>ensembles</em> as in <a href="#sec-sh-flows"><span>Section&nbsp;9.5</span></a>, each likelihood value will have separate predictions from each member of the ensemble, which we can average and take the standard deviation of to get uncertainties for each flow. With a bit of error propagation, we then construct the way overcomplicated formula of</p>
+<p><span class="math display">\[
+s_{\text{flow}}(x | m_X, m_S) \pm \sigma_{s} = \frac{q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) \pm \sigma^{({\text{flow}})}_{\text{sig}}}{\left(q^{({\text{flow}})}_{\text{sig}}(x  |m_X, m_S) \pm \sigma^{({\text{flow}})}_{\text{sig}}\right) + \left(q^{({\text{flow}})}_{\text{bkg}}(x) \pm \sigma^{({\text{flow}})}_{\text{bkg}}\right)}~,
+\]</span> <span id="eq-sflow"><span class="math display">\[
+\Rightarrow  \sigma_{s} = \sqrt{\frac{\left(q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) \sigma^{({\text{flow}})}_{\text{bkg}}\right)^2 + \left(q^{({\text{flow}})}_{\text{bkg}}(x) \sigma^{({\text{flow}})}_{\text{sig}}\right)^2}{\left( q^{({\text{flow}})}_{\text{sig}}(x |m_X, m_S) + q^{({\text{flow}})}_{\text{bkg}}(x) \right)^4}}~.
+\tag{9.3}\]</span></span></p>
+<!-- For implementation purposes, I include a pseudocoded version of this in @
+
+```
+class Discriminant:
+    sig_flow: FlowEnsemble
+    bkg_flow: FlowEnsemble
+
+    def __init__(self, sig_flow, bkg_flow):
+        self.sig_flow = sig_flow
+        self.bkg_flow = bkg_flow
+
+    @staticmethod
+    def discriminant_err(s, b, serr, berr):  # error propagation
+        return (
+            ((b**2) * (serr**2) + (s**2) * (berr**2)) / ((x + y) ** 4)
+        ) ** 0.5
+
+    def value_and_err(self, input, context):
+        sig, sig_err = self.sig_flow.pdf_and_err(input, context)
+        bkg, bkg_err = self.bkg_flow.pdf_and_err(input)
+
+        return sig / (sig + bkg), self.discriminant_err(sig, bkg, sig_err, bkg_err)
+``` -->
+<p>Only a small amount of prototyping of <span class="math inline">\(s_{\text{flow}}\)</span> was carried out, which I’ll talk about here. To model <a href="#eq-sflow">Equation&nbsp;<span>9.3</span></a>, the crucial ingredient we’re missing is the background flow <span class="math inline">\(q^{({\text{flow}})}_{\text{bkg}}(x)\)</span>; it may be desirable to split this up into explicitly modelling processes, but this was not explored, and just the overall shape was learned. Following the same prescription as <a href="#sec-sh-flows"><span>Section&nbsp;9.5</span></a>, but without any conditioning and a train/test split on the data points themselves, I trained a flow to model the (weighted) background shape. A comparison between the learned flow distribution and the data histogram can be found in <a href="#fig-flow-vs-bkg">Figure&nbsp;<span>9.13</span></a>.</p>
+<div id="fig-flow-vs-bkg" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/flowvsbkg.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.13: Left: Background histogram including event weights. Middle: Learned flow distribution. Right: Background histogram without event weights.</figcaption><p></p>
+</figure>
+</div>
+<p>Satisfied that the shape is good, we move swiftly on to view some of the example distributions given by <a href="#eq-sflow">Equation&nbsp;<span>9.3</span></a> using this flow and one of the results from the many training configuration tried in <a href="#sec-sh-flows"><span>Section&nbsp;9.5</span></a>. We find these distributions in <a href="#fig-sflow-shapes">Figure&nbsp;<span>9.14</span></a>, where we plot the value of <span class="math inline">\(s_{\text{flow}}\)</span> for an equal number of points from both background and signal distributions (244637 – the length of the background test set), using their values of <span class="math inline">\(m_{bb\gamma\gamma}, m_{bb}\)</span> as input. Note that the points shown are all unseen points from the perspective of the signal flow, and the background data is also from the test set partition from the training, so none of the data has been seen by either flow. Despite this, the observable shows some great promise for discriminating between signal and background, with the distributions being largely separated. The cases that perform slightly worse are those where the background Monte Carlo distribution peaks, e.g.&nbsp;the point <span class="math inline">\(m_X\)</span> = 300 GeV, <span class="math inline">\(m_S\)</span> = 170 GeV, but even then the performance is still highly discriminatory.</p>
+<div id="fig-sflow-shapes" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sh/conditioned_sflow_all.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.14: Plots of the distribution of <span class="math inline">\(s_{\text{flow}}\)</span> for a variety of test set signal points, where an even number of points are provided of either signal or background.</figcaption><p></p>
+</figure>
+</div>
+<!-- We may also be curious what happens when we condition on the wrong point, i.e. when the data comes from a different $m_X$ and $m_S$; such a case can be seen in -->
+</section>
+<section id="future-and-outlook" class="level2" data-number="9.8">
+<h2 data-number="9.8" class="anchored" data-anchor-id="future-and-outlook"><span class="header-section-number">9.8</span> Future and outlook</h2>
+<p>There are many ideas here – I’m unsure how many will make it into the final analysis product, but the interpolation has gotten more mature since I wrote this section, though it still suffers from some of the drawbacks listed. In particular though, it now trains on <em>all</em> the mass points, and will be assessed with some newly generated events from previously non-existent mass points that definitely fall in the interpolation range.</p>
+<p>Those that are ATLAS-inclined are invited to look at the internal note we just published, which includes much more detail on the overall analysis: ANA-HDBS-2021-17-INT1.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-evt" class="csl-entry" role="doc-biblioentry">
+Aad, Georges et al. 2022. <span>“<span class="nocase">Search for Higgs boson pair production in the two bottom quarks plus two photons final state in <span class="math inline">\(pp\)</span> collisions at <span class="math inline">\(\sqrt{s}=13\)</span> TeV with the ATLAS detector</span>.”</span> <em>Phys. Rev. D</em> 106 (5): 052001. <a href="https://doi.org/10.1103/PhysRevD.106.052001">https://doi.org/10.1103/PhysRevD.106.052001</a>.
+</div>
+<div id="ref-higgs" class="csl-entry" role="doc-biblioentry">
+ATLAS-Collaboration. 2012. <span>“Observation of a New Particle in the Search for the Standard Model Higgs Boson with the ATLAS Detector at the LHC.”</span> <em>Physics Letters B</em> 716 (1): 1–29. <a href="https://doi.org/10.1016/j.physletb.2012.08.020">https://doi.org/10.1016/j.physletb.2012.08.020</a>.
+</div>
+<div id="ref-pnn" class="csl-entry" role="doc-biblioentry">
+Baldi, Pierre, Kyle Cranmer, Taylor Faucett, Peter Sadowski, and Daniel Whiteson. 2016. <span>“Parameterized Neural Networks for High-Energy Physics.”</span> <em>The European Physical Journal C</em> 76 (5). <a href="https://doi.org/10.1140/epjc/s10052-016-4099-4">https://doi.org/10.1140/epjc/s10052-016-4099-4</a>.
+</div>
+<div id="ref-nnpdf" class="csl-entry" role="doc-biblioentry">
+Ball, Richard D. et al. 2015. <span>“<span class="nocase">Parton distributions for the LHC Run II</span>.”</span> <em>JHEP</em> 04: 040. <a href="https://doi.org/10.1007/JHEP04(2015)040">https://doi.org/10.1007/JHEP04(2015)040</a>.
+</div>
+<div id="ref-sherpa" class="csl-entry" role="doc-biblioentry">
+Bothmann, Enrico, Gurpreet Singh Chahal, Stefan Höche, Johannes Krause, Frank Krauss, Silvan Kuttimalai, Sebastian Liebschner, et al. 2019. <span>“Event Generation with Sherpa 2.2.”</span> <em><span>SciPost</span> Physics</em> 7 (3). <a href="https://doi.org/10.21468/scipostphys.7.3.034">https://doi.org/10.21468/scipostphys.7.3.034</a>.
+</div>
+<div id="ref-lrt" class="csl-entry" role="doc-biblioentry">
+Cranmer, Kyle, Juan Pavez, and Gilles Louppe. 2015. <span>“Approximating Likelihood Ratios with Calibrated Discriminative Classifiers.”</span> arXiv. <a href="https://doi.org/10.48550/ARXIV.1506.02169">https://doi.org/10.48550/ARXIV.1506.02169</a>.
+</div>
+<div id="ref-NMSSM" class="csl-entry" role="doc-biblioentry">
+Ellwanger, Ulrich, Cyril Hugonie, and Ana M. Teixeira. 2010. <span>“The Next-to-Minimal Supersymmetric Standard Model.”</span> <em>Physics Reports</em> 496 (1): 1–77. https://doi.org/<a href="https://doi.org/10.1016/j.physrep.2010.07.001">https://doi.org/10.1016/j.physrep.2010.07.001</a>.
+</div>
+<div id="ref-asym1" class="csl-entry" role="doc-biblioentry">
+Fromme, Lars, Stephan J Huber, and Michael Seniuch. 2006. <span>“Baryogenesis in the Two-Higgs Doublet Model.”</span> <em>Journal of High Energy Physics</em> 2006 (11): 038–38. <a href="https://doi.org/10.1088/1126-6708/2006/11/038">https://doi.org/10.1088/1126-6708/2006/11/038</a>.
+</div>
+<div id="ref-dm2" class="csl-entry" role="doc-biblioentry">
+Gonderinger, Matthew, Hyungjun Lim, and Michael J. Ramsey-Musolf. 2012. <span>“Complex Scalar Singlet Dark Matter: Vacuum Stability and Phenomenology.”</span> <em>Phys. Rev. D</em> 86 (August): 043511. <a href="https://doi.org/10.1103/PhysRevD.86.043511">https://doi.org/10.1103/PhysRevD.86.043511</a>.
+</div>
+<div id="ref-gps" class="csl-entry" role="doc-biblioentry">
+Görtler, Jochen, Rebecca Kehlbeck, and Oliver Deussen. 2019. <span>“A Visual Exploration of Gaussian Processes.”</span> <em>Distill</em>. <a href="https://doi.org/10.23915/distill.00017">https://doi.org/10.23915/distill.00017</a>.
+</div>
+<div id="ref-N2HDM" class="csl-entry" role="doc-biblioentry">
+He, Xiao-Gang, Tong Li, Xue-Qian Li, Jusak Tandean, and Ho-Chin Tsai. 2009. <span>“Constraints on Scalar Dark Matter from Direct Experimental Searches.”</span> <em>Phys. Rev. D</em> 79: 0235212. <a href="https://doi.org/10.1103/PhysRevD.79.023521">https://doi.org/10.1103/PhysRevD.79.023521</a>.
+</div>
+<div id="ref-C2HDM" class="csl-entry" role="doc-biblioentry">
+Ilya F. Ginzburg, Maria Krawczyk and Per Osland. 2002. <span>“<span class="nocase">Two-Higgs-Doublet Models with CP violation</span>.”</span> <a href="https://arxiv.org/abs/0211371">https://arxiv.org/abs/0211371</a>.
+</div>
+<div id="ref-asym2" class="csl-entry" role="doc-biblioentry">
+Jiang, Minyuan, Ligong Bian, Weicong Huang, and Jing Shu. 2016. <span>“Impact of a Complex Singlet: Electroweak Baryogenesis and Dark Matter.”</span> <em>Phys. Rev. D</em> 93 (March): 065032. <a href="https://doi.org/10.1103/PhysRevD.93.065032">https://doi.org/10.1103/PhysRevD.93.065032</a>.
+</div>
+<div id="ref-dm1" class="csl-entry" role="doc-biblioentry">
+Lerner, Rose N., and John McDonald. 2009. <span>“Gauge Singlet Scalar as Inflaton and Thermal Relic Dark Matter.”</span> <em>Phys. Rev. D</em> 80 (December): 123507. <a href="https://doi.org/10.1103/PhysRevD.80.123507">https://doi.org/10.1103/PhysRevD.80.123507</a>.
+</div>
+<div id="ref-evtgen" class="csl-entry" role="doc-biblioentry">
+Ryd, Anders, David Lange, Natalia Kuznetsova, Sophie Versille, Marcello Rotondo, David P. Kirkby, Frank K. Wuerthwein, and Akimasa Ishikawa. 2005. <span>“<span class="nocase">EvtGen: A Monte Carlo Generator for B-Physics</span>,”</span> May.
+</div>
+<div id="ref-sh-sens" class="csl-entry" role="doc-biblioentry">
+Sebastian Baum, Nausheen R. Shah. 2010. <span>“<span class="nocase">Benchmark Suggestions for Resonant Double Higgs Production at the LHC for Extended Higgs Sectors</span>.”</span> <a href="https://arxiv.org/abs/1904.10810">https://arxiv.org/abs/1904.10810</a>.
+</div>
+<div id="ref-pythia" class="csl-entry" role="doc-biblioentry">
+Sjöstrand, Torbjörn, Stefan Ask, Jesper R. Christiansen, Richard Corke, Nishita Desai, Philip Ilten, Stephen Mrenna, Stefan Prestel, Christine O. Rasmussen, and Peter Z. Skands. 2015. <span>“An Introduction to <span>PYTHIA</span> 8.2.”</span> <em>Computer Physics Communications</em> 191 (June): 159–77. <a href="https://doi.org/10.1016/j.cpc.2015.01.024">https://doi.org/10.1016/j.cpc.2015.01.024</a>.
+</div>
+<div id="ref-TRSM" class="csl-entry" role="doc-biblioentry">
+Tania Robens, Tim Stefaniak, and Jonas Wittbrodt. 2020. <span>“Two-Real-Scalar-Singlet Extension of the SM: LHC Phenomenology and Benchmark Scenarios.”</span> <em>The European Physical Journal C</em> 80 (151). https://doi.org/<a href="https://doi.org/10.1140/epjc/s10052-020-7655-x">https://doi.org/10.1140/epjc/s10052-020-7655-x</a>.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>in HEP-speak, high numbers of events = “high statistics”, hence the name<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./flow-interp.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
