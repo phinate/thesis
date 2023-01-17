@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - 2&nbsp; Probability and Statistics, in theory</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./stat-practical.html" rel="next">
+<link href="./physics.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Analysis in High-Energy Physics as a Differentiable Program</a>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container">
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Fundamentals</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./physics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./stat-fundamentals.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./stat-practical.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./diffprog.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./autodiff.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./ml.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Applications</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./diffprog-hep.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./flow-interp.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./sh.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Appendices</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+
+  <ul>
+  <li><a href="#probability-distributions-and-likelihood" id="toc-probability-distributions-and-likelihood" class="nav-link active" data-scroll-target="#probability-distributions-and-likelihood"><span class="toc-section-number">2.1</span>  Probability, distributions, and likelihood</a>
+  <ul class="collapse">
+  <li><a href="#axioms-of-probability-theory" id="toc-axioms-of-probability-theory" class="nav-link" data-scroll-target="#axioms-of-probability-theory"><span class="toc-section-number">2.1.1</span>  Axioms of probability theory</a></li>
+  <li><a href="#interpretations-of-p" id="toc-interpretations-of-p" class="nav-link" data-scroll-target="#interpretations-of-p"><span class="toc-section-number">2.1.2</span>  Interpretations of <span class="math inline">\(P\)</span></a></li>
+  <li><a href="#probability-density" id="toc-probability-density" class="nav-link" data-scroll-target="#probability-density"><span class="toc-section-number">2.1.3</span>  Probability density</a></li>
+  <li><a href="#change-of-variables-formula" id="toc-change-of-variables-formula" class="nav-link" data-scroll-target="#change-of-variables-formula"><span class="toc-section-number">2.1.4</span>  Change of variables formula</a></li>
+  <li><a href="#expectation-values" id="toc-expectation-values" class="nav-link" data-scroll-target="#expectation-values"><span class="toc-section-number">2.1.5</span>  Expectation values</a></li>
+  <li><a href="#sec-dists" id="toc-sec-dists" class="nav-link" data-scroll-target="#sec-dists"><span class="toc-section-number">2.1.6</span>  Commonly used distributions</a></li>
+  <li><a href="#sec-nps" id="toc-sec-nps" class="nav-link" data-scroll-target="#sec-nps"><span class="toc-section-number">2.1.7</span>  Nuisance parameters</a></li>
+  </ul></li>
+  <li><a href="#metrics-of-probability" id="toc-metrics-of-probability" class="nav-link" data-scroll-target="#metrics-of-probability"><span class="toc-section-number">2.2</span>  Metrics of probability</a>
+  <ul class="collapse">
+  <li><a href="#sec-fisher" id="toc-sec-fisher" class="nav-link" data-scroll-target="#sec-fisher"><span class="toc-section-number">2.2.1</span>  Fisher information and the Cramér–Rao bound</a></li>
+  <li><a href="#sec-KL" id="toc-sec-KL" class="nav-link" data-scroll-target="#sec-KL"><span class="toc-section-number">2.2.2</span>  Kullback-Leibler divergence</a></li>
+  </ul></li>
+  <li><a href="#inference" id="toc-inference" class="nav-link" data-scroll-target="#inference"><span class="toc-section-number">2.3</span>  Inference</a>
+  <ul class="collapse">
+  <li><a href="#sec-mle" id="toc-sec-mle" class="nav-link" data-scroll-target="#sec-mle"><span class="toc-section-number">2.3.1</span>  Point estimation</a></li>
+  <li><a href="#sec-conf-intervals" id="toc-sec-conf-intervals" class="nav-link" data-scroll-target="#sec-conf-intervals"><span class="toc-section-number">2.3.2</span>  Confidence intervals</a></li>
+  <li><a href="#sec-hyptests" id="toc-sec-hyptests" class="nav-link" data-scroll-target="#sec-hyptests"><span class="toc-section-number">2.3.3</span>  Frequentist hypothesis testing</a></li>
+  <li><a href="#duality-between-hypothesis-test-and-intervals" id="toc-duality-between-hypothesis-test-and-intervals" class="nav-link" data-scroll-target="#duality-between-hypothesis-test-and-intervals"><span class="toc-section-number">2.3.4</span>  Duality between hypothesis test and intervals</a></li>
+  <li><a href="#sec-bayes" id="toc-sec-bayes" class="nav-link" data-scroll-target="#sec-bayes"><span class="toc-section-number">2.3.5</span>  Bayesian procedures</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+
+
+  </div>
+
+
+</header>
+
+<p>It must be said that I have no desire to subject you, the reader, to the same philosophical torment that I have undergone in my pursuit of clarity of this topic, which I could not even claim to have reached. Moreover, given that this is an <em>experimental</em> physics thesis, it is exceedingly likely that you are a pragmatist, and wish to move swiftly on to the sections that may be useful to your life. Nonetheless, I’d like you to allow me the courtesy of proposing that there may in fact be something truly useful in revisiting these foundations, if only to reaffirm their non-utility.</p>
+<p>For this section, my most heavily used and recommended resource is <span class="citation" data-cites="bob">(<a href="references.html#ref-bob" role="doc-biblioref">Cousins 2018</a>)</span>, which I heard Bob himself refer to as his “life’s work”. Do give it a read – so many useful gems by someone who took a lot of time to build bridges between science and statistics!</p>
+<section id="probability-distributions-and-likelihood" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="probability-distributions-and-likelihood"><span class="header-section-number">2.1</span> Probability, distributions, and likelihood</h2>
+<p>Both the pre-amble to and the beginning of my PhD studies were decorated with thoughts on the nature of probability. At the time, I had just come out of a Masters degree project that involved the application of <em>nested sampling</em> <span class="citation" data-cites="ns">Skilling (<a href="references.html#ref-ns" role="doc-biblioref">2006</a>)</span> to infer the momenta of invisible neutrinos. This technique was invented by John Skilling, a prolific figure in the realm of Bayesian statistics, if only for his advocation thereof (if you’re planning to be indisposed for a time, you may find <span class="citation" data-cites="bayesrant">Skilling (<a href="references.html#ref-bayesrant" role="doc-biblioref">2008</a>)</span> of interest as reading material, but do make sure to dilute it with things like <span class="citation" data-cites="freq">Senn (<a href="references.html#ref-freq" role="doc-biblioref">2011</a>)</span> and <span class="citation" data-cites="mayo">Mayo (<a href="references.html#ref-mayo" role="doc-biblioref">2018</a>)</span>). This started me down a rabbit hole on the much-contended topic of the definition of probability. It turned out the topic was vast, with arguments both mathematical and philosophical dating back many hundreds of years, many of which are still alive in the present day. Of this, I was particularly surprised — my undergraduate courses had spent a mere ten minutes or so on the subject, and I thought I understood it perfectly well given the time allocated! “Surely”, I mused in confusion, “probability, as I’ve encountered it both intuitively and mathematically, is just</p>
+<p><span id="eq-probdef"><span class="math display">\[
+P(A) = \frac{\mathrm{number~of~occurrences~of~}A}{\mathrm{total~number~of~occurrences}}~,
+\tag{2.1}\]</span></span></p>
+<p>right?”</p>
+<p>Alas, the contentious nature of humanity would not allow me such a privilege. However, it is from this place of existential angst that we shall proceed, and uncover where this definition of probability encounters its limits (but also where it is useful).</p>
+<section id="axioms-of-probability-theory" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="axioms-of-probability-theory"><span class="header-section-number">2.1.1</span> Axioms of probability theory</h3>
+<p>For probability <span class="math inline">\(P\)</span> (whatever you think it means), and possible states of an event <span class="math inline">\(\Omega\)</span>, we can say for <span class="math inline">\(A \in \Omega\)</span>:</p>
+<ul>
+<li><span class="math inline">\(P(A) \geqslant 0\)</span> always</li>
+<li><span class="math inline">\(P(\Omega) = 1\)</span> (at least <em>one</em> event will occur)</li>
+<li>The union (<span class="math inline">\(\cup\)</span>) of variables <span class="math inline">\(P(A \cup B \cup C) = P(A) + P(B) + P(C)\)</span> for <em>mutually exclusive</em> events <span class="math inline">\(A,B,C \in \Omega\)</span> (i.e.&nbsp;only if they cannot occur at the same time)</li>
+</ul>
+<p>The next notion to cover is that of <strong>conditional probability</strong>:</p>
+<p><span id="eq-conditionalprob"><span class="math display">\[
+P(A \cap B) = P(A | B)P(B)~.
+\tag{2.2}\]</span></span></p>
+<p>Depending on whose axioms you follow, this quantity may be either derived (as in <span class="citation" data-cites="kolmogorov-thing">(<a href="references.html#ref-kolmogorov-thing" role="doc-biblioref">Shafer and Vovk 2006</a>)</span>) or axiomatically stated (as in <span class="citation" data-cites="definetti">(<a href="references.html#ref-definetti" role="doc-biblioref">Finetti 1970</a>)</span>). We can also expand this definition generally to include as many variables as we want, e.g.&nbsp;for 3 variables:</p>
+<p><span class="math display">\[
+P(A \cap B \cap) = P(A \cap C | B)P(B) = P(A| C,B)P(C|B)P(B)~,
+\]</span></p>
+<p>and then for N variables:</p>
+<p><span class="math display">\[
+P(\Cap_{i=1}^N X_i) = P(X_1 | X_2, ..., X_N)P(X_2 | X_3, ..., X_N)\dots P(X_{N-1} | X_N)P(X_N)
+\]</span></p>
+<p><span id="eq-prob-chain-rule"><span class="math display">\[
+\Rightarrow = \prod_{i=1}^N P(X_i | X_{j &gt; i})~,
+\tag{2.3}\]</span></span></p>
+<p>where <span class="math inline">\(X_{j &gt; i}\)</span> represents the set of all <span class="math inline">\(X_j\)</span> for which <span class="math inline">\(j &gt;i\)</span>. This is known as the <strong>probability chain rule</strong>.</p>
+<!-- A pictorial demonstration of this and other probability quantities can be found in @fig-probs. -->
+<!-- ![Diagram of various probabilities](probs){#fig-probs} -->
+<p>The axioms above lead to several other properties. For instance, the notion of conditional probability leads to the equation known as Bayes’ Theorem:</p>
+<p><span class="math display">\[
+P(A\cap B) = \frac{P(A|B)}{P(B)};\qquad P(B\cap A) = \frac{P(B|A)}{P(A)}
+\]</span> <span id="eq-bayes"><span class="math display">\[
+\Rightarrow P(A|B)P(A) = P(B|A)P(B)~,
+\tag{2.4}\]</span></span></p>
+<p>since the notion of “and” (<span class="math inline">\(\cap\)</span>) is not position-dependent, i.e.&nbsp;<span class="math inline">\(P(A\cap B) = P(B\cap A)\)</span>. This equation allows for the inversion of conditional probability, as long as we can provide the individual probabilities for <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. For example, the age-old situation of <span class="math inline">\(P(\mathrm{positive~test} | \mathrm{have~disease})\)</span> versus <span class="math inline">\(P(\mathrm{have~disease} | \mathrm{positive~test})\)</span>. See <span class="citation" data-cites="bob">(<a href="references.html#ref-bob" role="doc-biblioref">Cousins 2018</a>)</span> (and countless other introductions to probability) for a worked example along these lines.</p>
+<p>Another important notion is that of <strong>independence</strong>:</p>
+<ul>
+<li>For <em>independent</em> events <span class="math inline">\(A,B\)</span>, <span class="math inline">\(P(A | B) = P(A)\)</span> (i.e.&nbsp;their venn diagrams don’t overlap, so the occurrence of <span class="math inline">\(B\)</span> cannot influence <span class="math inline">\(A\)</span>)
+<ul>
+<li>This also implies <span class="math inline">\(P(A\cap B) = P(A)P(B)\)</span></li>
+</ul></li>
+</ul>
+<p>Independence is an important assumption for HEP – we assume that events in our particle colliders occur without influencing each other. This assumption fundamentally changes any modelling we do of a collider physics process in a probabilistic sense, as it reduces the modelling to event-level probabilities (and the joint distribution over all events is recovered through multiplication as above).</p>
+</section>
+<section id="interpretations-of-p" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="interpretations-of-p"><span class="header-section-number">2.1.2</span> Interpretations of <span class="math inline">\(P\)</span></h3>
+<p>The previous section discussed axioms and properties for probability <span class="math inline">\(P\)</span> that hold regardless of interpretation. However, when we start to give meaning to <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, <span class="math inline">\(\Omega\)</span> etc, this can pose issues. For something like a coin flip, this isn’t too much of an issue – we can ask what the chances of observing the number of occurrences of <span class="math inline">\(A\)</span> = heads or <span class="math inline">\(B\)</span> = tails in some number of experiments <span class="math inline">\(N\)</span>. This is known as the <strong>frequentist</strong> interpretation of <span class="math inline">\(P\)</span> – literally the <em>frequency</em> of that possible outcome. But what if, for example, I let <span class="math inline">\(A\)</span> = “The sky is blue right now”? Clearly it will be blue or it won’t be blue, so you’d imagine that perhaps the probability is 1/2 if we use the definition of <span class="math inline">\(P\)</span> in <a href="#eq-probdef">Equation&nbsp;<span>2.1</span></a>. This isn’t particularly useful though – since I said <em>now</em>, there’s only one data point we could ever take, and that would be to look at the sky. There’s no way to take into account the fact that we may live in a very rainy city during winter, or if the sun exploded (I hope it didn’t do that yet).</p>
+<p>The reason we faced issues there is because we tried to <em>assign a probability to a fact</em>. Similar questions could look like “what is the probability that the Higgs Boson exists?”, or “what are the odds of the next prime minister of the U.K. being a walrus?” – they’re all things that will either be true or untrue. We may like to make some probabilistic statements about these facts though (I’m particularly interested in the chances of the latter question): to do this, we need to shift our interpretation of <span class="math inline">\(P\)</span> to a <em>personalistic degree of belief</em>. This is known as the <strong>Bayesian</strong> interpretation of probability.</p>
+<p>Now, doing things the Bayesian way doesn’t mean we assign probabilites to facts with no reason (though we are free to do so). We end up incorporating <strong>prior information</strong> on these facts, e.g.&nbsp;the probability of it raining generally in your area, through Bayes’ theorem in <a href="#eq-bayes">Equation&nbsp;<span>2.4</span></a> (<span class="math inline">\(P(A)\)</span> and <span class="math inline">\(P(B)\)</span> could play that role). Note, however, that Bayes’ theorem stems from the axioms of probability, and <em>does not require Bayesian <span class="math inline">\(P\)</span></em>. It’s unfortunate that Bayesian and Bayes’ theorem are named as such, otherwise this would be clearer. Bayesian inference does, however, tend to use Bayes’ theorem for conditional inversion. See <a href="#sec-bayes"><span>Section&nbsp;2.3.5</span></a> for more on this.</p>
+</section>
+<section id="probability-density" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="probability-density"><span class="header-section-number">2.1.3</span> Probability density</h3>
+<p>We now shift our discussion from the big <span class="math inline">\(P\)</span> to the small <span class="math inline">\(p\)</span>, which is used to indicate the <strong>probability density function</strong> (pdf), defined implicitly through</p>
+<p><span class="math display">\[
+P(a \leqslant X \leqslant b) = \int_{a}^{b} p_X(x') dx'~.
+\]</span></p>
+<p>Here, we’re using capital letters for <strong>random variables</strong> (the thing that follows the distribution), and realizations of that random variable are in lowercase letters. We can also define the <strong>cumulative density function</strong> (cdf), defined for random variable <span class="math inline">\(X\)</span> as <span class="math inline">\(P(X \leq x)\)</span>. We can then write this in terms of the probability density function:</p>
+<p><span class="math display">\[
+P(X \leqslant x) = \int_{-\infty}^{x} p(x') dx'~.
+\]</span></p>
+<p>This gives us the relation</p>
+<p><span class="math display">\[
+p_X(x) = \frac{dP(X \leqslant x)}{dx}~.
+\]</span></p>
+<p>Pretty much all the same relations for big <span class="math inline">\(P\)</span> also hold for small <span class="math inline">\(p\)</span>, which can be attributed to many reasons (it’s a rabbit hole involving measure theory and similar concepts – see <span class="citation" data-cites="kolmogorov-thing">Shafer and Vovk (<a href="references.html#ref-kolmogorov-thing" role="doc-biblioref">2006</a>)</span> for more, it’s well-written!)</p>
+<section id="i.i.d." class="level4" data-number="2.1.3.1">
+<h4 data-number="2.1.3.1" class="anchored" data-anchor-id="i.i.d."><span class="header-section-number">2.1.3.1</span> i.i.d.</h4>
+<p>A common expression you’ll see about a set of random variables is that they’re <strong>i.i.d.</strong>, which stands for <em>independently and identically distributed</em>. This refers to the situation when</p>
+<ul>
+<li>Samples are drawn from the <em>same probability distribution</em></li>
+<li>Each sample drawn (random variable) is independent from any other sample</li>
+</ul>
+<p>An example is just drawing some random sample, e.g.&nbsp;<code>np.random.uniform(size=10)</code>. That would be 10 i.i.d. samples from a uniform distribution.</p>
+</section>
+</section>
+<section id="change-of-variables-formula" class="level3" data-number="2.1.4">
+<h3 data-number="2.1.4" class="anchored" data-anchor-id="change-of-variables-formula"><span class="header-section-number">2.1.4</span> Change of variables formula</h3>
+<p>If the distribution over <span class="math inline">\(x\)</span> is <span class="math inline">\(p(x)\)</span>, what’s the distribution over <span class="math inline">\(\log(x)\)</span>? Or, more generally, any monotonic function <span class="math inline">\(y = f(x)\)</span> with corresponding random variable <span class="math inline">\(Y\)</span>? Let’s look at the cdf:</p>
+<p><span class="math display">\[
+P(Y \leqslant y) = P(f(X) \leqslant y) = P(X \leqslant f^{-1}(y))~.
+\]</span></p>
+<p>Differentiating both sides with respect to <span class="math inline">\(y\)</span> to recover the pdfs:</p>
+<p><span class="math display">\[
+\frac{dP(Y \leqslant y)}{dy} = \frac{dP(X \leqslant f^{-1}(y))}{df^{-1}(y)}\frac{df^{-1}(y)}{dy}~~~ \Rightarrow ~p_Y(y) = p_X(f^{-1}(y)) \left|\frac{df^{-1}(y)}{dy}\right|~,
+\]</span></p>
+<p>where we’ve inserted the absolute value to ensure this holds for both monotonically increasing and decreasing functions. The multi-dimensional version of this involves the determinant of the <strong>Jacobian matrix</strong>, defined for a function involving vectors <span class="math inline">\(\mathbf{y}=f(\mathbf{x})\)</span> as</p>
+<p><span id="eq-jacobian"><span class="math display">\[
+J_f(\mathbf{x}) = f'(\mathbf{x}) = \left[\begin{array}{ccc}\frac{\partial y_{1}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial y_{1}}{\partial x_{n}} \\\vdots &amp; \ddots &amp; \vdots \\\frac{\partial y_{m}}{\partial x_{1}} &amp; \cdots &amp; \frac{\partial y_{m}}{\partial x_{n}}\end{array}\right]~.
+\tag{2.5}\]</span></span></p>
+<p>This leads to the formula</p>
+<p><span id="eq-change-of-variables"><span class="math display">\[
+p_Y(\mathbf{y}) = p_X(f^{-1}(\mathbf{y})) \left|\det{J_{f^{-1}}(\mathbf{y})} \right|~,
+\tag{2.6}\]</span></span></p>
+<p>which can be thought of as manipulating the space in the <span class="math inline">\(x\)</span>-<span class="math inline">\(y\)</span> plane (since determinants are akin to volume transforms) to make the probabilities match. This will be particularly useful when we come to look at normalizing flows.</p>
+</section>
+<section id="expectation-values" class="level3" data-number="2.1.5">
+<h3 data-number="2.1.5" class="anchored" data-anchor-id="expectation-values"><span class="header-section-number">2.1.5</span> Expectation values</h3>
+<p>The expectation value for a quantity <span class="math inline">\(f(x)\)</span> over a distribution <span class="math inline">\(p_X(x)\)</span> is defined as</p>
+<p><span class="math display">\[
+\mathbb{E}_{p_X}(f(x)) = \int_{-\infty}^{+\infty} f(x) p_X(x) dx~,
+\]</span></p>
+<p>which I loosely think of as the average value that <span class="math inline">\(f(x)\)</span> will have assuming probability distribution <span class="math inline">\(p_X\)</span>. Expectation values are useful to extract a definite value from a probability distribution, with many useful quantities such as the mean, variance, skew, and kurtosis all being able to be written in terms of expectation values (see more on this and the “moments” of a distribution in <a href="https://gregorygundersen.com/blog/2020/04/11/moments/">this thoughtful blog post</a>).</p>
+</section>
+<section id="sec-dists" class="level3" data-number="2.1.6">
+<h3 data-number="2.1.6" class="anchored" data-anchor-id="sec-dists"><span class="header-section-number">2.1.6</span> Commonly used distributions</h3>
+<section id="normal" class="level4" data-number="2.1.6.1">
+<h4 data-number="2.1.6.1" class="anchored" data-anchor-id="normal"><span class="header-section-number">2.1.6.1</span> Normal</h4>
+<p>We define the <strong>normal distribution</strong> – commonly known as a “Gaussian” in HEP – with the pdf</p>
+<p><span class="math display">\[ p(x | \mu, \sigma) = \frac{1}{\sigma \sqrt{2\pi} } e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2} .\]</span></p>
+<p>The parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> characterize the location and the width of the normal distribution respectively. In shorthand, we’ll denote this as <span class="math inline">\(\mathrm{Normal}(\mu, \sigma)\)</span>, or maybe also including the input <span class="math inline">\(x\)</span> via <span class="math inline">\(\mathrm{Normal}(x|\mu, \sigma)\)</span>.</p>
+<p>The normal distribution is exceedingly useful as a modelling tool due to the <em>central limit theorem</em>, which states that the distribution of the sum (and consequently the mean) of i.i.d. random variables calculated on a sample tends to a normal distribution as the size of your sample goes to infinity. This type of distribution is known as a <strong>sampling distribution</strong> as it involves a quantity that is computed on a per-sample basis.</p>
+<p>The specific normal distribution you end up with from the cental limit theorem is <span class="math inline">\(\mathrm{Normal}(\bar{\mu}, \bar{\sigma}/\sqrt{n})\)</span>, where <span class="math inline">\(\bar{\mu}\)</span> and <span class="math inline">\(\bar{\sigma}\)</span> are the sample mean and standard deviation respectively. Part of the power of the central limit theorem is that it works regardless of the shape of the original distribution! So it’s pretty impressive that we can get a good idea of how the distribution of the data mean looks, even with a finite sample size.</p>
+</section>
+<section id="sec-poisson" class="level4" data-number="2.1.6.2">
+<h4 data-number="2.1.6.2" class="anchored" data-anchor-id="sec-poisson"><span class="header-section-number">2.1.6.2</span> Poisson</h4>
+<p>Another very common distribution in HEP is the <strong>Poisson distribution</strong>. It’s useful when you want to model the occurrence rate of an event (and what happens on average). It’s defined for <em>independent events</em> <span class="math inline">\(n\)</span> as</p>
+<p><span class="math display">\[p(n | \lambda) = \frac{\lambda^n e^{-\lambda}}{n!}~,\]</span></p>
+<p>where <span class="math inline">\(\lambda\)</span> is termed the <em>expected number of events</em> (both the mean and variance turn out to be <span class="math inline">\(\lambda\)</span>). We’ll denote this using the shorthand of <span class="math inline">\(\mathrm{Poisson}(\lambda)\)</span>.</p>
+<p>One commonly used notion is the approximation of a Poisson distribution with a normal distribution with mean <span class="math inline">\(\lambda\)</span> and variance <span class="math inline">\(\sqrt{\lambda}\)</span> for large <span class="math inline">\(\lambda\)</span>. We can see this demonstrated in <a href="#fig-poisson">Figure&nbsp;<span>2.1</span></a>, where from <span class="math inline">\(\lambda \approx 10\)</span>, we start to observe the alignment of the shapes of the Poisson and normal distributions. This is the origin of the <span class="math inline">\(\sqrt{n}\)</span> errors that are often quoted on histogram bars of size <span class="math inline">\(n\)</span> – it assumes they are Poisson modelled (as we do when modelling likelihood functions in HEP), and if <span class="math inline">\(n\)</span> is around 10 or more, then we assign <span class="math inline">\(\sqrt{n}\)</span> as a notion of the standard deviation on the bin count <span class="math inline">\(n\)</span>.</p>
+<div class="cell" data-execution_count="1">
+<div class="cell-output cell-output-display">
+<div id="fig-poisson" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="stat-fundamentals_files/figure-html/fig-poisson-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.1: Comparison of the Poisson distribution at different values of <span class="math inline">\(\lambda\)</span> with a normal distribution with mean <span class="math inline">\(\lambda\)</span> and variance <span class="math inline">\(\sqrt{\lambda}\)</span>.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="uniform" class="level4" data-number="2.1.6.3">
+<h4 data-number="2.1.6.3" class="anchored" data-anchor-id="uniform"><span class="header-section-number">2.1.6.3</span> Uniform</h4>
+<p>The <strong>uniform</strong> distribution is a very simple construct, with pdf</p>
+<p><span class="math display">\[
+    p(x | a, b) =
+\begin{cases}
+    \frac{1}{b-a},&amp; \text{if } x\in [a,b]\\
+    0,              &amp; \text{otherwise}
+\end{cases}
+~.
+\]</span></p>
+<p>We’ll use the shorthand of <span class="math inline">\(\mathrm{Uniform}(a,b)\)</span>. When we refer to drawing values “at random”, we’re probably referring to drawing <span class="math inline">\(x\sim \mathrm{Uniform}(0,1)\)</span>.</p>
+</section>
+</section>
+<section id="sec-nps" class="level3" data-number="2.1.7">
+<h3 data-number="2.1.7" class="anchored" data-anchor-id="sec-nps"><span class="header-section-number">2.1.7</span> Nuisance parameters</h3>
+<p>When our probability model <span class="math inline">\(p(x|\mu)\)</span> fails to describe the data generating process well, we may add more parameters to our model in order to make it more flexible, and thereby hopefully increase the accuracy of the model. As an example, this could be a parameter that controls the shape of the overall distribution in a way that models a physical effect. Such parameters are called <strong>nuisance parameters</strong>, as they exist only to add model flexibility (we’re not interested in inferring their true values), and are then a nuisance to deal (increased dimensionality of any downstream calculations). If we denote the set of nuisance parameters of a model as <span class="math inline">\(\theta\)</span>, our likelihood then reads <span class="math inline">\(p(x|\mu,\theta)\)</span>.</p>
+<p>If we have some prior knowledge about <span class="math inline">\(\theta\)</span>, e.g.&nbsp;from a previous experiment that measured the physical event on data <span class="math inline">\(y\)</span> (termed “auxillary data” since it isn’t directly to do with our main experiment), it would be useful to use that to constrain possible values <span class="math inline">\(\theta\)</span> could take. In a Bayesian setting, this prior knowledge can be added when defining the prior distribution for that parameter at inference time. It’s also possible to bake this information into the probability model itself through constructing the joint likelihood of both experiments:</p>
+<p><span class="math display">\[p(x, y|\mu,\theta) = p(x|\mu,\theta)p(y|\theta) ~.\]</span></p>
+<p>In the case where the distribution <span class="math inline">\(p(y|\theta)\)</span> isn’t readily available, it’s common practice in HEP to approximate it using a distribution that models the shape of the data <span class="math inline">\(y\)</span> to some reasonable degree of accuracy, e.g.&nbsp;with a normal distribution of mean <span class="math inline">\(\theta\)</span> (this will be discussed more later).</p>
+<p>To extract information about parameters of interest <span class="math inline">\(\mu\)</span> from a likelihood that involves <span class="math inline">\(\theta\)</span>, we need to somehow lose our dependence on <span class="math inline">\(\theta\)</span> to recover a distribution that just depends on <span class="math inline">\(\mu\)</span>. The ways of doing this are as follows:</p>
+<p><strong>Profiling</strong>: for each value of <span class="math inline">\(\mu\)</span>, find the best fit value of <span class="math inline">\(\theta\)</span>, leading to</p>
+<p><span class="math display">\[ p_{\mathrm{profile}}(x|\mu) = p(x | \mu, \hat{\hat{\theta}});\quad\hat{\hat{\theta}}=\underset{\theta}{\mathrm{argmax}}(p(x|\mu,\theta))~.\]</span></p>
+<p>Here, we’re essentially picking our best guess of the value of the nuisance parameters given a specified <span class="math inline">\(\mu\)</span>. The profile likelihood will obviously be useful in the limit of <span class="math inline">\(\hat{\hat{\theta}}\)</span> being close to the true values of the nuisance parameters, but this isn’t guaranteed.</p>
+<p><strong>Marginalization</strong>: we simply integrate away the dependence on the nuisance parameters entirely:</p>
+<p><span class="math display">\[p_{\mathrm{marginal}}(x|\mu) = \int_{-\infty}^{+\infty} p(x| \mu, \theta) p(\theta) d\theta ~.\]</span></p>
+<p>Note that this requires a specification of a prior pdf <span class="math inline">\(p(\theta)\)</span>. Marginalizing is then a form of averaging of the likelihood and prior across the domain of <span class="math inline">\(\theta\)</span>. Despite this technically being a Bayesian procedure due to the specification of the prior, we’re free to use the resulting model in a frequentist way – this is just a model specification step.</p>
+</section>
+</section>
+<section id="metrics-of-probability" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="metrics-of-probability"><span class="header-section-number">2.2</span> Metrics of probability</h2>
+<section id="sec-fisher" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="sec-fisher"><span class="header-section-number">2.2.1</span> Fisher information and the Cramér–Rao bound</h3>
+<p>A useful quantity in many ways is the <strong>Fisher information matrix</strong>. We can write the definition for an element of this matrix for a likelihood function <span class="math inline">\(p(x ; \theta)\)</span> (<span class="math inline">\(\theta = \{\theta_i\}\)</span>) as</p>
+<p><span class="math display">\[
+\mathcal{I}(\theta)_{ij}=-\frac{\partial^2}{\partial \theta_i \partial \theta_j} \log p(x ; \theta)~.
+\]</span></p>
+<p>We’ll focus on the fact that you can extract <em>parameter uncertainty estimates</em> from this quantity. How? We turn to the Cramér–Rao bound, which states that if we have an unbiased estimator for the likelihood parameters <span class="math inline">\(\hat{\theta}\)</span>, the Fisher information matrix <span class="math inline">\(\mathcal{I}(\theta)\)</span> satisfies</p>
+<p><span id="eq-cramer-rao"><span class="math display">\[
+\Sigma_{\hat{\theta}^2} \geqslant [\mathcal{I}(\theta)]^{-1}~,
+\tag{2.7}\]</span></span></p>
+<p>where <span class="math inline">\(\Sigma_{\hat{\theta}}^2\)</span> is the covariance matrix for the fitted parameters <span class="math inline">\(\hat{\theta}\)</span>. In the asymptotic limit, the maximum likelihood estimator will attain this lower bound, and satisfies</p>
+<p><span class="math display">\[
+\sqrt{n}(\hat{\theta}-\theta) \rightarrow \text{Normal}(0, [\mathcal{I}(\theta)]^{-1})~
+\]</span></p>
+<p>for sample size <span class="math inline">\(n\)</span>. A useful thing about this is that the diagonal elements of the inverse Fisher information will then correspond to the variances of the individual parameters, i.e.&nbsp;<span class="math inline">\([\mathcal{I}(\theta)]^{-1}_{ii} = \sigma_{\theta_i}^2\)</span>. There are also many other interesting quantities we can extract from this equivalence, including the <em>generalized variance</em>, which is the determinant of the covariance matrix (or determinant of the inverse Fisher information). These quantities will see a little use later on.</p>
+</section>
+<section id="sec-KL" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="sec-KL"><span class="header-section-number">2.2.2</span> Kullback-Leibler divergence</h3>
+<p>The <strong>Kullback-Leibler divergence</strong> (KL divergence) is a commonly used quantity in machine learning and information theory to represent the “distance” between a probability distribution <span class="math inline">\(p(x)\)</span> and an estimation of that distribution <span class="math inline">\(q(x)\)</span>. Related to things like entropy, it can be thought of as the loss of information from using <span class="math inline">\(q\)</span> as an approximation to <span class="math inline">\(p\)</span>. It’s defined for continuous <span class="math inline">\(x\)</span> as</p>
+<p><span id="eq-kl-divergence"><span class="math display">\[
+D_{KL}(p(x) \| q(x))=\int_{-\infty}^{\infty} p(x) \ln \frac{p(x)}{q(x)} dx~.
+\tag{2.8}\]</span></span></p>
+<p>One interesting thing to note is that this is not a distance in the typical sense, since it’s an <em>asymmetric</em> number, i.e.&nbsp;<span class="math inline">\(D_{KL}(p(x) \| q(x)) \neq D_{KL}(q(x) \| p(x))\)</span>.</p>
+</section>
+</section>
+<section id="inference" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="inference"><span class="header-section-number">2.3</span> Inference</h2>
+<p><strong>Statistical inference</strong> can be viewed as the inverse of the data generating process. Let’s look at an example.</p>
+<p>Say that the Lorax created the Earth. Moreover, say that he did so by rolling a six-sided die, and putting the result of the die into a World Generating Machine, which merely requires a single number as input. As a neutral party that cannot confirm the Lorax’s roll, but can definitely observe the outcome, we may wonder: assuming we have a model of the World Generating Machine, what number did the Lorax roll to produce all that we see around us today? Moreover, can we factor in our prior suspicion that a Lorax rolled a die to select a number at random?</p>
+<p>Put in a more general way: given a parametrized model of the world around us, potential suspicions about the parameters themselves, and some data that could be described by that model, which values of the parameters could have produced the data? Moreover, is the model a good description of the data at all? Could another model have described the data more accurately? These type of questions fall within the umbrella of statistical inference.</p>
+<p>Let us add a layer of specificity to our questions. The key inquiries that are typically dealt with through inference are:</p>
+<ul>
+<li><strong>Point estimation</strong>: What value(s) of my model parameters best describe the data?</li>
+<li><strong>Interval estimation</strong>: How can I specify a plausible range for my model parameters based on the data they attempt to describe? (One can obtain a symbiotic relation between interval and point estimation by viewing a point estimate as the limit of shrinking intervals)</li>
+<li><strong>Hypothesis testing</strong>: Given a model of the data generating process, to what extent does it describe the data when…
+<ul>
+<li>…compared to another model with different form?</li>
+<li>…compared to the same model with different parameters?</li>
+<li>…not being compared to any particular alternative? (this has the particular name of the <em>goodness-of-fit test</em>)</li>
+</ul></li>
+</ul>
+<p>These questions are where the schools of probability see their strongest divide; whether we can assign probabilities to facts – e.g.&nbsp;what are the odds that neutrinos have masses – fundamentally alters the kind of question we can ask of our model/data. For example, instead of a point estimate of the neutrino masses, a Bayesian procedure could infer their <em>distribution</em> given the data (and some prior beliefs about their values), also termed the <em>posterior distribution</em>. Similarly, Bayesian intervals can say “what are the chances the true parameter value lies in this interval” (which frequentist procedures <em>can not determine</em>), and hypothesis testing can evaluate the probability of the hypothesis itself.</p>
+<p>However, these Bayesian procedures undertake the weight of the specification of a prior distribution for all of these quantities, which will (in the limited data regime, a.k.a. real life) strongly affect the result. Moreover, the frequentist procedures are indeed still useful for making exact, even if convoluted, statements about the model in the presence of observed data.</p>
+<p>A brief aside: you’ll notice that the common thread throughout these statements is the <em>model</em>. As like many statistics-adjacent HEP researchers before me, I will emphasize that <em>the likelihood model is the most important ingredient for any inference procedure</em>. In the limit of a well-designed model and sufficient data, even a room full of the most polarized statisticians, hopelessly resigned to their particular school of thought, will agree on basic statements about the validity of a hypothesis. Even failing this,a Bayesian would not ignore a <span class="math inline">\(p\)</span>-value of 0.9, and a frequentist would likewise raise their eyebrows at a flat or sharp posterior with low prior sensitivity. But since they both care about the model, any and all effort that could be spent arguing over inferencial philosophy may likely be better placed in talking to a domain expert for the problems you care about.</p>
+<p>But enough with the aside, or I’ll be subject to the same criticism of misplaced effort. Let’s review the different methods that implement answers to our questions of inference.</p>
+<section id="sec-mle" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="sec-mle"><span class="header-section-number">2.3.1</span> Point estimation</h3>
+<p>Given a probability model <span class="math inline">\(p(x|\mu)\)</span> for data <span class="math inline">\(x\)</span> and model parameters <span class="math inline">\(\mu\)</span>, the most common method of estimating parameter values compatible with observed data <span class="math inline">\(x_0\)</span> in the frequentist paradigm is the <strong>maximum likelihood estimate</strong> (MLE), defined as</p>
+<p><span class="math display">\[ \hat{\mu} = \underset{\mu}{\mathrm{argmax}}(p(x_0|\mu))~.\]</span></p>
+<p>In practice, we calculate <span class="math inline">\(\hat{\mu}\)</span> with an optimization procedure, e.g.&nbsp;through the (L)BGFS algorithm for unconstrained optimization <span class="citation" data-cites="lbgfs">(<a href="references.html#ref-lbgfs" role="doc-biblioref">Fletcher 1987</a>)</span>. Since most optimization algorithms target minimization (purely conventional), we often frame this equivalently as</p>
+<p><span class="math display">\[ \hat{\mu} = \underset{\mu}{\mathrm{argmin}} (-2\ln p(x_0|\mu))~.\]</span></p>
+<p>The prefactor of 2 leads to some nice theoretical properties via Wilk’s theorem, but that’s a later discussion (the 2 doesn’t matter for optimization purposes). We use calculate the MLE lot in HEP for a few reasons:</p>
+<ul>
+<li>It has a <em>Normal sampling distribution</em> in the asymptotic limit (so we can easily quote errors using a sample standard deviation)</li>
+<li>In the finite data regime, the MLE is effective for many distributions we care about (e.g.&nbsp;Normal, Poisson)</li>
+<li>Simple to understand and debug!</li>
+</ul>
+<p>Other methods of point estimation could be as simple as quoting the <em>mode</em> (value with highest density), <em>median</em> (value that partitions the distribution into equal segments of probability), or <em>arithmetic mean</em> (sum of the data divided by the size of the data). These are more useful in the absence of a good probability model.</p>
+</section>
+<section id="sec-conf-intervals" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="sec-conf-intervals"><span class="header-section-number">2.3.2</span> Confidence intervals</h3>
+<p>A significant part of my early PhD days was spent trying to understand the confidence interval. I will do my best to try and make you bang your head against the wall a little less than me (metaphorically, I hope).</p>
+<p>We begin with some statistic of the observed data <span class="math inline">\(x\)</span>. A confidence interval is then a statement about values of a model parameter <span class="math inline">\(\mu\)</span> for which the observed data is considered <em>“not extreme”</em>. Values of <span class="math inline">\(\mu\)</span> outside the interval are then those for which the observed data is <em>“extreme”</em>. We have a couple of ingredients to unpack here:</p>
+<ul>
+<li>How do we define a notion of “extreme” for the data?</li>
+<li>How do we construct the interval itself to satisfy this property (namely that the values of <span class="math inline">\(\mu\)</span> consistently treat <span class="math inline">\(x\)</span> as extreme or not)?</li>
+</ul>
+<p>For the first point, there’s a two-part answer: we need a way to order the data with a notion of extremity (rank it from least to most extreme), and then also determine the cutoff for which points are considered extreme or not. This cutoff isn’t going to be by value, but by <em>proportion</em>; we’ll place our yardstick such that all values of <span class="math inline">\(x\)</span> considered <em>not</em> extreme contain the majority of the probability (area under <span class="math inline">\(p(x|\mu)\)</span>). How much? That’s known as the <strong>confidence level</strong> (<span class="math inline">\(\mathrm{C.L.}\)</span>). Values considered <em>extreme</em> then occupy the other <span class="math inline">\(1-\mathrm{C.L.}\)</span> of the probability. We then determine those values of <span class="math inline">\(\mu\)</span> which produce distributions that satisfy this requirement <em>when the yardstick is in the same place as the observed data <span class="math inline">\(x_0\)</span></em>. We’ll see some examples of this below.</p>
+<p>For 1-D <span class="math inline">\(x\)</span>, we look at some simple orderings: - <em>Descending</em>: large <span class="math inline">\(x\)</span> is not considered extreme, and small <span class="math inline">\(x\)</span> is. The corresponding confidence interval is <span class="math inline">\([\mu_{\mathrm{lower}}, +\infty]\)</span>, where <span class="math inline">\(\mu_{\mathrm{lower}}\)</span> is known as a <strong>lower limit</strong> on <span class="math inline">\(\mu\)</span>. - <em>Ascending</em>: small <span class="math inline">\(x\)</span> is now not extreme, but large <span class="math inline">\(x\)</span> is. The corresponding confidence interval is <span class="math inline">\([-\infty, \mu_{\mathrm{upper}}]\)</span>, where <span class="math inline">\(\mu_{\mathrm{upper}}\)</span> is known as an <strong>upper limit</strong> on <span class="math inline">\(\mu\)</span>.</p>
+<p>We can also look at a <em>central</em> ordering, which produces an interval that can be constructed at a given confidence level <span class="math inline">\(\mathrm{C.L.}\)</span> through calculating a lower and upper limit <span class="math inline">\([\mu_{\mathrm{lower}}, \mu_{\mathrm{upper}}]\)</span>, each with a confidence level of <span class="math inline">\(1-(1-\mathrm{C.L.})/2\)</span> (which guarantees that the central interval contains <span class="math inline">\(\mathrm{C.L.}\)</span> of the probability).</p>
+<p>Let’s make this concrete with an example: we’ll take the same distribution studied in <span class="citation" data-cites="bob">(<a href="references.html#ref-bob" role="doc-biblioref">Cousins 2018</a>)</span> (Section 6.4), where we have a normal distribution with width parametrized as 1/5th of the mean:</p>
+<p><span class="math display">\[x \sim \mathrm{Normal}(\mu, \frac{\mu}{5}).\]</span></p>
+<p>From here, we can examime the pdf (at <span class="math inline">\(\mu=10\)</span> arbitrarily). We can also view the likelihood if we say we observed data <span class="math inline">\(x_0=10\)</span>. Both are shown in <a href="#fig-density">Figure&nbsp;<span>2.2</span></a>.</p>
+<div class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div id="fig-density" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="stat-fundamentals_files/figure-html/fig-density-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.2: Probability density function and likelihood for different assumed values of <span class="math inline">\(x\)</span> and <span class="math inline">\(\mu\)</span>.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s now use the aforementioned method to construct a central confidence interval for <span class="math inline">\(\mu\)</span>, at say a confidence level of 68.3%. We then divide up this confidence level into the lower and upper limits – each will be set with a confidence level of <span class="math inline">\(1-(1-0.683)/2 = 84.15\%\)</span>, such that the extreme data occupies one minus that amount (15.95%) of the probability on each side of the central interval, giving us back the desired 68.3% between the upper and lower limits.</p>
+<p>Finding these limits can be viewed as an optimization problem: we just need to choose <span class="math inline">\(\mu\)</span> such that the area under <span class="math inline">\(p(x|\mu)\)</span> is equal to 84.15% <em>below</em> <span class="math inline">\(x_0\)</span> for lower limits, and <em>above</em> <span class="math inline">\(x_0\)</span> for upper limits. We can frame this objective using the cumulative density function – the cdf evaluated at <span class="math inline">\(x_0\)</span> must be equal to 0.843 for lower limits, and equal to 1-0.843 for upper limits. As this thesis focuses on methods relating to gradient descent, we can use this to find our central interval, by optimizing <span class="math inline">\(\mu\)</span> with respect to a mean-squared error loss between the cdf and the relevant probability share. Doing this for our example gives us the limits [8.332, 12.502] that form a central confidence interval for <span class="math inline">\(\mu\)</span>.</p>
+<p>We can visualize the probability density for each of <span class="math inline">\(\mu_{\mathrm{lower}}\)</span> and <span class="math inline">\(\mu_{\mathrm{upper}}\)</span>, which should help cement the idea of capturing some amount of the probability up to <span class="math inline">\(x_0\)</span> based on an ordering of <span class="math inline">\(x\)</span>:</p>
+<div class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div id="fig-uplow" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="stat-fundamentals_files/figure-html/fig-uplow-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.3: Probability density functions at both <span class="math inline">\(\mu_{\mathrm{lower}}\)</span> and <span class="math inline">\(\mu_{\mathrm{upper}}\)</span>, showing that the enclosed area under the curve at <span class="math inline">\(x_0\)</span> equals the desired amount as dictated by the confidence level.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="neyman-construction" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="neyman-construction">Neyman construction</h4>
+<p>A different way to build confidence intervals (that generalizes to multiple dimensions) can be found in the form of the <strong>Neyman construction</strong>. Here, we start by constructing an <em>acceptance interval</em> for <span class="math inline">\(x\)</span>. Given an ordering of <span class="math inline">\(x\)</span>, a desired confidence level <span class="math inline">\(\mathrm{C.L.}\)</span>, and a value of <span class="math inline">\(\mu\)</span>, an acceptance interval for <span class="math inline">\(x\)</span> is defined such that the probability contained between <span class="math inline">\([x_1, x_2]\)</span> is equal to <span class="math inline">\(\mathrm{C.L.}\)</span>. In equation form:</p>
+<p><span class="math display">\[ [x_1, x_2]~s.t.~P(x\in[x_1,x_2] | \mu) = \mathrm{C.L.} .\]</span></p>
+<p>The endpoints <span class="math inline">\([x_1, x_2]\)</span> are well defined because we decided on an ordering for <span class="math inline">\(x\)</span> (does not need to be central!), with any data outside these endpoints designated as “extreme” with respect to that ordering.</p>
+<p>We can then draw the acceptance intervals for many values of <span class="math inline">\(\mu\)</span>. This can be visualized in a plot of <span class="math inline">\(\mu\)</span> against <span class="math inline">\(x\)</span> as a set of horizontal lines in <span class="math inline">\(x\)</span> corresponding to the acceptance intervals. How do we turn this into an interval on values of <span class="math inline">\(\mu\)</span>? We just draw a vertical line corresponding to our observed data <span class="math inline">\(x_0\)</span>, and choose the values of <span class="math inline">\(\mu\)</span> that lie where the line intercepts the acceptance intervals for <span class="math inline">\(x\)</span>. All of this is shown in <a href="#fig-neyman">Figure&nbsp;<span>2.4</span></a>.</p>
+<div class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div id="fig-neyman" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="stat-fundamentals_files/figure-html/fig-neyman-output-1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.4: Neyman confidence band, showing both the overall envelop and explicit acceptance intervals in <span class="math inline">\(x\)</span>. Also shows how one can then determine <span class="math inline">\(\mu_{\mathrm{lower}}\)</span> and <span class="math inline">\(\mu_{\mathrm{upper}}\)</span> at the intersection of the band and observed data <span class="math inline">\(x_0\)</span>.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Even though the appearance of the plot in <a href="#fig-neyman">Figure&nbsp;<span>2.4</span></a> makes it look so, it is completely <em>not required that <span class="math inline">\(\mu\)</span> be 1-D!</em> For example, <span class="math inline">\(\mu\)</span> could easily have been 2-D here, and then the confidence interval in 2-D could still be constructed by the points at which the observed data (which would be the plane defined by <span class="math inline">\(x_0=10\)</span>) meets the acceptance intervals, even if this stretches out over other parameter dimensions. What happens if that multi-dimensional space becomes even larger, even if we don’t care about some of the parameters? We’ll look at new ordering principle for this.</p>
+</section>
+<section id="likelihood-ratio-ordering" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="likelihood-ratio-ordering">Likelihood ratio ordering</h4>
+<p>A fourth ordering principle for the data was proposed by Feldman &amp; Cousins in <span class="citation" data-cites="FC">(<a href="references.html#ref-FC" role="doc-biblioref">Feldman and Cousins 1998</a>)</span>, and is based on the likelihood ratio</p>
+<p><span class="math display">\[ R(x, \mu) = \frac{p(x|\mu)}{p(x| \hat{\mu})} ,\]</span></p>
+<p>where <span class="math inline">\(\hat{\mu}\)</span> represents the best-fit value of <span class="math inline">\(\mu\)</span>. Commonly used in HEP, it appeals to intuition since there’s then a correspondence between the notion of “extreme” and low probability density (relative to the maximum). Moreover, since it’s a ratio, a change in variables from <span class="math inline">\(x\)</span> to <span class="math inline">\(f(x)\)</span> would lead to the Jacobians cancelling in <span class="math inline">\(R\)</span>, making this ordering invariant to a change of metric. We can construct intervals ordered by <span class="math inline">\(R\)</span> through the Neyman method as above.</p>
+<section id="profiling" class="level5 unnumbered">
+<h5 class="unnumbered anchored" data-anchor-id="profiling">Profiling</h5>
+<p>In the case where the likelihood parameters can be split into <span class="math inline">\([\mu, \theta]\)</span>, with <span class="math inline">\(\theta\)</span> representing nuisance parameters, we can make this interval construction more feasable by using the <strong>profile likelihood ratio</strong>:</p>
+<p><span id="eq-profile-lhood-ratio"><span class="math display">\[
+\lambda(x, \mu) = \frac{p\left(x|\mu,\hat{\hat{\theta}}(\mu)\right)}{p\left(x| \hat{\mu}, \hat{\theta}\right)},
+\tag{2.9}\]</span></span></p>
+<p>where <span class="math inline">\(\hat{\hat{\theta}}(\mu)\)</span> represents the fitted value of <span class="math inline">\(\theta\)</span> when holding <span class="math inline">\(\mu\)</span> fixed. Doing this reduces the dimensionality of the parameter space to just those of which we’re interested in (e.g.&nbsp;signal strength). However, coverage properties for intervals constructed in this way may vary, so need to have their sampling properties studied (see section 13 in <span class="citation" data-cites="bob">(<a href="references.html#ref-bob" role="doc-biblioref">Cousins 2018</a>)</span>).</p>
+</section>
+</section>
+<section id="coverage" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="coverage">Coverage</h4>
+<p>Despite that a confidence interval is in values of <span class="math inline">\(\mu\)</span>, it’s an inherently <em>data-dependent construct</em> – you’ll get a different confidence interval for different observed data <span class="math inline">\(x_0\)</span>. The endpoints of the interval <span class="math inline">\([\mu_{\mathrm{lower}}, \mu_{\mathrm{upper}}]\)</span> are consequently treated as random variables. The confidence level, then, is a property of the set of intervals that would be constructed over many experiments: if we sampled <span class="math inline">\(x\)</span> from the true distribution many times with many experiments, and constructed a confidence interval using each sample with confidence level of 95%, then 95% of those intervals would contain (or <strong>cover</strong>) the true value of <span class="math inline">\(\mu\)</span>. The collection of these confidence intervals is called a <strong>confidence set</strong>, and we say that it has 95% <strong>coverage</strong>.</p>
+<p>How do we know our confidence set has this property? Well, the Neyman confidence set has it by definition: if we think about just the single distribution at the true value <span class="math inline">\(\mu_T\)</span>, the Neyman procedure creates an acceptance interval such that the probability between <span class="math inline">\([x_1, x_2]\)</span> is equal to the confidence level (say 95%). If we then do many experiments (i.e.&nbsp;sample <span class="math inline">\(x\sim p(x | \mu_T)\)</span>), we know that 95% of the time, the dotted line representing the data point will lie within the acceptance interval of <span class="math inline">\(\mu_T\)</span>. Ah – this is exactly the requirement for <span class="math inline">\(\mu_T\)</span> to be included in our confidence interval! It then follows that 95% of the <em>intervals</em> constructed will then include the true value of <span class="math inline">\(\mu\)</span>, corresponding exactly to when the observed data lies within the acceptance interval for <span class="math inline">\(\mu=\mu_T\)</span>.</p>
+<p>This is all well and good, but may ring some alarm bells – we only have one interval in practice, right? Isn’t there a chance that we draw data such that the confidence interval falls in the 5% that don’t cover the true, unknown value of <span class="math inline">\(\mu\)</span>, and thereby <em>contradicting the distribution that produced the data point</em>?</p>
+<p>In short, yes. But that doesn’t mean confidence intervals are useless – a single 95% interval is overwhelmingly more likely to contain the true parameter value than not. Remember: we’re always going to have inherent uncertainty on the statements we make on unknown true parameter values – this uncertainty is expressed as a probability distribution for Bayesian methods, and as a statement about sampling properties (results in the limit of many repeated experiments) for frequentist methods.</p>
+</section>
+</section>
+<section id="sec-hyptests" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="sec-hyptests"><span class="header-section-number">2.3.3</span> Frequentist hypothesis testing</h3>
+<p>Hypothesis testing gives us a framework to make qualitative statements about how extreme the observed data seems under a proposed theory, often in comparison to various alternatives. Note we use “extreme” in the same way as with confidence intervals, so we’re going to need to establish an ordering principle for the data. Let’s go into more detail.</p>
+<p>Once again, we concern ourselves with a statistic of the data <span class="math inline">\(x\)</span> and model parameters <span class="math inline">\(\mu\)</span>. Here we follow the conventions set out by Neyman (again) and Pearson in <span class="citation" data-cites="hyptests">(<a href="references.html#ref-hyptests" role="doc-biblioref">Neyman and Pearson 1933</a>)</span>, and start with the notion of a <strong>null</strong> hypothesis <span class="math inline">\(H_0\)</span>, which is the assumed default model for the data. One would often take this to be the Standard Model, for example. We then come up with an alternative hypothesis <span class="math inline">\(H_1\)</span>. In what way can <span class="math inline">\(H_0\)</span> and <span class="math inline">\(H_1\)</span> differ? We could have:</p>
+<ul>
+<li>Two totally separate probability models <span class="math inline">\(p_1(x | \mu_1)\)</span> and <span class="math inline">\(p_2(x | \mu_2)\)</span>, which can differ in number of parameters and functional form</li>
+<li>A set of hypotheses within a probability model; <span class="math inline">\(p(x | \mu)\)</span> induces a family of hypotheses parametrized by <span class="math inline">\(\mu\)</span>, for instance, with any two values of <span class="math inline">\(\mu\)</span> potentially serving as <span class="math inline">\(H_0\)</span> and <span class="math inline">\(H_1\)</span></li>
+</ul>
+<p>A hypothesis at a point (e.g.&nbsp;<span class="math inline">\(p(x | \mu=0)\)</span>) is known as a <strong>simple hypothesis</strong>, and a set of hypotheses (e.g.&nbsp;a second, unspecified model <span class="math inline">\(p_2(x | \mu)\)</span>, or <span class="math inline">\(p(x | \mu\neq0)\)</span>) is known as a <strong>composite hypothesis</strong>. In HEP, we’re commonly testing a point null of <span class="math inline">\(H_0\)</span> = Standard Model (<span class="math inline">\(p(x | \mu=0)\)</span>) against a composite alternative of <span class="math inline">\(H_1\)</span> = Something Else (<span class="math inline">\(p(x | \mu\neq0)\)</span>). This poses a challenge from an optimality perspective that we’ll cover shortly.</p>
+<p>So, how do we actually do the testing itself? We’ll need an ordering principle to rank data from least to most extreme. To do this, we usually concentrate on defining a good <strong>test statistic</strong> of the data <span class="math inline">\(t(x)\)</span>, then fix an ordering of <span class="math inline">\(t(x)\)</span> ascending (but other orderings are possible, e.g.&nbsp;two-tailed tests are centrally ordered in <span class="math inline">\(t(x)\)</span>). From there, we come up with a cutoff value <span class="math inline">\(t_c\)</span> such that data with <span class="math inline">\(t &gt; t_c\)</span> is seen as extreme. The proportion of the probability held by these extreme values is known as the <strong>confidence level</strong> or <strong>test size</strong> <span class="math inline">\(\alpha\)</span>.</p>
+<p>Under <em>which distribution</em> is this ordering and designation of <span class="math inline">\(\alpha\)</span> performed? We do this with the pdf of the test statistic under the null hypothesis, <span class="math inline">\(p(t(x)|H_0)\)</span>. Importantly, this distribution may not be known to us, and we may have to estimate it by sampling many values of <span class="math inline">\(x \sim p(x|H_0)\)</span>, then calculate <span class="math inline">\(t(x)\)</span> for all of them, and estimate the density of the result. Moreover, without this distribution, we don’t know how to place our cutoff <span class="math inline">\(t_c\)</span> so it contains a proportion <span class="math inline">\(\alpha\)</span> of the data considered most extreme!</p>
+<p>One more thing we can deduce from the above: our statements on how extreme the observed data appears are <em>fundamentally under the assumption that <span class="math inline">\(H_0\)</span> is true.</em> Keep this in mind!</p>
+<p>If the observed data <span class="math inline">\(x_0\)</span> falls in the extreme proportion of possible values, i.e.&nbsp;<span class="math inline">\(t(x_0) &gt; t_c\)</span>, we then say we <em>reject</em> <span class="math inline">\(H_0\)</span> compared to <span class="math inline">\(H_1\)</span>. Note that this does <em>not mean we accept <span class="math inline">\(H_1\)</span>!</em> For that, we’d have to look at decision theory, which involves establishing the notion of probabilities for <span class="math inline">\(H_0\)</span> and <span class="math inline">\(H_1\)</span>, which is beyond the scope of this frequentist testing framework (a more detailed discussion can be found in e.g. <span class="citation" data-cites="bob">(<a href="references.html#ref-bob" role="doc-biblioref">Cousins 2018</a>)</span>, Section 3.4).</p>
+<p>So if our testing revolves around <span class="math inline">\(H_0\)</span>, where does the alternative <span class="math inline">\(H_1\)</span> come into play? We can see the presence of <span class="math inline">\(H_1\)</span> in commonly used orderings, such as the <em>likelihood ratio</em> of the two hypothesis: <span class="math inline">\(t(x, \mu) = p(x | H_0)/p(x|H_1)\)</span>. Furthermore, we can define a measure of <em>error</em> in relation to <span class="math inline">\(H_1\)</span>: given <span class="math inline">\(H_1\)</span> is true, what’s the probability of accepting <span class="math inline">\(H_0\)</span>, even when the data come from <span class="math inline">\(H_1\)</span>? This quantity is known as <span class="math inline">\(\beta\)</span> – a <em>powerful</em> test would have low <span class="math inline">\(\beta\)</span>, i.e.&nbsp;often rejects <span class="math inline">\(H_0\)</span> in favour of <span class="math inline">\(H_1\)</span> when it is true, leading to the quantity <span class="math inline">\(1-\beta\)</span> being known as the <strong>power</strong> of a test.</p>
+<div id="fig-visualtest" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/alphabeta.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.5: Visualization of a hypothesis test</figcaption><p></p>
+</figure>
+</div>
+<p>When framing things in terms of error, we can see that the confidence level <span class="math inline">\(\alpha\)</span> also represents an error: <em>the probability of rejecting <span class="math inline">\(H_0\)</span> given that it’s true.</em> Why? If the observed data was truly generated from <span class="math inline">\(H_0\)</span>, it will fall in the extreme proportion of the data exactly <span class="math inline">\(\alpha\)</span> of the time, since that’s the way we designated the proportions to begin with. This would lead to the erroneous statement of rejecting <span class="math inline">\(H_0\)</span> (though we know this stops short of a <em>decision</em> on <span class="math inline">\(H_1\)</span>). We can see a representation of both <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> in <a href="#fig-visualtest">Figure&nbsp;<span>2.5</span></a>.</p>
+<p>The quantities <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> are often called <em>type-I</em> and <em>type-II</em> error respectively. I forget this all the time (in particular which type means what) so rarely use these names, but include them for completeness.</p>
+<section id="p-values" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="p-values"><span class="math inline">\(p\)</span>-values</h4>
+<p>So we set up a test by choosing the size <span class="math inline">\(\alpha\)</span>, obtain the distribution for our chosen test statistic <span class="math inline">\(t(x)\)</span>, and calculate the cutoff value <span class="math inline">\(t_c\)</span>. What next? We’ll take our observed data <span class="math inline">\(x_0\)</span>, calculate <span class="math inline">\(t(x_0)\)</span>, and see if it lies past <span class="math inline">\(t_c\)</span>. If so, we’ll reject <span class="math inline">\(H_0\)</span>. If so, we’d maybe like to know by how much the data was incompatible with <span class="math inline">\(H_0\)</span>. This quantity is known as the <span class="math inline">\(p\)</span>-value, and is just the area under <span class="math inline">\(p(t(x) | H_0)\)</span>, i.e.</p>
+<p><span class="math display">\[ p_{x_0} = \int_{x_0}^{+\infty}p(t(x) | H_0) dx ~.\]</span></p>
+<p>Note that the quantity <span class="math inline">\(p_{x}\)</span> exists generally for <span class="math inline">\(x\)</span> – this is just a rephrasing of the data into units that tell us how much of the test statistic distribution we’re enclosing to the right under <span class="math inline">\(H_0\)</span>. <span class="math inline">\(p_{x_0}\)</span> is then this statement for the observed data.</p>
+<p>We can then rephrase a hypothesis test as rejecting <span class="math inline">\(H_0\)</span> when <span class="math inline">\(p_{x_0} &lt; \alpha\)</span>, and accepting <span class="math inline">\(H_0\)</span> otherwise. A low <span class="math inline">\(p\)</span>-value is then a sign of low compatibility between the observed data and <span class="math inline">\(H_0\)</span>. (Here, my notation has come back to bite me… <span class="math inline">\(p_{x_0}\)</span> is absolutely <em>not</em> the probability of <span class="math inline">\(x_0\)</span>!!!)</p>
+</section>
+<section id="optimality" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="optimality">Optimality</h4>
+<p>What defines an optimal test? Well, <span class="math inline">\(\alpha\)</span> is specified prior to the test, so we’re left with maximizing the <em>power</em> <span class="math inline">\(1-\beta\)</span>. The task then becomes: given <span class="math inline">\(\alpha\)</span>, choose a test statistic <span class="math inline">\(t(x)\)</span> such that the power <span class="math inline">\(1-\beta\)</span> is maximized.</p>
+<p>In the case where <span class="math inline">\(H_0\)</span> and <span class="math inline">\(H_1\)</span> are simple, the likelihood ratio is the optimal test statistic in the sense of power, which can be proved through the Neyman-Pearson Lemma (omitted here for the sake of brevity, though see a visual proof in <span class="citation" data-cites="kyleproof">(<a href="references.html#ref-kyleproof" role="doc-biblioref">Cranmer 2020</a>)</span>).</p>
+<p>When we have a composite hypothesis, things get trickier, since we’ve only worked out the best test statistic for two point hypotheses. Instead of most powerful test, we need to change our language: we want the <em>uniformly most powerful test</em> across the many point hypotheses contained within the composite hypothesis.</p>
+<p>A proxy way to address this is the following: we know that the likelihood ratio is optimal for two point hypothesis. If we’re testing a point null (<span class="math inline">\(\mu=\mu_0\)</span>) against a composite alternative (<span class="math inline">\(\mu \neq \mu_0\)</span>), we can represent the alternative through the <em>best-fit hypothesis to the observed data</em>, i.e.&nbsp;estimate <span class="math inline">\(\hat{\mu}\)</span> via maximum likelihood. We can then use the test statistic <span class="math inline">\(p(x | \mu_0) / p(x | \hat{\mu})\)</span>. This is exactly analogous to the use of a likelihood ratio ordering in confidence intervals!</p>
+</section>
+</section>
+<section id="duality-between-hypothesis-test-and-intervals" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="duality-between-hypothesis-test-and-intervals"><span class="header-section-number">2.3.4</span> Duality between hypothesis test and intervals</h3>
+<p>It was probably hard to watch the number of times I defined “extreme” in this very specific way that seems to apply to both intervals and tests, without commenting on how they’re similar or different. That’s because they’re one-to-one in many ways!</p>
+<p>Say we make a <span class="math inline">\(\mathrm{C.L.}\)</span> = 95% confidence interval of <span class="math inline">\([\mu_1, \mu_2]\)</span> given an ordering principle/test statistic (e.g.&nbsp;likelihood ratio), a pdf <span class="math inline">\(p(x | \mu)\)</span>, and some observed data <span class="math inline">\(x_0\)</span>. This interval contains all values of <span class="math inline">\(\mu\)</span> for which the observed data <span class="math inline">\(x_0\)</span> is deemed <em>not</em> extreme. Given the <em>same ordering principle</em>, a hypothesis test of some particular <span class="math inline">\(\mu_0\)</span> asks: does <span class="math inline">\(x_0\)</span> lie in the extreme fraction of data <span class="math inline">\(\alpha = 1-\mathrm{C.L.}\)</span> when <span class="math inline">\(\mu=\mu_0\)</span>? This is the <em>same thing</em> as asking: does <span class="math inline">\(\mu_0\)</span> lie in the confidence interval <span class="math inline">\([\mu_1, \mu_2]\)</span>? If so, then the acceptance interval for <span class="math inline">\(p(x | \mu_0)\)</span> will be intercepted by <span class="math inline">\(x_0\)</span> – this would <em>accept</em> <span class="math inline">\(H_0\)</span> in the testing framework, since <span class="math inline">\(x_0\)</span> under assumption of <span class="math inline">\(\mu_0\)</span> is not considered extreme.</p>
+<p>I hope this is clear enough, it took me a little while to see initially! One can then <em>invert a test</em> to produce a related confidence interval, which just means taking the set of <span class="math inline">\(\mu\)</span> that aren’t rejected in a test using the observed data:</p>
+<p><span class="math display">\[ \{\mu: t(x_0, \mu) &lt; t_c \} = \mathrm{confidence~interval~at~C.L.~of~}1-\alpha ~.\]</span></p>
+</section>
+<section id="sec-bayes" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="sec-bayes"><span class="header-section-number">2.3.5</span> Bayesian procedures</h3>
+<p>I won’t talk much about the Bayesian methodology here since I didn’t explicitly use it in my PhD, but it’s worth mentioning for contrast. Moreover, if you’re a student within HEP reading this, I don’t want to make it seem like there’s only one way of doing things – there are analyses that use these methods, and I think they should be explored more! See something like <span class="citation" data-cites="sivia">(<a href="references.html#ref-sivia" role="doc-biblioref">Sivia and Skilling 2006</a>)</span> for a comprehensive introduction.</p>
+<p>As I’ve mentioned a few times, the Bayesian interpretation of probability admits distributions for facts; one can ask “how likely is supersymmetry?” or “what’s the distribution for my signal strength?” These questions are often answered via use of Bayes theorem, which states that for probability distribution <span class="math inline">\(p(\cdot)\)</span>, data <span class="math inline">\({x}\)</span>, and model parameters <span class="math inline">\({\mu} = \{ \mu_1, \mu_2, \dots, \mu_n\}\)</span>, <span class="math display">\[
+p({\mu}|{x}) = \frac{p({x}|{\mu})p({\mu})}{p({x})}~.
+\]</span></p>
+<p>We call <span class="math inline">\(p({\mu}|{x})\)</span> the joint <strong>posterior</strong> distribution of the parameters <span class="math inline">\({\mu}\)</span>, since it reflects our updated beliefs post-data. We know about the likelihood <span class="math inline">\(p(x|\mu)\)</span>, but <span class="math inline">\(p({\mu})\)</span> (the product of the individual distributions <span class="math inline">\(p(\mu_i)\)</span>) is a new player in the game: these are the <strong>prior</strong> distributions for each parameter, called as such to reflect our prior belief in their distributions. We need to incorporate this information to perform inference using this paradigm, which is often a difficult task to do faithfully (even when we want to claim ignorance). Finally, the normalizing factor <span class="math inline">\(p({x})\)</span> is termed the <strong>model evidence</strong>, and is obtained by marginalizing out the model parameters:</p>
+<p><span class="math display">\[
+\mathrm{Evidence} = \int_\Omega p({x}|\mu)\times p(\mu)\,\mathrm{d}\mu
+\]</span> over parameter domain <span class="math inline">\(\Omega\)</span>. Often, Bayesian computation only requires proportionality with respect to the parameters, so it’s common to just think of the equation</p>
+<p><span class="math display">\[
+\mathrm{Posterior} \propto \mathrm{Likelihood} \times \mathrm{Priors}
+\]</span> as the defining equation of Bayesian inference, though the model evidence remains useful as a compatibility measure between data and likelihood.</p>
+<p>One thing to note: Bayes theorem does not use the Bayesian definition of probability unless we decide to – it’s derived from the axioms of probability, and is thus invariant of interpretation. Using this theorem in a Bayesian way only holds when we have a true but unknown quantity (e.g.&nbsp;<span class="math inline">\(\mu\)</span>) as the subject of our distribution, as is done here.</p>
+<p>Armed with this equation, Bayesian procedures include:</p>
+<ul>
+<li><strong>Posterior estimation</strong> (e.g.&nbsp;through Markov chain monte carlo and it’s variants)
+<ul>
+<li>Can then perform point estimation via <em>maximum a posteriori</em> (the mode of the posterior)</li>
+</ul></li>
+<li><strong>Credible intervals</strong>: in contrast to confidence intervals where the endpoints are random variables, <span class="math inline">\(\mu\)</span> itself is now the random variable, and the interval is constructed such that it contains the true value <span class="math inline">\(\mu_T\)</span> with some allocated probability.</li>
+<li><strong>Hypothesis testing</strong>: Bayesian hypothesis tests do exist, and involve the model evidence; I won’t talk about them here.</li>
+<li><strong>Evidence estimation</strong>, e.g.&nbsp;nested sampling <span class="citation" data-cites="ns">(<a href="references.html#ref-ns" role="doc-biblioref">Skilling 2006</a>)</span>, which also comes with a posterior estimate as a by-product.</li>
+</ul>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-bob" class="csl-entry" role="doc-biblioentry">
+Cousins, Robert D. 2018. <span>“Lectures on Statistics in Theory: Prelude to Statistics in Practice.”</span> arXiv. <a href="https://doi.org/10.48550/ARXIV.1807.05996">https://doi.org/10.48550/ARXIV.1807.05996</a>.
+</div>
+<div id="ref-kyleproof" class="csl-entry" role="doc-biblioentry">
+Cranmer, Kyle. 2020. <span>“Neyman-Pearson Lemma.”</span> <a href="http://theoryandpractice.org/stats-ds-book/statistics/neyman_pearson.html">http://theoryandpractice.org/stats-ds-book/statistics/neyman_pearson.html</a>.
+</div>
+<div id="ref-FC" class="csl-entry" role="doc-biblioentry">
+Feldman, Gary J., and Robert D. Cousins. 1998. <span>“Unified Approach to the Classical Statistical Analysis of Small Signals.”</span> <em>Physical Review D</em> 57 (7): 3873–89. <a href="https://doi.org/10.1103/physrevd.57.3873">https://doi.org/10.1103/physrevd.57.3873</a>.
+</div>
+<div id="ref-definetti" class="csl-entry" role="doc-biblioentry">
+Finetti, Bruno de. 1970. <em>Theory of Probability: A Critical Introductory Treatment</em>. New York: John Wiley.
+</div>
+<div id="ref-lbgfs" class="csl-entry" role="doc-biblioentry">
+Fletcher, Roger. 1987. <em>Practical Methods of Optimization</em>. Second. New York, NY, USA: John Wiley &amp; Sons.
+</div>
+<div id="ref-mayo" class="csl-entry" role="doc-biblioentry">
+Mayo, Deborah G. 2018. <em>Statistical Inference as Severe Testing: How to Get Beyond the Statistics Wars</em>. Cambridge University Press. <a href="https://doi.org/10.1017/9781107286184">https://doi.org/10.1017/9781107286184</a>.
+</div>
+<div id="ref-hyptests" class="csl-entry" role="doc-biblioentry">
+Neyman, J., and E. S. Pearson. 1933. <span>“On the Problem of the Most Efficient Tests of Statistical Hypotheses.”</span> <em>Philosophical Transactions of the Royal Society of London. Series A, Containing Papers of a Mathematical or Physical Character</em> 231: 289–337. <a href="http://www.jstor.org/stable/91247">http://www.jstor.org/stable/91247</a>.
+</div>
+<div id="ref-freq" class="csl-entry" role="doc-biblioentry">
+Senn, Stephen. 2011. <span>“You May Believe You Are a Bayesian but You Are Probably Wrong.”</span> <em>Rationality, Markets and Morals</em> 2 (January).
+</div>
+<div id="ref-kolmogorov-thing" class="csl-entry" role="doc-biblioentry">
+Shafer, Glenn, and Vladimir Vovk. 2006. <span>“The Sources of Kolmogorov’s Grundbegriffe.”</span> <em>Statistical Science</em> 21 (1). <a href="https://doi.org/10.1214/088342305000000467">https://doi.org/10.1214/088342305000000467</a>.
+</div>
+<div id="ref-sivia" class="csl-entry" role="doc-biblioentry">
+Sivia, D., and J. Skilling. 2006. <em>Data Analysis: A Bayesian Tutorial</em>. Oxford Science Publications. OUP Oxford. <a href="https://books.google.ch/books?id=lYMSDAAAQBAJ">https://books.google.ch/books?id=lYMSDAAAQBAJ</a>.
+</div>
+<div id="ref-ns" class="csl-entry" role="doc-biblioentry">
+Skilling, John. 2006. <span>“<span class="nocase">Nested sampling for general Bayesian computation</span>.”</span> <em>Bayesian Analysis</em> 1 (4): 833–59. <a href="https://doi.org/10.1214/06-BA127">https://doi.org/10.1214/06-BA127</a>.
+</div>
+<div id="ref-bayesrant" class="csl-entry" role="doc-biblioentry">
+———. 2008. <span>“This Physicist’s View of Gelman Bayes.”</span> <a href="http://www.stat.columbia.edu/~gelman/stuff_for_blog/rant2.pdf">http://www.stat.columbia.edu/~gelman/stuff_for_blog/rant2.pdf</a>.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config);
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./physics.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></span>
+      </a>
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./stat-practical.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

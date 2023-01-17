@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - 1&nbsp; Physics background</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./stat-fundamentals.html" rel="next">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Analysis in High-Energy Physics as a Differentiable Program</a>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container">
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Fundamentals</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./physics.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./stat-fundamentals.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./stat-practical.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Probability and Statistics, in practice</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./diffprog.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./autodiff.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Automatic differentiation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./ml.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Machine learning</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Applications</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./diffprog-hep.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data Analysis in High-Energy Physics as a Differentiable Program</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./flow-interp.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Signal Model Interpolation using Normalizing Flows</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./sh.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Search for a heavy scalar particle <span class="math inline">\(X\)</span> decaying to a scalar <span class="math inline">\(S\)</span> and a Higgs boson, with final state <span class="math inline">\(b\bar{b}\gamma\gamma\)</span> in the ATLAS detector</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./references.html" class="sidebar-item-text sidebar-link">References</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Appendices</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a>
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+          <li class="sidebar-item">
+  <div class="sidebar-item-container">
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+
+  <ul>
+  <li><a href="#the-standard-model" id="toc-the-standard-model" class="nav-link active" data-scroll-target="#the-standard-model"><span class="toc-section-number">1.1</span>  The Standard Model</a>
+  <ul class="collapse">
+  <li><a href="#forces" id="toc-forces" class="nav-link" data-scroll-target="#forces"><span class="toc-section-number">1.1.1</span>  Forces</a></li>
+  </ul></li>
+  <li><a href="#properties-of-particles-and-their-colliders" id="toc-properties-of-particles-and-their-colliders" class="nav-link" data-scroll-target="#properties-of-particles-and-their-colliders"><span class="toc-section-number">1.2</span>  Properties of particles (and their colliders)</a>
+  <ul class="collapse">
+  <li><a href="#kinematics" id="toc-kinematics" class="nav-link" data-scroll-target="#kinematics"><span class="toc-section-number">1.2.1</span>  Kinematics</a></li>
+  <li><a href="#quantifying-collisions" id="toc-quantifying-collisions" class="nav-link" data-scroll-target="#quantifying-collisions"><span class="toc-section-number">1.2.2</span>  Quantifying collisions</a></li>
+  </ul></li>
+  <li><a href="#particle-detectors" id="toc-particle-detectors" class="nav-link" data-scroll-target="#particle-detectors"><span class="toc-section-number">1.3</span>  Particle detectors</a>
+  <ul class="collapse">
+  <li><a href="#kinematics-again" id="toc-kinematics-again" class="nav-link" data-scroll-target="#kinematics-again"><span class="toc-section-number">1.3.1</span>  Kinematics, again</a></li>
+  </ul></li>
+  <li><a href="#simulators" id="toc-simulators" class="nav-link" data-scroll-target="#simulators"><span class="toc-section-number">1.4</span>  Simulators</a></li>
+  <li><a href="#sec-bsm" id="toc-sec-bsm" class="nav-link" data-scroll-target="#sec-bsm"><span class="toc-section-number">1.5</span>  Issues with the Standard Model, and what may lie beyond</a>
+  <ul class="collapse">
+  <li><a href="#the-hierarchy-problem" id="toc-the-hierarchy-problem" class="nav-link" data-scroll-target="#the-hierarchy-problem"><span class="toc-section-number">1.5.1</span>  The hierarchy “problem”</a></li>
+  <li><a href="#gravity" id="toc-gravity" class="nav-link" data-scroll-target="#gravity"><span class="toc-section-number">1.5.2</span>  Gravity</a></li>
+  <li><a href="#other-things" id="toc-other-things" class="nav-link" data-scroll-target="#other-things"><span class="toc-section-number">1.5.3</span>  Other things</a></li>
+  <li><a href="#going-beyond-the-standard-model" id="toc-going-beyond-the-standard-model" class="nav-link" data-scroll-target="#going-beyond-the-standard-model"><span class="toc-section-number">1.5.4</span>  Going beyond the Standard Model</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+
+
+  </div>
+
+
+</header>
+
+<p>What makes up you and me? How do interactions on the smallest scales affect the way the universe was made and how it will end? Why does anything exist at all? Is anyone even reading this? If they do, but no-one is there to see them, will they make a sound?</p>
+<p>At least two of these existential questions are explored by the scientific discipline known as <strong>high-energy physics</strong> (HEP). This term encompasses things like <strong>particle physics</strong>, <strong>astrophysics</strong>, and <strong>cosmology</strong>, which are a mix of studying things at the largest and smallest possible scales, and have surprisingly large interplay. We focus here on particle physics, which looks at the very, very small.</p>
+<section id="the-standard-model" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="the-standard-model"><span class="header-section-number">1.1</span> The Standard Model</h2>
+<p>An innumerable number of particle physics results in the last 10 years or so have shown no signs of deviating from the predictions made from the <strong>Standard Model</strong> of particle physics, a theory proposed and developed by many scientists over many years <span class="citation" data-cites="sm">(<a href="references.html#ref-sm" role="doc-biblioref">Oerter 2006</a>)</span>. It’s been extraordinarily robust to experiments that have probed it thus far, and it is very much the norm for any budding physicist to pessimistically assume any search to uncover new physics will state “no excesses were found”, with the result being “consistent with the Standard Model prediction”. We go over an extremely brief overview of this ludicrously successful model in the following paragraphs, which are largely based on <span class="citation" data-cites="dtong">(<a href="references.html#ref-dtong" role="doc-biblioref">Tong 2022</a>)</span> and <span class="citation" data-cites="buckley">(<a href="references.html#ref-buckley" role="doc-biblioref">Buckley, White, and White 2021</a>)</span>.</p>
+<!-- But like an onion, matter has a layer deeper still, with protons and neutrons being made up of different **quarks**, which are another type of particle. Specifically, the proton contains two *up quarks* ($u$), and one down quark ($d$), which we denote using $uud$. The electric charge of $u$ is +2/3, and the charge of $d$ is -1/3, so the overall charge of the proton is +1. In contrast, the neutron has a composition of $udd$, and has an overall neutral electric charge of 0. The electron $e^-$, with overall charge of -1, seems to be irreducible, and belongs to a species of particle known as **leptons**. Each lepton is associated with a corresponding neutrino -- a chargeless particle with unknown mass which we denote with $\nu_e$. We're slowly approaching botanical levels of nomenclature, so I'll summarize the rest of the particle types and naming in @fig-standard-model. For each fundamental particle listed, there also exists a corresponding **anti-particle**, which has the opposite sign for the charge (and other quantum numbers). We denote this with a bar for quarks (e.g. $\bar{b}$ is the anti $b$ quark), and for a change in sign for leptons (e.g. the positron $e^+$). It is not yet known whether there are anti-neutrinos, or if they are their own anti-particle. -->
+<p>The Standard Model is a type of <strong>quantum field theory</strong>, which operates using a fundamental object defined over all of time and space called a <em>field</em>. These fields are described by equations that can be treated as waves, which are restricted to travel in discrete quanta of energy. These quanta are generally what we’ve been calling “particles”, and also serve to mediate what we know as <strong>forces</strong>. Said in another way, everything that we call a particle is actually an oscillation of a field, where the field is the fundamental object as opposed to the particle. Nevertheless, the following conversation is mostly had from a particle-first perspective in order to salvage some intuition, even if it breaks down under a fine enough microscope (somewhat literally – we’ll get to this in due course). So, even though we won’t mention them too much, do keep in the back of your mind that everything that manifests here is actually a result of these fields interacting in some way<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Now, as far as I have checked, I am particles. So are you. Which particles are we? Textbooks would have us believe that we’re made of “atoms”, which in turn are made up of protons, neutrons, and electrons. Are they made up of their own “atoms” too? In a sense; the electron is irreducible as far as we know, but protons and neutrons are composed of constituents known as <strong>quarks</strong>, which again, don’t seem to be further reducible (at least from the perspective of the Standard Model). These quarks come in two “flavors”: the <em>up quark</em> <span class="math inline">\(u\)</span> and the <em>down quark</em> <span class="math inline">\(d\)</span>. There’s no particular reason for these names other than to make it neat to tell apart quarks in a linguistically pleasing way. Zooming out again to an atomic scale, the proton has a quark composition of <span class="math inline">\(uud\)</span> (two up quarks and one down quark), and a neutron has <span class="math inline">\(udd\)</span> (two down, one up)<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<!-- A property of quarks that also follows this poor naming pattern can be found in the notion of *color*; quarks can be either red, green, or blue, which is just a way of categorizing the way they interact with the strong force. Indeed, this has nothing to do with visual color -- something that makes sense when we realize color appears when our eyes perceive photons, a different kind of particle. -->
+<p>One last ingredient we’ll add here to complete this set of particles is the <strong>neutrino</strong>: an electrically neutral particle with extremely low mass. How do we even know it exists if it doesn’t noticeably interact with electromagnetic or gravitational forces? While not responsible for building up matter like me and you, it plays a role when matter decays, for instance, and was postulated by Wolfgang Pauli in 1930 to make up for losses in energy and momentum when atoms undergo beta decay (e.g.&nbsp;for a neutron to decay into a proton, it will emit an electron and a neutrino). Another fun neutrino fact is that 1 billion of them have probably passed through you as you finish this paragraph, mostly coming from nuclear interactions in the sun.</p>
+<p>These four particles complete the <strong>first generation</strong>: <span class="math inline">\(e^-\)</span>, <span class="math inline">\(d\)</span>, <span class="math inline">\(u\)</span>, and <span class="math inline">\(\nu_e\)</span>. As the name implies, there are additional generations – exactly two more, in fact, which is a stringent requirement of the mathematics of quantum field theory (though experiment could easily refute this in future). These generations are analogous to the first, each with something electron-like, two quarks, and a neutrino, with the generations differing by mass (abd name) alone. The second generation contains the muon <span class="math inline">\(\mu^-\)</span>, the strange quark <span class="math inline">\(s\)</span>, the charm quark <span class="math inline">\(c\)</span>, and the muon neutrino <span class="math inline">\(\nu_\mu\)</span>, while the third contains the tauon (or just tau) <span class="math inline">\(\tau\)</span>, the bottom quark <span class="math inline">\(b\)</span>, the top quark <span class="math inline">\(t\)</span>, and the tau neutrino <span class="math inline">\(\nu_\tau\)</span>. The full spread of these particles is shown in <a href="#fig-sm">Figure&nbsp;<span>1.1</span></a>, including details on the charges and relative masses (assuming the electron mass <span class="math inline">\(m_e = 0.511\)</span> <span class="math inline">\(\text{MeV}\)</span> was actually 1 kg). And no, we have no idea why the top quark is a Big Chungus<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<div id="fig-sm" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/sm.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.1: A cartoon schematic of the Standard Model fermions. Images are examples of objects that weigh about the same relative mass to the electron, assuming the electron weighed 1 kg.</figcaption><p></p>
+</figure>
+</div>
+<p>Particles carry an intrinsic angular momentum, known as <strong>spin</strong>. If you want a mental picture, this can be thought of to some degree as the particles literally spinning in place, but it’s of course more a property of the field than the particles themselves. The main thing to note about spin is that it’s quantized into half-integer amounts (e.g.&nbsp;1/2, 1, 1+1/2 etc.), and the sign indicates the direction of that spin. Importantly, particles with half-integer spin cannot occupy the same location, which is known as the Fermi exclusion principle. We can also define the notion of <strong>handedness</strong>: a (massless) particle is left-handed if its spin vector and momentum vector are pointing in the same direction, and right handed if they’re pointing opposite directions.</p>
+<p>We come to yet another notion of particles: <strong>antimatter</strong>. Each particle in the table above has an antimatter counterpart, denoted either with a bar over the letter for quarks and neutrinos (<span class="math inline">\(\bar{u}, \bar{\nu_\mu}\)</span>) and through flipping the sign of the charge for leptons (such as the positron <span class="math inline">\(e^+\)</span>). This is just notation; antimatter is a flipping of the sign of some of the basic properties of the particle, namely the electric charge and the handedness. We note here that whether the neutrino is its own antiparticle is a subject up for debate; it is unknown if right-handed neutrinos (or left-handed antineutrinos) exist at all.</p>
+<section id="forces" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="forces"><span class="header-section-number">1.1.1</span> Forces</h3>
+<p>When two particles feel a force, it’s often said that those particles undergo the exchange of the relevant particle to that force, i.e.&nbsp;there’s a <em>mediator</em> for every force in the form of a particle. But in my mind, this leads to weird images of some particles throwing other particles off one another, which is then somehow meant to manifest as something like gravity or magnetic attraction, neither of which seem intuitive<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. Nevertheless, it remains a useful construct to think about these mediator particles from the perspective of the underlying mathematics. These particles that mediate forces carry integer spin, and are called <strong>bosons</strong> for this reason. Here are the main examples:</p>
+<ul>
+<li>The <strong>electromagnetic force</strong> (or hypercharge), carried by the <strong>photon</strong> <span class="math inline">\(\gamma\)</span></li>
+<li>The <strong>weak force</strong>, carried by three particles: the <span class="math inline">\(W^+\)</span>, <span class="math inline">\(W^-\)</span>, and <span class="math inline">\(Z^0\)</span> bosons</li>
+<li>The <strong>strong force</strong>, carried by the <strong>gluon</strong> <span class="math inline">\(g\)</span> (named for being the glue that keeps protons together)</li>
+<li><strong>Gravity</strong>, which is not described by the Standard Model. In theory, one could have a force-carrying particle called the <em>graviton</em>, but this has no experimental evidence yet.</li>
+</ul>
+<section id="the-higgs-field" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="the-higgs-field">The Higgs field</h4>
+<p>To top off our description of the Standard Model, we mention the <strong>Higgs field</strong>, with a quantum of energy known as the <strong>Higgs boson</strong>. The field (and particle) are the only ones in the Standard Model without any spin, which is what we call a <strong>scalar field</strong>. This property leads to a surprising fact: the value of the Higgs field can be <em>non-zero in the vacuum</em>. The reason for this is due to the shape of the <strong>potential energy</strong> of the Higgs field, which can be loosely thought of as how much energy the Higgs field needs to have to take on a certain value. In the Standard Model, this potential <span class="math inline">\(V(\phi)\)</span>, where <span class="math inline">\(\phi\)</span> is the value of the Higgs field, has the relatively simple form</p>
+<p><span id="eq-higgs-potential"><span class="math display">\[
+V(\phi)=a|\phi|^2+b|\phi|^4~.
+\tag{1.1}\]</span></span></p>
+<p>The Standard Model predicts the shape of this potential as shown in <a href="#fig-higgs-potential">Figure&nbsp;<span>1.2</span></a>, which is only possible with <span class="math inline">\(a &lt; 0\)</span> and <span class="math inline">\(b &gt; 0\)</span>. In the absence of anything else, i.e.&nbsp;in the vacuum, the Higgs field will sit somewhere at the minima of this potential. But as shown in <a href="#fig-higgs-potential">Figure&nbsp;<span>1.2</span></a>, the values of the field in this valley are non-zero.</p>
+<div id="fig-higgs-potential" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/higgspotential.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.2: An example of the shape of the Higgs potential predicted by the Standard Model. A cartoon ball is shown to indicate that the Higgs will settle in one of the low-energy states away from the origin. Attribution: <span class="citation" data-cites="ox">(<a href="references.html#ref-ox" role="doc-biblioref">Oxford University 2021</a>)</span></figcaption><p></p>
+</figure>
+</div>
+<p>A consequence of the Higgs field being “turned on” in the vacuum with some value of energy is that it is responsible for giving <em>fundamental particles mass</em>. Here, I stress the word “fundamental” – the mass of composite particles made of quarks (or <strong>hadrons</strong>) is actually due to large fluctuations of the associated quantum fields, where the Higgs-given masses are a negligible contribution (the mass of the proton is about 1836<span class="math inline">\(m_e\)</span>, which is clearly larger than two up quarks and one down quark from <a href="#fig-sm">Figure&nbsp;<span>1.1</span></a>). An often-quoted analogy that holds very delicately is treating the Higgs field as a thick, viscous liquid (think Marmite), and particles then gain mass as they move through it, with the amount of resistance depending somehow on the type of particle. This interaction is technically a fifth force called the Higgs force, but it’s not often quoted as such.</p>
+<p>The particle discovered by the ATLAS and CMS experiments at CERN in 2012 is widely believed to represent the Higgs boson as proposed by the Standard Model <span class="citation" data-cites="higgs">(<a href="references.html#ref-higgs" role="doc-biblioref">ATLAS-Collaboration 2012</a>)</span>. This is largely due to the mass measured for the Higgs boson being consistent with the Standard Model prediction of <span class="math inline">\(m_H \approx 125\)</span> <span class="math inline">\(\text{GeV}\)</span>. For something fairly up-to-date, a summary of Higgs mass measurements can be found in <a href="#fig-higgs-mass">Figure&nbsp;<span>1.3</span></a>. However, it is precisely the fact that the Higgs is this mass that has left the field of particle physics in a bit of a muddle. We’ll touch on this at the end of the chapter.</p>
+<div id="fig-higgs-mass" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/higgsmass.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.3: Summary of the main Higgs boson mass measurements with their associated errors. Attribution: <span class="citation" data-cites="atlaspublic">(<a href="references.html#ref-atlaspublic" role="doc-biblioref">ATLAS Collaboration 2022a</a>)</span></figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="decays-of-the-higgs-boson" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="decays-of-the-higgs-boson">Decays of the Higgs boson</h4>
+<p>For all this talk of the Higgs boson, it doesn’t stop around for long. It has a lifetime of <span class="math inline">\(1.6 \times 10^{-22}\)</span> seconds, which is a number smaller than a second by a factor of around a billion squared. The result of this is that the Higgs will decay into other particles nearly instantly within our particle detectors – we’re then left to chase its shadow. The Higgs can decay into many different particle types, provided, of course, their total mass does not exceed that of the Higgs (conservation of energy). However, it is more likely to decay to some things than others. These different probabilities for particles to decay into each variety are known as <strong>branching ratios</strong>, with the Higgs’ most common decay being to two <span class="math inline">\(b\)</span>-quarks. We can see these branching ratios as a function of the Higgs mass in <a href="#fig-higgs-ratios">Figure&nbsp;<span>1.4</span></a>, where we have a little look either side of the measured mass from our experiments.</p>
+<div id="fig-higgs-ratios" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/SMHiggsBR_120-130.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.4: Branching ratios of the Standard Model Higgs boson to its main decay modes as a function of mass. Attribution: <span class="citation" data-cites="ratios">(<a href="references.html#ref-ratios" role="doc-biblioref">CERN 2017</a>)</span></figcaption><p></p>
+</figure>
+</div>
+<p>A general note on decays: you’ll see decays to two quarks written sometimes as <span class="math inline">\(qq\)</span>, <span class="math inline">\(bb\)</span> etc, but any decay to two identical quarks means one of them is an anti-quark, for reasons of conservation of charge amongst other things. So <span class="math inline">\(H\rightarrow bb\)</span> means <span class="math inline">\(H\rightarrow b\bar{b}\)</span>, just in case I’m not explicit in future.</p>
+</section>
+</section>
+</section>
+<section id="properties-of-particles-and-their-colliders" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="properties-of-particles-and-their-colliders"><span class="header-section-number">1.2</span> Properties of particles (and their colliders)</h2>
+<p>Due to the equivalence of mass and energy (think <span class="math inline">\(E=mc^2\)</span>), one could imagine the ability to create things with large mass, if we had enough energy to do so. That is precisely the idea behind <strong>particle colliders</strong>: we give particles a large amount of energy (i.e.&nbsp;they’re traveling close to the speed of light), and then collide them so that they interact. These interactions, with sufficient energy, can then lead to the creation of heavier particles, provided that particle has mass that’s less than the energy at which the particles that produced it collided. We call this energy the <strong>center-of-mass energy</strong>, which is around <span class="math inline">\(13.6 \,\text{TeV}\)</span> for run 3 of the Large Hadron Collider. This process of collision is usually done through charged particles such as protons, because we can accelerate them using electric and magnetic fields to speeds that can produce energies like this.</p>
+<p>How do we detect if we produced the particles we want? We can do this by analyzing data from the collision; for that, we need to surround areas of our collider with <strong>detectors</strong>, which collect all the by-products that splash out from the center of the collision. These detectors, along with some input from software, have the ability to <em>reconstruct</em> the tracks that (charged) particles leave in the detector, from which one can determine properties like the charge from the way the track curves. Additionally, there are modules that can measure the energy deposited from particles emerging from the collisions, which can be placed at different distances to measure particles with different lifetimes (short-lived particles that decay quickly won’t ever make it past a certain distance before being totally absorbed by the detector itself).</p>
+<p>Given this, we’ll go over some of the properties that particles have while moving, and why they’re useful for looking at the validity of physical theories.</p>
+<p>From here, we will use the convention of <strong>natural units</strong>, which essentially absorbs constant factors of the speed of light <span class="math inline">\(c\)</span> and the Planck constant <span class="math inline">\(\bar{h}\)</span> into the units chosen. You will then see quantities quoted in <strong>electron volts</strong> (<span class="math inline">\(\text{eV}\)</span>) with different prefactors as usual for the size (<span class="math inline">\(\text{GeV}\)</span> = giga electron volts = <span class="math inline">\(1\times 10^9\)</span> <span class="math inline">\(\text{eV}\)</span> etc.). <span class="math inline">\(1\,\text{eV}\)</span> is a very small amount of energy indeed (<span class="math inline">\(1.6 \times 10^{-19}\)</span> Joules), with the center-of-mass energy of the Large Hadron Collider being <span class="math inline">\(13.6\)</span> TeV – still much less than a sandwich (but I would support building a sandwich collider; see <span class="citation" data-cites="meatball">(<a href="references.html#ref-meatball" role="doc-biblioref">Doglioni et al. 2019</a>)</span> for an attempt of this nature, though physics results may vary).</p>
+<section id="kinematics" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="kinematics"><span class="header-section-number">1.2.1</span> Kinematics</h3>
+<p>We start with <strong>relativistic kinematics</strong>, i.e.&nbsp;how things move when they’re nearly at the speed of light. Objects like this are best described by talking about <strong>spacetime</strong>, which imparts an extra temporal dimension to the traditional three-vector for position in the form of a four-vector:</p>
+<p><span class="math display">\[
+x^\mu = (t, x, y, z) = (x_0, x_1, x_2, x_3)~.
+\]</span></p>
+<p>Equivalently, we can drop the index <span class="math inline">\(\mu\)</span> from upper to lower, and get the equivalent <span class="math inline">\(x_\mu = (t, -x, -y, -z) = (x_0, -x_1, -x_2, -x_3)\)</span> (choice of convention). This allows for the compact notation of dot products between four-vectors using summation notation:</p>
+<p><span id="eq-four-vec-prod"><span class="math display">\[
+x^\mu y_\mu = y_\mu x^\mu  = x_0y_0 - [x_1y_1 + x_2y_2 + x_3y_3]~.
+\tag{1.2}\]</span></span></p>
+<p>This quantity is important, as it can be shown to be <em>Lorentz-invariant</em>, which means the value remains the same even if we change the reference frame we’re in (i.e.&nbsp;we move in some way relative to the object). Using the four-vector for position, we can define a four-momentum:</p>
+<p><span class="math display">\[
+p^\mu = m \frac{dx^\mu}{d\tau}~,
+\]</span></p>
+<p>where <span class="math inline">\(m\)</span> is the object <strong>rest mass</strong>, and <span class="math inline">\(\tau\)</span> is the <strong>proper time</strong>, defined by applying the relativistic factor <span class="math inline">\(\gamma\)</span> to time as</p>
+<p><span class="math display">\[
+t = \gamma\tau;~~~ \gamma = \frac{1}{\sqrt{1-v^2}}
+\]</span></p>
+<p>for magnitude of the object’s three-velocity <span class="math inline">\(v = |\mathbf{v}|\)</span>. This leads to an equivalent notation of</p>
+<p><span class="math display">\[
+p^\mu = (E, \mathbf{p}); ~~~ E=\gamma m,~\mathbf{p}=\gamma m \mathbf{v}~.
+\]</span></p>
+<p>Using <a href="#eq-four-vec-prod">Equation&nbsp;<span>1.2</span></a>, we can take the dot product of <span class="math inline">\(p^\mu\)</span> with itself:</p>
+<p><span id="eq-mom-dot"><span class="math display">\[
+p^2 = p^\mu p_\mu = E^2 - |\mathbf{p}|^2~.
+\tag{1.3}\]</span></span></p>
+<p>We can exploit the fact that <span class="math inline">\(p^2\)</span> is invariant to its reference frame and examine one case in particular: a stationary body with 0 velocity but some mass will have a non-zero four-momentum <span class="math inline">\(p^\mu = (m, 0)\)</span>. Then, we have <span class="math inline">\(p^2 = m^2\)</span>, which we can set equal to <a href="#eq-mom-dot">Equation&nbsp;<span>1.3</span></a> that holds generally:</p>
+<p><span id="eq-invariant-mass"><span class="math display">\[
+\Rightarrow E^2 - |\mathbf{p}|^2 = m^2~,
+\tag{1.4}\]</span></span></p>
+<p>which is called the <strong>energy-momentum relation</strong>, and leads to the left-hand side being known as the <strong>invariant mass</strong> <span class="math inline">\(s\)</span>, since it recovers the rest mass of a body in that body’s rest frame. Of course, <span class="math inline">\(\sqrt{s}\)</span> is then the actual rest mass in this case, which is why we write <span class="math inline">\(\sqrt{s} = 13.6 \, \text{TeV}\)</span> as the center-of-mass energy for the LHC.</p>
+<p>For multiple particles, <a href="#eq-invariant-mass">Equation&nbsp;<span>1.4</span></a> then gives rise to the concept of the invariant mass of a system of bodies with four-momenta <span class="math inline">\(p_1, p_2, ...\)</span> – their total momenta is <span class="math inline">\(\sum_i p_i\)</span>, and the total invariant mass is then</p>
+<p><span id="eq-invariant-mass-system"><span class="math display">\[
+s_{1,2,...} = \left(\sum_i p_i\right)^2 ~,
+\tag{1.5}\]</span></span></p>
+<p>which will involve terms in the energies and three-momenta of the different particles as per <a href="#eq-invariant-mass">Equation&nbsp;<span>1.4</span></a>. This quantity will be particularly important when we come to the search for a new particle in the latter stages of the thesis, because it allows us to detect <strong>resonances</strong>, which are intermediate particles that can produce a different final state. As an example, the Higgs boson can decay to four leptons via other vector bosons as per <a href="#fig-higgs-ratios">Figure&nbsp;<span>1.4</span></a> (e.g.&nbsp;two <span class="math inline">\(Z\)</span> bosons can each decay into two leptons), meaning the Higgs can then be found in the invariant mass of this four-lepton system, <span class="math inline">\(m_{4l}\)</span>. We can see this in <a href="#fig-higgs-m4l">Figure&nbsp;<span>1.5</span></a>, where there’s a peak at the Higgs mass of <span class="math inline">\(m_H \approx 125\)</span> <span class="math inline">\(\text{GeV}\)</span>, since the invariant mass of the initial state (a Higgs boson with <span class="math inline">\(E^2 - |\mathbf{p}|^2 = m_H^2\)</span>) is equal to that of the final state (four leptons) by energy/momentum conservation.</p>
+<div id="fig-higgs-m4l" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/higgsm4l.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.5: An example plot of the four-lepton invariant mass, taken from a recent Higgs boson mass measurement in this final state. Attribution: <span class="citation" data-cites="m4l">(<a href="references.html#ref-m4l" role="doc-biblioref">ATLAS Collaboration 2022b</a>)</span></figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="quantifying-collisions" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="quantifying-collisions"><span class="header-section-number">1.2.2</span> Quantifying collisions</h3>
+<p>An interaction between colliding particles (that usually produce some measurable detector output) is called a <strong>scattering event</strong>, or more simply just an <strong>event</strong>. To cause an event then, indeed, particles must collide. What’s the chances of that happening? If we were instead talking about two tennis balls colliding, there would be an idea of a cross-sectional area influencing this, whereby if the tennis ball were to enter that region, collision of some variety would occur due to the balls being close enough, with the rate of this occurring being related to the size of that area. A similar quantity exists for particles colliding, which we call the <strong>scattering cross-section</strong> <span class="math inline">\(\sigma\)</span> (or just cross-section). The details on how one calculates a cross-section are more complicated for particles, but quantum field theory has exact rules for this that involve quantities called scattering amplitudes, and also performing an integral over the space of momenta of the initial state particles. I omit the details as they are beyond the scope of my work – see e.g.&nbsp;section 2.7 of <span class="citation" data-cites="buckley">(<a href="references.html#ref-buckley" role="doc-biblioref">Buckley, White, and White 2021</a>)</span> for more. We will go as far to state this: given a number of scattering events <span class="math inline">\(N\)</span> (every interaction between some set of colliding particles), the rate of these events occurring is directly proportional to the cross-section, i.e.</p>
+<p><span id="eq-cross-section"><span class="math display">\[
+\frac{dN}{dt} \propto \sigma~~~\Rightarrow \frac{dN}{dt} = \mathcal{L}(t) \sigma~,
+\tag{1.6}\]</span></span></p>
+<p>where we’ve denoted the constant of proportionality as the <strong>luminosity</strong> <span class="math inline">\(\mathcal{L}(t)\)</span>, which generally can be a function of anything to do with the structure of the colliding objects (e.g.&nbsp;beams of particles) at some time <span class="math inline">\(t\)</span>. We can see that increasing <span class="math inline">\(\mathcal{L}(t)\)</span> increases the event rate; this leads to the analogy of beams of colliding particles being “brigher” with higher luminosity, hence the name.</p>
+<p>We can also state that the overall cross-section of some collision is equal to the sum over the cross-sections for mutually exclusive physics processes <span class="math inline">\(i\)</span> (as to not double count): <span class="math inline">\(\sigma = \sum_i \sigma_i\)</span>, and we have individual equations</p>
+<p><span class="math display">\[
+\frac{dN_i}{dt} = \mathcal{L}(t) \sigma_i~.
+\]</span></p>
+<p>The take-home from this is that for any physics process, the event rate in a collision will be a function of a term that dictates the underlying physics (<span class="math inline">\(\sigma_i\)</span>) and a term that is influenced by beam structure (<span class="math inline">\(\mathcal{L}(t)\)</span>). Moreover, we can define an overall <strong>integrated luminosity</strong> <span class="math inline">\(L\)</span> as a metric of cumulative beam “brightness” up to some time <span class="math inline">\(T\)</span> by integrating <a href="#eq-cross-section">Equation&nbsp;<span>1.6</span></a>:</p>
+<p><span class="math display">\[
+L = \int_0^T \mathcal{L}(t) dt = N/\sigma~.
+\]</span></p>
+<p>The cross-section has units of area (m<span class="math inline">\(^2\)</span>), and is usually quoted in <em>barns</em>, where 1 b = <span class="math inline">\(10^{-28}\)</span> m<span class="math inline">\(^2\)</span>. Since <span class="math inline">\(N\)</span> is unitless, the luminosity then has units of inverse barns, which are usually quoted at the femto scale (fb<span class="math inline">\(^{-1}\)</span>).</p>
+</section>
+</section>
+<section id="particle-detectors" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="particle-detectors"><span class="header-section-number">1.3</span> Particle detectors</h2>
+<p>We’ll say a few words on the detectors that are used to measure these particle collisions, with a focus on the ATLAS detector at CERN <span class="citation" data-cites="ATLAS">ATLAS Collaboration (<a href="references.html#ref-ATLAS" role="doc-biblioref">2008</a>)</span>.</p>
+<p>ATLAS is the name for both the detector that wraps around part of the beam pipe at the Large Hadron Collider, the experiment that it conducts, and for the collaboration of people that work on building the detector and analyzing the resulting data. The detector itself is split up into four concentric parts: the <strong>inner tracking detector</strong>, <strong>electromagnetic calorimeter</strong>, <strong>hadronic calorimeter</strong>, and the <strong>muon detector</strong>, which are in the toy schematic shown in <a href="#fig-detector">Figure&nbsp;<span>1.6</span></a>. Each part has a different job, which is summarized in the following paragraphs.</p>
+<div id="fig-detector" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/detector-schematic.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.6: A toy schematic for the transverse cross-section of an imagined particle detector for collisions of two beams. The signatures different types of particles would leave are depicted within the detector.</figcaption><p></p>
+</figure>
+</div>
+<p>The inner detector tracks charged particles that leave <em>hits</em>; these come from things like ionization of a gas as the particle moves through, and having charged wires that collect the free electrons from the ionization. By trying to intelligently draw a line through these hits, e.g.&nbsp;by fitting a functional form, we can reconstruct the shape of the track. To measure the properties of charged particles emerging from collisions like the charge and momentum, we can look at the curvature of the track. To bend particles in the detector so that they have curvature, we need to apply a magnetic field that causes the particles to move in circular motion in the transverse plane (i.e.&nbsp;perpendicular to the direction of the beam). ATLAS does this by surrounding it’s inner detector with a solenoid magnet (and toroidal magnets on the barrel and endcaps).</p>
+<p>You’ll have noticed there are two calorimeters – this is because electrons and photons penetrate material much less deep than hadrons, so they’re separated into two different parts. Calorimeters in general measure <em>energy deposits</em> by having the particles collide with some dense material, which causes energy loss in some way, and then interlacing that material with something that can collect information on the energy of the resulting products from traveling through the dense medium. The <em>electromagnetic calorimeter</em> is responsible for doing this for electrons and photons, where they undergo energy loss by scattering and Bremsstrahlung radiation. It’s worth noting that quarks are never observed standalone in a detector. Instead, they rapidly decay into sprays of collimated <strong>hadrons</strong> (particles containing quarks) by the process of hadronization. We refer to these structures as particle <strong>jets</strong>. The <em>hadronic calorimeter</em> exists to detect hadrons from these particle jets, where their main source of energy loss is scattering processes with the calorimeter material.</p>
+<p>The final part is the muon detector, which sits external to all other detectors, and is also a tracking detector like the inner detector. The muon passes through the inner detector and calorimeters, but typically will not lose much energy like other particles might from scattering or Bremsstrahlung. That means that if we have a tracking detector far from the beam pipe, it’s likely that anything it picks up will be a muon.</p>
+<section id="kinematics-again" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="kinematics-again"><span class="header-section-number">1.3.1</span> Kinematics, again</h3>
+<p>Using the information the detectors give us, we can summarize an event by the properties of the objects that the detector picked up as a result. We can think of an event as a list of particles with four-momenta, and one additional entry that has the missing four-momentum compared to the total inital proton four-momenta, which could include particles invisible to the detector like neutrinos. These four-momenta are typically transformed to a different set of coordinates that better fit with describing the geometry of the detector itself.</p>
+<p>If we denote the beam axis as the <span class="math inline">\(z\)</span> direction, the <span class="math inline">\(x\)</span>-<span class="math inline">\(y\)</span> plane is known as the <strong>transverse plane</strong>, which groups the three-momentum of a particle into <span class="math inline">\(\mathbf{p} = (\mathbf{p}_T, p_z)\)</span>. One will often hear about the magnitude <span class="math inline">\(p_T = |\mathbf{p}_T|\)</span> being a quantity of interest, which is due to the fact that objects with high <span class="math inline">\(p_T\)</span> will likely be much easier to reconstruct and measure precisely, since they are not mixed up with all of the colliding proton beam debris in the <span class="math inline">\(z\)</span>-direction. For this reason, we’re actually not able to measure <span class="math inline">\(p_z\)</span> very well, and instead look to variables that are <em>invariant</em> to changes in velocity in the <span class="math inline">\(z\)</span> direction. One example of a quantity like this is the <strong>rapidity</strong>, defined as</p>
+<p><span class="math display">\[
+y = \frac{1}{2}\ln{\left(\frac{E+p_z}{E-p_z}\right)}~,
+\]</span></p>
+<p>which measures how “forward” (close to the +ve <span class="math inline">\(z\)</span> axis) or “backward” (close to the -ve <span class="math inline">\(z\)</span> axis) a particle lies. <span class="math inline">\(y\)</span> = 0 corresponds to no <span class="math inline">\(z\)</span> component of the momentum, and <span class="math inline">\(\pm \infty\)</span> means the momentum is aligned with the +ve and -ve <span class="math inline">\(z\)</span> direction respectively. Particle physicists often use the <strong>pseudorapidity</strong>, defined as</p>
+<p><span class="math display">\[
+\eta = -\ln{\left(\tan{\frac{\theta}{2}}\right)}~,
+\]</span></p>
+<p>which is equal to the rapidity for particles with energy <span class="math inline">\(E\)</span> much higher than their mass <span class="math inline">\(m\)</span>. It’s preferred since the polar angle <span class="math inline">\(\theta\)</span> between <span class="math inline">\(z\)</span> and the transverse plane is much easier to determine than <span class="math inline">\(p_z\)</span>, for instance. We can thus fully specify a particle’s position in the detector with the (pseudo)rapidity and the azimuthal angle <span class="math inline">\(\phi\)</span> between the <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> directions.</p>
+</section>
+</section>
+<section id="simulators" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="simulators"><span class="header-section-number">1.4</span> Simulators</h2>
+<p>We are not able to perform our data analysis on collisions where we <em>know for sure</em> what produced them. If we could access this information, that would allow us to do many practice runs where we tune things to give us the best chance to discover the signal, if it was actually there. To this end, countless generations of particle physicists have worked on building robust <strong>simulators</strong> that can produce many Monte Carlo events (read: randomly sampled events from physics distributions). They work by calculating the different terms in an expansion as set out by quantum field theory responsible for the rates of physics processes, known as <em>perturbative field theory</em>, to a specified order in the expansion. This is what is referred to by phrases like <em>leading order</em> (LO) and next-to-leading order (NLO) – it’s the choice of terms you include in the perturbation calculation, which corresponds to choosing to include the different ways to produce that given final state you want to produce.</p>
+<p>After simulating the physics processes themselves, we’re not quite ready to jump in and optimize our analysis code, because we’re not looking at something that mirrors what we’d expect from our detector. As an example, it’s likely that our detector is only able to measure particle momenta up to a certain <em>resolution</em>, but we have access to the true values with no uncertainty. To change this, we can apply a layer of functions that attempt to <em>smear</em> the output, e.g.&nbsp;by sampling momentum from a normal distribution centered around the true value instead of using the true value directly, which should mimic the fact that we’re inherently limited in the way we can measure these quantities in real life. Moreover, we won’t be encountering the values of momentum – we’ll be getting electrical signals from a wire! We need to then do the additional step of <strong>digitization</strong>, which turns the physics quantities into things we’d expect from a detector, such as track hits and energy deposits.</p>
+<p>Once we’ve done all that, we’re free to then attempt to <strong>reconstruct</strong> the events just like we would for a regular detector (essentially building up particle four-momenta from track information), which allows us to make sure we don’t do any better in getting the physics information than we would be able to in actuality. We can then use this information as the input for our physics analysis, and begin to optimize. The only difference is that there’s a bias between the simulation and real data we may struggle to account for, but we trade off by having a label on each event that tells us which physics process it came from (i.e.&nbsp;signal or background). We can see this whole process depicted in <a href="#fig-simulator">Figure&nbsp;<span>1.7</span></a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-simulator" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p>
+</p><pre class="mermaid" data-tooltip-selector="#mermaid-tooltip-1">graph TB;
+    A[Underlying physics processes]
+    B[Detector smearing]
+    C[Digitization]
+    D[Reconstruction]
+    E[Data analysis]
+    F[Real collision data!]
+    subgraph simulation
+    A--&gt;B--&gt;C
+    end
+    C--&gt;D--&gt;E
+    F--&gt;D
+</pre>
+<div id="mermaid-tooltip-1" class="mermaidTooltip">
+
+</div>
+<p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1.7: A summary of the different workflow steps that are taken when simulating particle physics processes, including mirroring detector effects.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-bsm" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="sec-bsm"><span class="header-section-number">1.5</span> Issues with the Standard Model, and what may lie beyond</h2>
+<p>Here we touch on a few of the cracks in the Standard Model, and some proposed resolutions. We’ll only explore enough to get an idea that it’s certainly worth searching for these solutions in some way!</p>
+<section id="the-hierarchy-problem" class="level3" data-number="1.5.1">
+<h3 data-number="1.5.1" class="anchored" data-anchor-id="the-hierarchy-problem"><span class="header-section-number">1.5.1</span> The hierarchy “problem”</h3>
+<p>A property unique to the Higgs boson is that its measured mass is very sensitive to physics at higher energy scales (read: new particles with higher masses than discussed here), so the fact that the Higgs is fairly light at <span class="math inline">\(125\,\text{GeV}\)</span> is a strong constraint on the scale of new physics that we’re likely to see. Let’s explore a little why this is.</p>
+<p>Now, in a bit of an aside, quantum field theories are able to work well due to a process called <strong>renormalization</strong>, which essentially amounts to subtracting away infinite quantities that can arise in calculations involving fields. A consequence of this is that all parameters of a quantum field theory are inherently linked to some energy scale (or equivalently distance scale) at which we admit our ignorance, i.e.&nbsp;there’s an energy <em>cutoff</em> at which we say our theory no longer applies at energies higher than this. We term that cutoff <span class="math inline">\(\Lambda_{\text{UV}}\)</span>, One surprising thing about the choice of <span class="math inline">\(\Lambda_{\text{UV}}\)</span> is that it actually impacts the value of the Higgs mass! This is because similar to hadrons, the Higgs boson gains its own mass in part due to the quantum fluctuations of many different fields, with <span class="math inline">\(\Lambda_{\text{UV}}\)</span> controlling the scale of these fluctuations. These are colloquially termed as quantum “corrections” to the value of the mass. So when we measure <span class="math inline">\(m_H\)</span>, what’s actually beneath the curtain? It turns out that <span class="math inline">\(m_H\)</span> is then actually made up of two parts:</p>
+<p><span class="math display">\[
+m_H^2 \approx\left|a+\mathcal{O}\left(\Lambda_{\mathrm{UV}}^2\right)\right| \approx 125 \,\text{GeV}~,
+\]</span></p>
+<p>where the parameter <span class="math inline">\(a\)</span> is part of the formula for the Higgs potential in <a href="#eq-higgs-potential">Equation&nbsp;<span>1.1</span></a>. This <span class="math inline">\(a\)</span> parameter, which is usually referred to as the <em>bare mass</em> (i.e.&nbsp;what would be the mass in the absence of corrections), is that it has to be large and negative if <span class="math inline">\(\Lambda_{\mathrm{UV}}\)</span> is of any reasonable size in order to cancel out their values enough to get <span class="math inline">\(125\,\text{GeV}\)</span>.</p>
+<p>This isn’t necessarily a problem, per se, but it’s quite the coincidence if true. To be as kind as possible to us, we can say Standard Model is no longer valid just above the current energy scale of the LHC (<span class="math inline">\(13600 \,\text{GeV}\)</span>), which would make the parameter <span class="math inline">\(a\)</span> be of a similar size such that their sum results in <span class="math inline">\(125\,\text{GeV}\)</span>. This would mean we’d see some new theory come into play around the <span class="math inline">\(\text{TeV}\)</span> scale, which we haven’t found evidence for. Of course, to see <em>pretty much no signs</em> that there’s new physics at this energy scale, we’d probably hedge our bets that it holds a bit further out than this, which would lead to numbers much larger (hundreds of thousands) having to cancel out precisely to <span class="math inline">\(125\,\text{GeV}\)</span>. Again, this isn’t necessarily an issue – nature could just be very fine-tuned. But this is a source of unease for many theoretical physicists, and it remains an open “problem” to find out why this is the case.</p>
+</section>
+<section id="gravity" class="level3" data-number="1.5.2">
+<h3 data-number="1.5.2" class="anchored" data-anchor-id="gravity"><span class="header-section-number">1.5.2</span> Gravity</h3>
+<p>It is unfortunate that such a well-tested theory does not adequately describe gravity, which, at the time of writing, seems to still be doing its thing. Moreover, Einstein’s theory of General Relativity, which describes gravity, doesn’t seem to fit well with all this particle talk, but it too is a very well-tested theory. This is one of many frustrating things about having the Standard Model triumph experimentally: we <em>know</em> it’s not good enough alone<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, and it somehow has to interplay with another very important theory, despite these puzzle pieces having wildly serrated edges. So yeah, we’re not too happy about this.</p>
+</section>
+<section id="other-things" class="level3" data-number="1.5.3">
+<h3 data-number="1.5.3" class="anchored" data-anchor-id="other-things"><span class="header-section-number">1.5.3</span> Other things</h3>
+<p>More problems we don’t have an answer to include:</p>
+<ul>
+<li>Why do we live in a matter dominated universe instead of antimatter?</li>
+<li>Do the forces of nature unify at a certain energy scale?</li>
+<li>What’s the deal with dark matter?</li>
+<li>…and many more!</li>
+</ul>
+<p>All of these questions have potential answers involving both new physics theories and verifiable experimental consequences (which makes them well-posed theories). The agenda of the LHC and many other particle physics experiments is then to probe them however we can, with the tools available to us.</p>
+</section>
+<section id="going-beyond-the-standard-model" class="level3" data-number="1.5.4">
+<h3 data-number="1.5.4" class="anchored" data-anchor-id="going-beyond-the-standard-model"><span class="header-section-number">1.5.4</span> Going beyond the Standard Model</h3>
+<p>Just to mention one, the most commonly touted theory that has been investigated in recent years is <em>supersymmetry</em>, which makes it such that every particle proposed in <a href="#fig-sm">Figure&nbsp;<span>1.1</span></a> has a supersymmetric partner at some higher energy scale<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. Importantly, these additions help to stabilize the mass of the Higgs boson in the hierarchy problem, and also conveniently helps with unification of forces. It’s actually all quite neat, but has the large drawback of a total lack of evidence for its existence.</p>
+<p>There are many more theories of this nature, including many exotic new particles and ideas, but none seem to have poked their head out at any of our experiments as of yet. That’s why it remains paramount to both look for these new hypothesized particles and also precisely measure things that the Standard Model predicts, which may act as a calling card for a new theory we have yet to discover.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
+<div id="ref-ATLAS" class="csl-entry" role="doc-biblioentry">
+ATLAS Collaboration. 2008. <span>“<span class="nocase">The ATLAS Experiment at the CERN Large Hadron Collider</span>.”</span> <em>JINST</em> 3: S08003. <a href="https://doi.org/10.1088/1748-0221/3/08/S08003">https://doi.org/10.1088/1748-0221/3/08/S08003</a>.
+</div>
+<div id="ref-atlaspublic" class="csl-entry" role="doc-biblioentry">
+———. 2022a. <span>“ATLAS Summary Physics Plots.”</span> <a href="https://atlaspo.cern.ch/public/summary_plots/">https://atlaspo.cern.ch/public/summary_plots/</a>.
+</div>
+<div id="ref-m4l" class="csl-entry" role="doc-biblioentry">
+———. 2022b. <span>“Measurement of the Higgs Boson Mass in the <span class="math inline">\(H \rightarrow ZZ^* \rightarrow 4\ell\)</span> Decay Channel Using 139 Fb<span class="math inline">\(^{-1}\)</span> of <span class="math inline">\(\sqrt{s}=13\)</span> TeV <span class="math inline">\(pp\)</span> Collisions Recorded by the ATLAS Detector at the LHC.”</span> arXiv. <a href="https://doi.org/10.48550/ARXIV.2207.00320">https://doi.org/10.48550/ARXIV.2207.00320</a>.
+</div>
+<div id="ref-higgs" class="csl-entry" role="doc-biblioentry">
+ATLAS-Collaboration. 2012. <span>“Observation of a New Particle in the Search for the Standard Model Higgs Boson with the ATLAS Detector at the LHC.”</span> <em>Physics Letters B</em> 716 (1): 1–29. <a href="https://doi.org/10.1016/j.physletb.2012.08.020">https://doi.org/10.1016/j.physletb.2012.08.020</a>.
+</div>
+<div id="ref-buckley" class="csl-entry" role="doc-biblioentry">
+Buckley, Andy, Christopher White, and Martin White. 2021. <em>Practical Collider Physics</em>. 2053-2563. IOP Publishing. <a href="https://doi.org/10.1088/978-0-7503-2444-1">https://doi.org/10.1088/978-0-7503-2444-1</a>.
+</div>
+<div id="ref-ratios" class="csl-entry" role="doc-biblioentry">
+CERN. 2017. <span>“CERN Yellow Reports: Monographs, Vol 2 (2017): Handbook of LHC Higgs Cross Sections: 4. Deciphering the Nature of the Higgs Sector.”</span> CERN. <a href="https://doi.org/10.23731/CYRM-2017-002">https://doi.org/10.23731/CYRM-2017-002</a>.
+</div>
+<div id="ref-meatball" class="csl-entry" role="doc-biblioentry">
+Doglioni, Caterina, Suarez Rebeca, Nathan Simpson, Geoffrey Mullier, David Cox, and William Kalderon. 2019. <span>“The MEAL Collaboration (MEat Ball AcceLerator).”</span> <em>Stupid Hackathon Sweden</em>. <a href="https://docs.google.com/presentation/d/1gsmlsq8gu11pZV4X-yBy_g1DLFZXASfZgYrS-vn17SU/edit?usp=sharing">https://docs.google.com/presentation/d/1gsmlsq8gu11pZV4X-yBy_g1DLFZXASfZgYrS-vn17SU/edit?usp=sharing</a>.
+</div>
+<div id="ref-sm" class="csl-entry" role="doc-biblioentry">
+Oerter, R. 2006. <em><span class="nocase">The theory of almost everything: The standard model, the unsung triumph of modern physics</span></em>.
+</div>
+<div id="ref-ox" class="csl-entry" role="doc-biblioentry">
+Oxford University. 2021. <span>“Why Two Higgs Are Better Than One.”</span> website. <a href="https://www.physics.ox.ac.uk/news/why-two-higgs-are-better-one">https://www.physics.ox.ac.uk/news/why-two-higgs-are-better-one</a>.
+</div>
+<div id="ref-dtong" class="csl-entry" role="doc-biblioentry">
+Tong, David. 2022. <span>“David Tong: Lectures on Particle Physics.”</span> Website. <a href="https://www.damtp.cam.ac.uk/user/tong/particle.html">https://www.damtp.cam.ac.uk/user/tong/particle.html</a>.
+</div>
+</div>
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>One cool thing I discovered while writing this thesis from David Tong’s lecture notes is the following: the fact two particles of the same type have all the same properties can be thought of as two people putting their hand in a big sandpit and sculpting a particle from the a handful of sand.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Beyond sounding remarkably like instructions to navigate a maze, these compositions actually hide a secret in their notation: they actually refer to three <em>additional</em> quarks, where there is a pre-existing sea of quarks already there in the vacuum, continually coming in and out of existence. The void is not as lonely as one may imagine.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Here, I invite those unfamiliar with this term to use Google (or, at the time of writing, ChatGPT is probably more appropriate)<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>I would love to give an analogy here like waves getting bigger or smaller after exchanging different waves between them (since forces and particles are all excitations of fields), but I don’t have enough grounding in the details to assert if it’s a good one. Indeed, the “intuition” of a field theory is more just working through the large number of equations that describe an interaction, and then being content enough with your effort that you claim to have understanding of how it works. Instead of going down this rabbit hole, we’ll take the scope-driven decision to leave a good reference and move on (e.g.&nbsp;<a href="https://www.damtp.cam.ac.uk/user/tong/qft.html">David Tong’s QFT lecture notes</a>).<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>I’ve heard water cooler talk about particle physicists even being upset at the Higgs discovery for this very reason – a nail in the coffin for many other theories.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>These particles have super cute names like sleptons, squarks, gluinos… I highly recommend reading the Wikipedia page.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config);
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Preface</span>
+      </a>
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./stat-fundamentals.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Probability and Statistics, in theory</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
