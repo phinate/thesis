@@ -11,7 +11,7 @@ jupyter: python3
 ---
 
 
-[@NNLOPS], [@mgmc], [@matplotlib]
+<!-- [@NNLOPS], [@mgmc], [@matplotlib] -->
 
 # Automatic differentiation
 

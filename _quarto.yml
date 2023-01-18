@@ -42,6 +42,9 @@ pdf-engine: pdflatex
 # biblatexoptions: citestyle=numeric
 format:
   html:
+    toc-location: right
+    toc-title: "On this page:"
+    code-copy: true
     theme: 
       - united
       - custom.scss

@@ -271,47 +271,6 @@ div.csl-indent {
 </nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation"><span class="toc-section-number">7.1</span>  Motivation</a>
-  <ul class="collapse">
-  <li><a href="#sec-simple-anal" id="toc-sec-simple-anal" class="nav-link" data-scroll-target="#sec-simple-anal"><span class="toc-section-number">7.1.1</span>  A simplified analysis example, both with and without uncertainty</a></li>
-  </ul></li>
-  <li><a href="#making-hep-analysis-differentiable" id="toc-making-hep-analysis-differentiable" class="nav-link" data-scroll-target="#making-hep-analysis-differentiable"><span class="toc-section-number">7.2</span>  Making HEP Analysis Differentiable</a>
-  <ul class="collapse">
-  <li><a href="#a-simple-example-cut-optimization-with-gradient-descent" id="toc-a-simple-example-cut-optimization-with-gradient-descent" class="nav-link" data-scroll-target="#a-simple-example-cut-optimization-with-gradient-descent"><span class="toc-section-number">7.2.1</span>  A simple example: cut optimization with gradient descent</a></li>
-  <li><a href="#examining-a-typical-analysis" id="toc-examining-a-typical-analysis" class="nav-link" data-scroll-target="#examining-a-typical-analysis"><span class="toc-section-number">7.2.2</span>  Examining a typical analysis</a></li>
-  <li><a href="#sec-bkde" id="toc-sec-bkde" class="nav-link" data-scroll-target="#sec-bkde"><span class="toc-section-number">7.2.3</span>  Binned density estimation (histograms)</a></li>
-  <li><a href="#differentiable-likelihood-construction" id="toc-differentiable-likelihood-construction" class="nav-link" data-scroll-target="#differentiable-likelihood-construction"><span class="toc-section-number">7.2.4</span>  Differentiable likelihood construction</a></li>
-  <li><a href="#differentiable-test-statistics-profile-likelihood-ratio" id="toc-differentiable-test-statistics-profile-likelihood-ratio" class="nav-link" data-scroll-target="#differentiable-test-statistics-profile-likelihood-ratio"><span class="toc-section-number">7.2.5</span>  Differentiable test statistics (profile likelihood ratio)</a></li>
-  <li><a href="#differentiable-hypothesis-tests" id="toc-differentiable-hypothesis-tests" class="nav-link" data-scroll-target="#differentiable-hypothesis-tests"><span class="toc-section-number">7.2.6</span>  Differentiable hypothesis tests</a></li>
-  <li><a href="#sec-inferno" id="toc-sec-inferno" class="nav-link" data-scroll-target="#sec-inferno"><span class="toc-section-number">7.2.7</span>  Bonus: Uncertainties on likelihood parameters</a></li>
-  </ul></li>
-  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together"><span class="toc-section-number">7.3</span>  Putting it all together!</a>
-  <ul class="collapse">
-  <li><a href="#a-quick-aside-on-inferno-vs-neos" id="toc-a-quick-aside-on-inferno-vs-neos" class="nav-link" data-scroll-target="#a-quick-aside-on-inferno-vs-neos"><span class="toc-section-number">7.3.1</span>  A quick aside on INFERNO vs <code>neos</code></a></li>
-  </ul></li>
-  <li><a href="#sec-neos" id="toc-sec-neos" class="nav-link" data-scroll-target="#sec-neos"><span class="toc-section-number">7.4</span>  <code>neos</code>: End-to-End Optimized Summary Statistics for High-Energy Physics</a>
-  <ul class="collapse">
-  <li><a href="#example-gaussian-blobs" id="toc-example-gaussian-blobs" class="nav-link" data-scroll-target="#example-gaussian-blobs"><span class="toc-section-number">7.4.1</span>  Example: Gaussian blobs</a></li>
-  <li><a href="#sec-neos-issues" id="toc-sec-neos-issues" class="nav-link" data-scroll-target="#sec-neos-issues"><span class="toc-section-number">7.4.2</span>  Practical issues</a></li>
-  </ul></li>
-  <li><a href="#whats-really-the-best-loss-function" id="toc-whats-really-the-best-loss-function" class="nav-link" data-scroll-target="#whats-really-the-best-loss-function"><span class="toc-section-number">7.5</span>  What’s <em>really</em> the best loss function?</a>
-  <ul class="collapse">
-  <li><a href="#sec-which-loss-model" id="toc-sec-which-loss-model" class="nav-link" data-scroll-target="#sec-which-loss-model"><span class="toc-section-number">7.5.1</span>  A loss landscape interlude for a two-bin model</a></li>
-  </ul></li>
-  <li><a href="#gaussian-blobs-again" id="toc-gaussian-blobs-again" class="nav-link" data-scroll-target="#gaussian-blobs-again"><span class="toc-section-number">7.6</span>  Gaussian blobs, again</a>
-  <ul class="collapse">
-  <li><a href="#bin-observable" id="toc-bin-observable" class="nav-link" data-scroll-target="#bin-observable"><span class="toc-section-number">7.6.1</span>  5-bin observable</a></li>
-  <li><a href="#bin-observable-1" id="toc-bin-observable-1" class="nav-link" data-scroll-target="#bin-observable-1"><span class="toc-section-number">7.6.2</span>  20-bin observable</a></li>
-  <li><a href="#optimizing-binning-and-neural-network-simultaneously" id="toc-optimizing-binning-and-neural-network-simultaneously" class="nav-link" data-scroll-target="#optimizing-binning-and-neural-network-simultaneously"><span class="toc-section-number">7.6.3</span>  Optimizing binning and neural network simultaneously</a></li>
-  </ul></li>
-  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next"><span class="toc-section-number">7.7</span>  What’s next?</a></li>
-  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="toc-section-number">7.8</span>  Credits</a></li>
-  </ul>
-</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -331,7 +290,20 @@ div.csl-indent {
   
 
 </header>
-
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page:</h2>
+   
+  <ul>
+  <li><a href="#motivation" id="toc-motivation"><span class="toc-section-number">7.1</span>  Motivation</a></li>
+  <li><a href="#making-hep-analysis-differentiable" id="toc-making-hep-analysis-differentiable"><span class="toc-section-number">7.2</span>  Making HEP Analysis Differentiable</a></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together"><span class="toc-section-number">7.3</span>  Putting it all together!</a></li>
+  <li><a href="#sec-neos" id="toc-sec-neos"><span class="toc-section-number">7.4</span>  <code>neos</code>: End-to-End Optimized Summary Statistics for High-Energy Physics</a></li>
+  <li><a href="#whats-really-the-best-loss-function" id="toc-whats-really-the-best-loss-function"><span class="toc-section-number">7.5</span>  What’s <em>really</em> the best loss function?</a></li>
+  <li><a href="#gaussian-blobs-again" id="toc-gaussian-blobs-again"><span class="toc-section-number">7.6</span>  Gaussian blobs, again</a></li>
+  <li><a href="#whats-next" id="toc-whats-next"><span class="toc-section-number">7.7</span>  What’s next?</a></li>
+  <li><a href="#credits" id="toc-credits"><span class="toc-section-number">7.8</span>  Credits</a></li>
+  </ul>
+</nav>
 <p>This is the title track of this thesis, and rightly so; it dominated metrics in both my time spent and headspace given for any of the topics I’ve written about. I feel incredibly privileged to have worked on something like this, which is fairly self-contained, and draws upon themes from both machine learning and statistical inference in order to make headway in addressing a long-standing issue: <em>systematic-aware optimization</em>. What’s even cooler is that it goes further than this, opening up a whole variety of possibilities to optimize with the whole statistical inference procedure in the loop, and rethink the ways in which we can improve our workflows. I hope you enjoy it!</p>
 <section id="motivation" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="motivation"><span class="header-section-number">7.1</span> Motivation</h2>

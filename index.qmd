@@ -1,9 +1,14 @@
+---
+execute: 
+  enabled: false
+---
+
 # Preface {.unnumbered}
 
 > “I didn't have time to write a short ~~letter~~ thesis, so I wrote a long one instead.” ― Mark Twain (adapted)
 
 
-Many curious things can stem from direct messages on Twitter(cite). You can count the contents of this thesis as one of them.
+Many curious things can stem from direct messages on Twitter^[Citation needed, but not provided.]. You can count the contents of this thesis as one of them.
 
 In October of 2019, I got off the tram from the Blandonnet stop in Geneva, arriving bewildered to CERN for a 6 month placement. I had no idea what I was going to be doing there, since my assigned supervisor and I had not communicated at any point leading up to this visit. I just knew that I was doing this placement as part of my position, which was funded as part of a Marie Curie International Training Network (they let you do placements), and that my supervisor was in some way connected to the team working on the [ROOT software suite]().
 
@@ -16,3 +21,24 @@ I enthusiastically followed up on Lukas' offer to collaborate, and before I knew
 As such, if you were expecting a typical HEP thesis, you may be surprised at what lies ahead, hopefully in a positive matter. We will still traverse the lands of particle physics, but will be stepping around many puddles that most dive into, and instead spend a bit of extra time in the marshlands of probability and statistics, which inform almost all of the work done in my PhD from a practical and motivational standpoint. From there, we'll foray into the fields of gradients, including how we calculate them, why we care, and what they're used for. There, we will meet the buzzwords that you may have come here for in the first place: **machine learning** and **differentiable programming**. Armed with these fundamentals, we will tackle my application of them to problems in collider physics, including optimizing summary statistics while being aware of uncertainty, interpolating between new physics models, and searching for new particles produced in association with a Higgs boson! (Maybe there's puppies too. I don't know. But don't you want to find out?)
 
 This whole thesis was created from markdown and executable code, thanks to the [Quarto framework](http://quarto.com).
+
+
+# How to cite {.unnumbered}
+
+There are a number of unreleased studies here (especially in Chapter 7) that may be of interest to cite. If you wish to do so, please use the following bibtex entry:
+
+```bibtex
+@phdthesis{Nathan-Simpson-Thesis,
+  abstract     = {{Machine learning methods are now ubiquitous in physics, but often target objectives that are one or two steps removed from our physics goals. A prominent example of this is the discrimination between signal and background processes, which doesn’t account for the presence of systematic uncertainties – something crucial for the calculation of quantities such as the discovery significance and upper limits.<br/><br/>To combat this, this thesis shows that physics analysis workflows can be optimized in an end-to-end fashion, including the treatment of nuisance parameters that model systematic uncertainties, provided that the workflow is differentiable. By leveraging automatic differentiation and surrogates for non-differentiable operations, this work has made this possible for the first time, and demonstrates its use in a proof-of-concept scenario.<br/><br/>This thesis will motivate the use of end-to-end optimization as described above, cover the techniques that make it possible, and show recent developments in a high-energy physics context. Future directions that aim to scale and apply these methods will also be highlighted.<br/><br/>In addition to this, a method to interpolate between the signatures of new physics models is presented, which uses normalizing flows. The thesis then goes on to show the use of the technique in a search for a new scalar boson &#x1d446; produced in association with a Higgs boson from a heavy new scalar &#x1d44b;. There are also some contributions that interpolate between the event yields with Gaussian processes, and that show how we can use normalizing flows to construct a likelihood ratio-inspired observable.}},
+  author       = {{Simpson, Nathan}},
+  isbn         = {{978-91-8039-494-9}},
+  keywords     = {{differentiable programming; machine learning; particle physics}},
+  language     = {{eng}},
+  publisher    = {{Lund University}},
+  school       = {{Lund University}},
+  title        = {{Data Analysis in High-Energy Physics as a Differentiable Program}},
+  url          = {{http://dx.doi.org/10.5281/zenodo.7520315}},
+  doi          = {{10.5281/zenodo.7520315}},
+  year         = {{2023}},
+}
+```
