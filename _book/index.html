@@ -22,69 +22,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -95,7 +32,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./physics.html" rel="next">
+<link href="./cite.html" rel="next">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -129,7 +66,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -161,6 +98,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link active">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cite.html" class="sidebar-item-text sidebar-link">Citing this thesis</a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -252,16 +194,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </div>
 </nav>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page:</h2>
-   
-  <ul>
-  <li><a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a></li>
-  <li><a href="#how-to-cite" id="toc-how-to-cite" class="nav-link" data-scroll-target="#how-to-cite">How to cite</a></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -319,23 +252,6 @@ pyhf is being used in a few on-going projects within ATLAS, also people like e.g
 <p>I enthusiastically followed up on Lukas’ offer to collaborate, and before I knew it, I was sat at a table in CERN’s main restaurant (R1 if you’re a cool kid) with both Lukas and my would-be supervisor (who would not be my supervisor), ready to start a project on building something that had never been done before, but using tools that I was familiar with. That project became <code>neos</code>, and started the development of a new paradigm for how we view optimizing our data analysis pipelines, and the cornerstone of this thesis – differentiable programming. Totally different from just a ROOT-less analysis, but I also did a bit of that in the end anyway.</p>
 <p>As such, if you were expecting a typical HEP thesis, you may be surprised at what lies ahead, hopefully in a positive matter. We will still traverse the lands of particle physics, but will be stepping around many puddles that most dive into, and instead spend a bit of extra time in the marshlands of probability and statistics, which inform almost all of the work done in my PhD from a practical and motivational standpoint. From there, we’ll foray into the fields of gradients, including how we calculate them, why we care, and what they’re used for. There, we will meet the buzzwords that you may have come here for in the first place: <strong>machine learning</strong> and <strong>differentiable programming</strong>. Armed with these fundamentals, we will tackle my application of them to problems in collider physics, including optimizing summary statistics while being aware of uncertainty, interpolating between new physics models, and searching for new particles produced in association with a Higgs boson! (Maybe there’s puppies too. I don’t know. But don’t you want to find out?)</p>
 <p>This whole thesis was created from markdown and executable code, thanks to the <a href="http://quarto.com">Quarto framework</a>.</p>
-</section>
-<section id="how-to-cite" class="level1 unnumbered">
-<h1 class="unnumbered">How to cite</h1>
-<p>There are a number of unreleased studies here (especially in Chapter 7) that may be of interest to cite. If you wish to do so, please use the following bibtex entry:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">@phdthesis</span>{<span class="ot">Nathan</span>-<span class="ot">Simpson</span>-<span class="ot">Thesis</span>,</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">abstract</span>     = {{Machine learning methods are now ubiquitous in physics, but often target objectives that are one or two steps removed from our physics goals. A prominent example of this is the discrimination between signal and background processes, which doesn’t account for the presence of systematic uncertainties – something crucial for the calculation of quantities such as the discovery significance and upper limits.&lt;br/&gt;&lt;br/&gt;To combat this, this thesis shows that physics analysis workflows can be optimized in an end-to-end fashion, including the treatment of nuisance parameters that model systematic uncertainties, provided that the workflow is differentiable. By leveraging automatic differentiation and surrogates for non-differentiable operations, this work has made this possible for the first time, and demonstrates its use in a proof-of-concept scenario.&lt;br/&gt;&lt;br/&gt;This thesis will motivate the use of end-to-end optimization as described above, cover the techniques that make it possible, and show recent developments in a high-energy physics context. Future directions that aim to scale and apply these methods will also be highlighted.&lt;br/&gt;&lt;br/&gt;In addition to this, a method to interpolate between the signatures of new physics models is presented, which uses normalizing flows. The thesis then goes on to show the use of the technique in a search for a new scalar boson &amp;#x1d446; produced in association with a Higgs boson from a heavy new scalar &amp;#x1d44b;. There are also some contributions that interpolate between the event yields with Gaussian processes, and that show how we can use normalizing flows to construct a likelihood ratio-inspired observable.}},</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span>       = {{Simpson, Nathan}},</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">isbn</span>         = {{978-91-8039-494-9}},</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">keywords</span>     = {{differentiable programming; machine learning; particle physics}},</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">language</span>     = {{eng}},</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">publisher</span>    = {{Lund University}},</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">school</span>       = {{Lund University}},</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>        = {{Data Analysis in High-Energy Physics as a Differentiable Program}},</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span>          = {{http://dx.doi.org/10.5281/zenodo.7520315}},</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">doi</span>          = {{10.5281/zenodo.7520315}},</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>         = {{2023}},</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>
@@ -449,8 +365,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-page nav-page-previous">
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./physics.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./cite.html" class="pagination-link">
+        <span class="nav-page-text">Citing this thesis</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -15,6 +15,7 @@ book:
   cover-image: cover.png
   chapters:
     - index.qmd
+    - cite.qmd
     - part: "Fundamentals"
       chapters:
         - physics.qmd
