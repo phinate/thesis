@@ -209,7 +209,7 @@ div.csl-indent {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+    <h2 id="toc-title">On this page:</h2>
    
   <ul>
   <li><a href="#building-blocks-of-automatic-differentiation" id="toc-building-blocks-of-automatic-differentiation" class="nav-link active" data-scroll-target="#building-blocks-of-automatic-differentiation"><span class="toc-section-number">5.1</span>  Building blocks of automatic differentiation</a>
@@ -246,7 +246,7 @@ div.csl-indent {
 
 </header>
 
-<p><span class="citation" data-cites="NNLOPS">(<a href="references.html#ref-NNLOPS" role="doc-biblioref">Hamilton et al. 2013</a>)</span>, <span class="citation" data-cites="mgmc">(<a href="references.html#ref-mgmc" role="doc-biblioref">Alwall et al. 2011</a>)</span>, <span class="citation" data-cites="matplotlib">(<a href="references.html#ref-matplotlib" role="doc-biblioref">Hunter 2007</a>)</span></p>
+<!-- [@NNLOPS], [@mgmc], [@matplotlib] -->
 <p>One may think that the pace of scientific discovery is determined by the speed at which new ideas are formed. That was likely true in the early days; if I posited that a rock, when thrown, will roughly trace a parabolic arc, we likely don’t need to take leaps in experimental physics to test this hypothesis to some ballpark degree of accuracy – maybe we could even get away with just a ruler and the naked eye. In contrast to this, science as done in the present requires a little additional technology in order to probe the questions that we’re interested in (unless we get really, really good rulers).</p>
 <p>I say this to emphasize that the advancements made in deep learning over the past couple decades can be largely attributed to the ability to run <em>efficient and exact</em> learning algorithms at scale. For this, we have <strong>automatic differentiation</strong> to thank (which we playfully term “autodiff”), which allows us to take the gradient of pretty much arbitrary computer code. Which is pretty damn cool.</p>
 <p>This section will take a tour through the basics of gradient computation, and then we’ll compare the different types of automatic differentiation mechanisms (do we build a graph of our program before executing the code, or do we trace it at runtime?), and then show some example code for each.</p>
@@ -444,20 +444,11 @@ f(x^*) = x^*,
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography" style="display: none">
-<div id="ref-mgmc" class="csl-entry" role="doc-biblioentry">
-Alwall, Johan, Michel Herquet, Fabio Maltoni, Olivier Mattelaer, and Tim Stelzer. 2011. <span>“<span>MadGraph</span> 5: Going Beyond.”</span> <em>Journal of High Energy Physics</em> 2011 (6). <a href="https://doi.org/10.1007/jhep06(2011)128">https://doi.org/10.1007/jhep06(2011)128</a>.
-</div>
 <div id="ref-implicit" class="csl-entry" role="doc-biblioentry">
 Duvenaud, David, Matt Johnson, and Zico Kolter. n.d. <span>“Deep Implicit Layers - Neural Odes, Deep Equilibirum Models, and Beyond.”</span> <em>Deep Implicit Layers - Neural ODEs, Deep Equilibirum Models, and Beyond</em>. <a href="http://implicit-layers-tutorial.org/">http://implicit-layers-tutorial.org/</a>.
 </div>
-<div id="ref-NNLOPS" class="csl-entry" role="doc-biblioentry">
-Hamilton, Keith, Paolo Nason, Emanuele Re, and Giulia Zanderighi. 2013. <span>“<span>NNLOPS</span> Simulation of Higgs Boson Production.”</span> <em>Journal of High Energy Physics</em> 2013 (10). <a href="https://doi.org/10.1007/jhep10(2013)222">https://doi.org/10.1007/jhep10(2013)222</a>.
-</div>
 <div id="ref-lukasautodiff" class="csl-entry" role="doc-biblioentry">
 Heinrich, Lukas. 2020. <em>Lukasheinrich/Pyhep2020-Autodiff-Tutorial 0.0.2</em> (version 0.0.2). Zenodo. <a href="https://doi.org/10.5281/zenodo.4067099">https://doi.org/10.5281/zenodo.4067099</a>.
-</div>
-<div id="ref-matplotlib" class="csl-entry" role="doc-biblioentry">
-Hunter, J. D. 2007. <span>“Matplotlib: A 2D Graphics Environment.”</span> <em>Computing in Science &amp; Engineering</em> 9 (3): 90–95. <a href="https://doi.org/10.1109/MCSE.2007.55">https://doi.org/10.1109/MCSE.2007.55</a>.
 </div>
 </div>
 </section>
