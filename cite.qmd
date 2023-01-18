@@ -1,0 +1,23 @@
+---
+toc: false
+---
+
+# Citing this thesis {.unnumbered}
+
+There are a number of unreleased studies here (especially in Chapter 7) that may be of interest to cite. If you wish to do so, please use the following bibtex entry:
+
+```bibtex
+@phdthesis{Nathan-Simpson-Thesis,
+  abstract     = {{Machine learning methods are now ubiquitous in physics, but often target objectives that are one or two steps removed from our physics goals. A prominent example of this is the discrimination between signal and background processes, which doesn’t account for the presence of systematic uncertainties – something crucial for the calculation of quantities such as the discovery significance and upper limits.<br/><br/>To combat this, this thesis shows that physics analysis workflows can be optimized in an end-to-end fashion, including the treatment of nuisance parameters that model systematic uncertainties, provided that the workflow is differentiable. By leveraging automatic differentiation and surrogates for non-differentiable operations, this work has made this possible for the first time, and demonstrates its use in a proof-of-concept scenario.<br/><br/>This thesis will motivate the use of end-to-end optimization as described above, cover the techniques that make it possible, and show recent developments in a high-energy physics context. Future directions that aim to scale and apply these methods will also be highlighted.<br/><br/>In addition to this, a method to interpolate between the signatures of new physics models is presented, which uses normalizing flows. The thesis then goes on to show the use of the technique in a search for a new scalar boson &#x1d446; produced in association with a Higgs boson from a heavy new scalar &#x1d44b;. There are also some contributions that interpolate between the event yields with Gaussian processes, and that show how we can use normalizing flows to construct a likelihood ratio-inspired observable.}},
+  author       = {{Simpson, Nathan}},
+  isbn         = {{978-91-8039-494-9}},
+  keywords     = {{differentiable programming; machine learning; particle physics}},
+  language     = {{eng}},
+  publisher    = {{Lund University}},
+  school       = {{Lund University}},
+  title        = {{Data Analysis in High-Energy Physics as a Differentiable Program}},
+  url          = {{http://dx.doi.org/10.5281/zenodo.7520315}},
+  doi          = {{10.5281/zenodo.7520315}},
+  year         = {{2023}},
+}
+```
