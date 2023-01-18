@@ -78,7 +78,6 @@ from jax.nn import swish
 import jax.numpy as jnp
 from jax.numpy import tanh
 subplot_settings = dict(figsize=[7, 3], dpi=150, tight_layout=True, sharex=True)
-import colourmap
 
 colors = [f'C{i}' for i in range(10)] + ['gold',  'turquoise']
 
@@ -112,23 +111,23 @@ You'll typically see all this represented in a ball-and-stick diagram, e.g. @fig
 Here's a compact formula for a computation of a single layer. Given a set of $n$ activations from the previous layer (0th layer meaning just the data points), and $k$ neurons in layer $i$, the output of applying the neurons to the activations to obtain the $i+1$th layer is represented as a matrix equation:
 
 $$
-\textcolor[HTML]{17BECF}{
+\textcolor{#17BECF}{
 \underbrace{\left[\begin{array}{c}
-a_0^{(i)} \\
-a_1^{(i)} \\
+a_0^{(i+1)} \\
+a_1^{(i+1)} \\
 \vdots \\
-a_n^{(i)}
-\end{array}\right]}_{\mathrm{activations for layer }i+1}}=\sigma\left(\textcolor[HTML]{FF7F0E}{\underbrace{\left[\begin{array}{cccc}
+a_n^{(i+1)}
+\end{array}\right]}_{\text{activations for layer }i+1}}=\sigma\left(\textcolor{#FF7F0E}{\underbrace{\left[\begin{array}{cccc}
 w_{0,0} & w_{0,1} & \cdots & w_{0, n} \\
 w_{1,0} & w_{1,1} & \cdots & w_{1, n} \\
 \vdots & \vdots & \ddots & \vdots \\
 w_{k, 0} & w_{k, 1} & \cdots & w_{k, n}
-\end{array}\right]}_{\text{weight matrix}}}\textcolor[HTML]{1F77B4}{\underbrace{\left[\begin{array}{c}
+\end{array}\right]}_{\text{weight matrix}}}\textcolor{#1F77B4}{\underbrace{\left[\begin{array}{c}
 a_0^{(i)} \\
 a_1^{(i)} \\
 \vdots \\
 a_n^{(i)}
-\end{array}\right]}_{\text{activations for layer }i}}+\textcolor[HTML]{2CA02C}{\underbrace{\left[\begin{array}{c}
+\end{array}\right]}_{\text{activations for layer }i}}+\textcolor{#2CA02C}{\underbrace{\left[\begin{array}{c}
 b_0 \\
 b_1 \\
 \vdots \\
@@ -137,7 +136,7 @@ b_n
 $$
 
 $$
-\Rightarrow \textcolor[HTML]{17BECF}{\mathbf{a}^{(i+1)}} = \sigma\left(\textcolor[HTML]{FF7F0E}{\mathbf{W}}\textcolor[HTML]{1F77B4}{\mathbf{a}^{(i)}} + \textcolor[HTML]{2CA02C}{\mathbf{b}}\right)~,
+\Rightarrow \textcolor{#17BECF}{\mathbf{a}^{(i+1)}} = \sigma\left(\textcolor{#FF7F0E}{\mathbf{W}}\textcolor{#1F77B4}{\mathbf{a}^{(i)}} + \textcolor{#2CA02C}{\mathbf{b}}\right)~,
 $$
 
 where applying the activation $\sigma$ is distributed to its elements, i.e.

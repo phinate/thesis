@@ -3,8 +3,16 @@ project:
 
 book:
   title: "Data Analysis in High-Energy Physics as a Differentiable Program"
-  author: "Nathan Simpson"
   date: "02/03/2023"
+  author:
+    - name: Nathan Simpson
+      url: https://phinate.github.io
+      affiliation: Lund University
+  citation:
+    type: thesis
+    doi: "10.5281/zenodo.7520314"
+    url: https://phinate.github.io/thesis
+  cover-image: cover.png
   chapters:
     - index.qmd
     - part: "Fundamentals"
@@ -25,17 +33,15 @@ book:
     - neos-extra.qmd
 
 execute:
-  freeze: auto
-
+  freeze: auto 
+website:
+  twitter-card: true
 bibliography: references.bib
 pdf-engine: pdflatex
 # cite-method: biblatex
 # biblatexoptions: citestyle=numeric
 format:
   html:
-    theme: sketchy
-  pdf:
-    documentclass: scrreprt
-    # cite-method: biblatex
-    keep-tex: true
-    #
+    theme: 
+      - united
+      - custom.scss
