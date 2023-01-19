@@ -16,6 +16,7 @@ book:
   chapters:
     - index.qmd
     - cite.qmd
+    - quotes.qmd
     - part: "Fundamentals"
       chapters:
         - physics.qmd
@@ -32,6 +33,7 @@ book:
     - references.qmd
   appendices:
     - neos-extra.qmd
+
 
 execute:
   freeze: auto 
