@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Analysis in High-Energy Physics as a Differentiable Program - Appendix A — Results when optimizing a neural network observable and binning simultaneously</title>
+<title>Data Analysis in High-Energy Physics as a Differentiable Program - This is the Most Important Chapter</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,7 +30,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./references.html" rel="prev">
+<link href="./physics.html" rel="next">
+<link href="./cite.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -70,7 +71,7 @@ ul.task-list li input[type="checkbox"] {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Appendix A — Results when optimizing a neural network observable and binning simultaneously</h1>
+      <h1 class="quarto-secondary-nav-title">This is the Most Important Chapter</h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -105,7 +106,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./quotes.html" class="sidebar-item-text sidebar-link">This is the Most Important Chapter</a>
+  <a href="./quotes.html" class="sidebar-item-text sidebar-link active">This is the Most Important Chapter</a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -188,7 +189,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
+  <a href="./neos-extra.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Results when optimizing a neural network observable and binning simultaneously</span></a>
   </div>
 </li>
       </ul>
@@ -198,31 +199,14 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page:</h2>
-   
-  <ul>
-  <li><a href="#bin-observable" id="toc-bin-observable" class="nav-link active" data-scroll-target="#bin-observable"><span class="toc-section-number">A.1</span>  5-bin observable</a>
-  <ul class="collapse">
-  <li><a href="#metrics" id="toc-metrics" class="nav-link" data-scroll-target="#metrics">Metrics</a></li>
-  <li><a href="#histograms" id="toc-histograms" class="nav-link" data-scroll-target="#histograms">Histograms</a></li>
-  <li><a href="#neural-network-contours-in-data-space" id="toc-neural-network-contours-in-data-space" class="nav-link" data-scroll-target="#neural-network-contours-in-data-space">Neural network contours in data space</a></li>
-  </ul></li>
-  <li><a href="#bin-observable-1" id="toc-bin-observable-1" class="nav-link" data-scroll-target="#bin-observable-1"><span class="toc-section-number">A.2</span>  20-bin observable</a>
-  <ul class="collapse">
-  <li><a href="#metrics-1" id="toc-metrics-1" class="nav-link" data-scroll-target="#metrics-1">Metrics</a></li>
-  <li><a href="#histograms-1" id="toc-histograms-1" class="nav-link" data-scroll-target="#histograms-1">Histograms</a></li>
-  <li><a href="#neural-network-contours-in-data-space-1" id="toc-neural-network-contours-in-data-space-1" class="nav-link" data-scroll-target="#neural-network-contours-in-data-space-1">Neural network contours in data space</a></li>
-  </ul></li>
-  </ul>
-</nav>
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-bins-app" class="quarto-section-identifier d-none d-lg-block">Appendix A — Results when optimizing a neural network observable and binning simultaneously</span></h1>
+<h1 class="title d-none d-lg-block">This is the Most Important Chapter</h1>
 </div>
 
 
@@ -236,135 +220,66 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="bin-observable" class="level2" data-number="A.1">
-<h2 data-number="A.1" class="anchored" data-anchor-id="bin-observable"><span class="header-section-number">A.1</span> 5-bin observable</h2>
-<section id="metrics" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="metrics">Metrics</h3>
+<p>The audience of this thesis is four-fold: you are likely either</p>
+<ul>
+<li>My colleague</li>
+<li>Someone close to me</li>
+<li>On my PhD defense committee</li>
+<li>A grad student that got told to read this by your supervisor and you don’t know why</li>
+</ul>
+<p>I’m here to appeal to the fourth genre of reader. I struggled a lot with impostor syndrome for a long time in my PhD. So, instead of doing a bunch of cringe quotes about things like “history” and “physics” at the start of each chapter, I’m going to give you a bunch of motivational quotes from people that inspired me in my PhD journey.</p>
+<p>I asked these people, more or less: “What advice would you give to yourself if you were to do your PhD again?” Their responses are as follows:</p>
+<blockquote class="blockquote">
+<p>I wish someone had said to me. Find somewhere good to study- maybe a couch- maybe a table too and learn to study. Really learn to study calmly. Because You have to play the long game this time.</p>
+<p>– <em>Melissa Franklin</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Work life balance is important, shame your physics friends into turning off their physics brains if you have to !</p>
+<p>– <em>Sean Gasiorowski</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<ul>
+<li><p>Try to find something that genuinely excites you or sets your brain on fire, even if it isn’t the thing that other people think is the most important. There are an endless number of projects that someone thinks (correctly!) are important and which will benefit from your work, but you should focus on the things that you have fun working on. Those are the things that will carry you through.</p></li>
+<li><p>Work with people that are respectful, honest, and kind. Everyone is brilliant, so you won’t have to worry about not finding success. So make sure that the people you’re working with are going to respect you and your goals, as those people will not only be the most beneficial to your Ph.D.&nbsp;but will also become your colleagues and future collaborators. (Corollary: Don’t beat yourself up if you find out that the people you’re working with are jerks. Get what you need done and then move on to work with people who are better.)</p></li>
+<li><p>A Ph.D.&nbsp;is a wonderful time to explore things with great freedom. But it also is not designed to be a good long term job and is designed to be done. Avoid the very difficult temptation to take on extra work that doesn’t benefit your research goals and as you reach the later years of your Ph.D.&nbsp;follow your experience and intuition about where it is important to put time and work — at that point you’re already driving the work and research, your advisor should be helping you navigate other areas of the research world at that point.</p></li>
+<li><p>Take your sleep seriously and don’t lose sleep to chase conference deadlines. It is never worth it.</p></li>
+</ul>
+<p>– <em>Matthew Feickert</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>(1) Always stay curious. Take time each day to learn about something you’re interested in.</p>
+<p>(2) Be grateful for your support system. At the end of the day, it’s not about the science, it’s about who you’re doing the science with and lives the journey with you along the way :)</p>
+<p>– <em>Nicole Hartman</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>One memorable thing I was told by Amir Farbin was “The point of thesis is to finish thesis”. I think it was in broken English like that. It was helpful while writing and stuck with me.</p>
+<p>I’m not sure if “The Higgs mass is <span class="math inline">\(125 \,\text{GeV}\)</span>” or “Don’t search for SUSY” count :-)</p>
+<p>– <em>Kyle Cranmer</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Things will break, experiments — and your pet projects — will fail. Deadlines won’t be met. Everything takes more time than expected. It may feel like you just keep running into obstacles. But eventually, you will climb over them! You’ll make all the mistakes in a very narrow field, and that will make you an expert, as Niels Bohr allegedly said.</p>
+<p>My tips: document *everything*: your code, configs, ideas, thoughts, questions, answers, and especially things you tried but didn’t work. Ask early; it is much less embarrassing than when you’re about to wrap up your thesis. Go to events, talk with people, make friends. Finally, remember to celebrate even the smallest of accomplishments!</p>
+<p>– <em>Katja Mankinen</em></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>One generic thing is probably spending a day to learn git right at the start, I did that way too late. Also, be careful with how you choose to spend your time between different projects.</p>
+<p>– <em>Alex Held</em></p>
+</blockquote>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/test_metricsfewbins.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Plots of the different metrics calculated on the test set for different training strategies using a 5-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).</figcaption><p></p>
+<p><img src="images/hannah.jpg" class="unnumbered img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">– Hannah Herde</figcaption><p></p>
 </figure>
 </div>
-</section>
-<section id="histograms" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="histograms">Histograms</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-discovery-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the discovery <span class="math inline">\(p\)</span>-value <span class="math inline">\(p_0\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-CLs-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-COMB-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to a combination of discovery <span class="math inline">\(p\)</span>-value and <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<p><img src="images/new-hist-models-poi_uncert-5bin.png" class="img-fluid"></p>
-</section>
-<section id="neural-network-contours-in-data-space" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="neural-network-contours-in-data-space">Neural network contours in data space</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-discovery-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the discovery <span class="math inline">\(p\)</span>-value <span class="math inline">\(p_0\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-CLs-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-COMB-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to a combination of discovery <span class="math inline">\(p\)</span>-value and <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-poi_uncert-5bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the Fisher information estimate of <span class="math inline">\(\sigma_{\hat{\mu}}\)</span>.</figcaption><p></p>
-</figure>
-</div>
-</section>
-</section>
-<section id="bin-observable-1" class="level2" data-number="A.2">
-<h2 data-number="A.2" class="anchored" data-anchor-id="bin-observable-1"><span class="header-section-number">A.2</span> 20-bin observable</h2>
-<section id="metrics-1" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="metrics-1">Metrics</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/test_metricsfewbins.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Plots of the different metrics calculated on the test set for different training strategies using a 20-bin neural network observable. The results are averaged across 9 random seeds for the weight initializations. The scatter points on some of the curves represent the model that we would select in practice if using that training strategy (provided we decide to use the loss as the selection metric).</figcaption><p></p>
-</figure>
-</div>
-</section>
-<section id="histograms-1" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="histograms-1">Histograms</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-discovery-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the discovery <span class="math inline">\(p\)</span>-value <span class="math inline">\(p_0\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-CLs-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-COMB-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to a combination of discovery <span class="math inline">\(p\)</span>-value and <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-hist-models-poi_uncert-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the Fisher information estimate of <span class="math inline">\(\sigma_{\hat{\mu}}\)</span>.</figcaption><p></p>
-</figure>
-</div>
-</section>
-<section id="neural-network-contours-in-data-space-1" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="neural-network-contours-in-data-space-1">Neural network contours in data space</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-discovery-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the discovery <span class="math inline">\(p\)</span>-value <span class="math inline">\(p_0\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-CLs-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-COMB-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to a combination of discovery <span class="math inline">\(p\)</span>-value and <span class="math inline">\(\mathrm{CL}_s\)</span>.</figcaption><p></p>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="images/new-grid-models-poi_uncert-20bin.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Histograms from optimizing with respect to the Fisher information estimate of <span class="math inline">\(\sigma_{\hat{\mu}}\)</span>.</figcaption><p></p>
-</figure>
-</div>
+<p>I can’t say much more than everyone here has said, but I’ll mention three things:</p>
+<ul>
+<li><p>Find a support system. Having close friends is so, so invaluable. Reach out to people if you can, or when you don’t feel like you have anyone, try a service like the Samaritans. Also therapy. Like, please try therapy.</p></li>
+<li><p>Really learn to program. That was the game changer for me. Being able to go from idea to code quickly is what lets you both do and enjoy research. It really breathes life into it.</p></li>
+<li><p>Probably most important: <em>be gentle with yourself</em>. I learned this the hard way sometimes. It’s a life skill, and it will really save your ass to know how to treat yourself like a friend.</p></li>
+</ul>
+<p>I hope this was useful! You got this – we all have your back.</p>
 
 
-</section>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -467,11 +382,14 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./references.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">References</span>
+      <a href="./cite.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Citing this thesis</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./physics.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Physics background</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->
